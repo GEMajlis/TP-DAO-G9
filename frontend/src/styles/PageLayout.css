@@ -1,0 +1,64 @@
+/* Fondo general */
+.page-container {
+  background: linear-gradient(to bottom right, #007baf, #0099cc);
+  min-height: 100vh;
+  color: white;
+  text-align: center;
+  padding: 80px 20px 60px;
+}
+
+/* Título principal */
+.page-title {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+/* Subtítulo */
+.page-subtitle {
+  font-size: 1.1rem;
+  color: #d9f3ff;
+  margin-bottom: 40px;
+}
+
+/* Contenedor de secciones */
+.page-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+}
+
+/* Tarjetas / secciones */
+.page-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 25px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 700px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.page-card:hover {
+  transform: scale(1.03);
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Botones comunes */
+.btn-primary {
+  background-color: #f4a300;
+  color: #0b3d5e;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #ffc107;
+  transform: scale(1.05);
+}

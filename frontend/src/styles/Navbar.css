@@ -1,0 +1,60 @@
+/* Barra superior estilo Unbounce */
+.navbar {
+  background-color: #0b3d5e;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 40px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Logo o nombre de la app */
+.navbar-brand {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+/* Links */
+.navbar-links {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+  margin: 0;
+}
+
+.navbar-links a {
+  text-decoration: none;
+  color: #d4e9f7;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.navbar-links a:hover,
+.navbar-links a.active {
+  color: #f4a300;
+}
+
+/* Botones de acción */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-actions button {
+  background-color: transparent;
+  border: 1px solid #f4a300;
+  color: #f4a300;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.navbar-actions button:hover {
+  background-color: #f4a300;
+  color: #0b3d5e;
+}
