@@ -1,38 +1,190 @@
-.App {
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: white;
+}
+
+.tituloPagina {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #00aeff;
+  border-bottom-style: solid;
+  border-color: #00aeff;
+  border-bottom-width: thin;
+  padding-bottom: 0.1em;
+  margin-bottom: 0.5em;
+}
+
+.divBody {
+  background-color: white;
+  min-height: 75vh;
+  padding: 1rem;
+  flex: 1;
+}
+
+.table th,
+.table td {
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.navbar {
+  background-color: rgb(1, 83, 121);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+.navbar-nav {
+  .nav-item {
+    .nav-link {
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 0px;
+
+      &.active {
+        color: #00aeff !important;
+      }
+
+      &:not(.active):hover {
+        color: #c9c9c9;
+      }
+    }
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.logo {
+  color: white;
+  font-weight: 600;
+  font-size: 1.2rem;
+  padding: 0.5rem 1rem;
+  vertical-align: middle;
+  margin-right: 10px;
+  border-right: 1px solid #e7e7e7;
+}
+
+/* todos los formularios */
+form {
+  background-color: rgb(241, 243, 247);
+  border-radius: 0.5rem;
+  border-style: solid;
+  border-color: lightgrey;
+  border-width: thin;
+  margin: 0em 0.5rem 1rem 0.5rem;
+  padding: 0.5rem;
+}
+
+.botones button {
+  margin: 0em 0.5em 0.5em 0em;
+}
+
+.acciones button {
+  margin: 0em 0.2em 0em 0.2em;
+}
+
+/* todos los labels menos los de los radio y check */
+label:not([class^='custom-control']) {
+  background-color: #d7dfe7;
+  border-radius: 0.5em;
+  /* border-bottom: solid; */
+  margin-right: -0.9em;
+  /* para que columna label este cerca del input*/
+  padding-left: 0.5em;
+  display: block;
+  height: 90%;
+}
+
+/*<=576*/
+@media only screen and (max-width: 575px) {
+  label:not([class^='custom-control']) {
+    margin-right: 0em;
+    margin-top: 0.3rem;
+    /* para separar grupo label/input */
+  }
+}
+
+/*>=576*/
+@media only screen and (min-width: 576px) {
+  .inputMedio {
+    width: 12em;
+  }
+
+  .inputChico {
+    width: 7em;
+  }
+}
+
+.pyBadge {
+  background-color: #00aeff;
+  color: white;
+  display: inline-block;
+  padding: 0.35em 0.4em;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+}
+
+/* mensajes de validacion */
+.validacion {
+  color: red;
+  font-size: 0.8em;
+  font-style: italic;
+  padding-left: 1em;
+  padding-bottom: 0.5em;
+}
+
+/* mensajes de alerta al buscar y grabar */
+.mensajesAlert {
+  /* color: #495057; */
+  margin: 0rem 0.5rem 0rem 0.5rem;
+}
+
+.paginador {
+  background-color: white;
+  border-style: solid;
+  border-color: lightgrey;
+  border-width: thin;
+  padding: 0.5rem 1rem 0.5rem 1rem;
+  margin-top: -1rem;
+  border-top-width: 0;
+}
+
+::placeholder {
+  text-transform: none;
+}
+
+/* encabezados de tablas */
+thead {
+  /* bootstrap thead-light*/
+  color: #495057;
+  background-color: #aeb7d7;
+  /* #e9ecef; */
+  border-color: #dee2e6;
+}
+
+/* redes al pie de pagina */
+.redes {
+  color: blueviolet;
+  margin-left: 0.6em;
+
+}
+
+footer {
+  background-color: white;
+  border-top: 1px solid #e7e7e7;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  align-items: center;
+  flex-shrink: 0;
+  height: 80px;
 }
