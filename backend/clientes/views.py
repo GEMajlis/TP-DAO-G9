@@ -27,28 +27,31 @@ def cliente_create(request):
 
 @require_http_methods(["GET"])
 def cliente_dni(request, dni):
-    conexion = sqlite3.connect("db.sqlite3")
-    cursor = conexion.cursor()
-    cliente = cursor.execute(
-        "SELECT * FROM clientes_cliente WHERE dni = ?", (dni,)
-    ).fetchone()
-    conexion.close()
+    try:
+        conexion = sqlite3.connect("db.sqlite3")
+        cursor = conexion.cursor()
+        cliente = cursor.execute(
+            "SELECT * FROM CLIENTES WHERE dni = ?", (dni,)
+        ).fetchone()
+        conexion.close()
 
-    if not cliente:
-        return JsonResponse({"error": "Cliente no encontrado"}, status=404)
+        if not cliente:
+            return JsonResponse({"error": "Cliente no encontrado"}, status=404)
 
-    return JsonResponse(
-        {
-            "clientes": [
-                {
-                    "dni": cliente[0],
-                    "nombre": cliente[1],
-                    "apellido": cliente[2],
-                    "telefono": cliente[3],
-                }
-            ]
-        }
-    )
+        return JsonResponse(
+            {
+                "clientes": [
+                    {
+                        "dni": cliente[0],
+                        "nombre": cliente[1],
+                        "apellido": cliente[2],
+                        "telefono": cliente[3],
+                    }
+                ]
+            }
+        )
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
 
 
 @require_http_methods(["GET"])
@@ -56,7 +59,7 @@ def cliente_nombre(request, nombre):
     conexion = sqlite3.connect("db.sqlite3")
     cursor = conexion.cursor()
     cliente = cursor.execute(
-        "SELECT * FROM clientes_cliente WHERE nombre = ?", (nombre,)
+        "SELECT * FROM CLIENTES WHERE nombre = ?", (nombre,)
     ).fetchall()
     conexion.close()
 
@@ -111,11 +114,11 @@ def cliente_delete(request, dni):
         conexion = sqlite3.connect("db.sqlite3")
         cursor = conexion.cursor()
         cliente = cursor.execute(
-            "SELECT * FROM clientes_cliente WHERE dni = ?", (dni,)
+            "SELECT * FROM CLIENTES WHERE dni = ?", (dni,)
         ).fetchone()
         if not cliente:
             return JsonResponse({"error": "Cliente no encontrado"}, status=404)
-        cursor.execute("DELETE FROM clientes_cliente WHERE dni = ?", (cliente[0],))
+        cursor.execute("DELETE FROM CLIENTES WHERE dni = ?", (cliente[0],))
         conexion.commit()
         return JsonResponse({"message": "Cliente eliminado correctamente"}, status=200)
     except Exception as e:

@@ -8,3 +8,6 @@ class Cliente(models.Model):
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
     telefono = models.IntegerField()
+
+    class Meta:
+        db_table = "CLIENTES"
