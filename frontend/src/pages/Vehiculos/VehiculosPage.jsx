@@ -5,62 +5,79 @@ import "../../styles/PageLayout.css";
 
 export default function VehiculosPage() {
   const [vista, setVista] = useState("menu");
+  const [todosLosVehiculos, setTodosLosVehiculos] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
   const [vehiculoEditando, setVehiculoEditando] = useState(null);
   const [pagina, setPagina] = useState(1);
   const [volverA, setVolverA] = useState("menu");
+  const [filtroPatente, setFiltroPatente] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("");
 
   useEffect(() => {
     const datosSimulados = [
-      { IdVehiculo: 1, Patente: "AB123CD", Marca: "Toyota", Modelo: "Corolla", Anio: 2022, Activo: true },
-      { IdVehiculo: 2, Patente: "AE555EE", Marca: "Ford", Modelo: "Ranger", Anio: 2021, Activo: true },
-      { IdVehiculo: 3, Patente: "ZZ999XX", Marca: "Fiat", Modelo: "Cronos", Anio: 2023, Activo: false },
+      { Patente: "AB123CD", Marca: "Toyota", Modelo: "Corolla", Color: "Negro", Estado: "Disponible" },
+      { Patente: "AE555EE", Marca: "Ford", Modelo: "Ranger", Color: "Rojo", Estado: "Alquilado" },
+      { Patente: "ZZ999XX", Marca: "Fiat", Modelo: "Cronos", Color: "Blanco", Estado: "En Mantenimiento" },
     ];
+    setTodosLosVehiculos(datosSimulados);
     setVehiculos(datosSimulados);
   }, []);
 
+  const handleBuscar = (numPagina) => {
+    setPagina(numPagina || 1);
+
+    const resultado = todosLosVehiculos.filter((v) => {
+    const cumplePatente = v.Patente.toLowerCase().includes(filtroPatente.toLowerCase());
+    let cumpleEstado = true;
+    if (filtroEstado !== "") {
+      cumpleEstado = v.Estado === filtroEstado;
+    }
+    return cumplePatente && cumpleEstado;
+    });
+
+    setVehiculos(resultado);
+  };
+
   const handleAgregar = (origen) => {
     setVehiculoEditando(null);
-    setVolverA(origen); 
+    setVolverA(origen);
     setVista("form");
   };
 
   const handleModificar = (vehiculo) => {
     setVehiculoEditando(vehiculo);
-    setVolverA("lista"); 
+    setVolverA("lista");
     setVista("form");
-  };
-
-  const handleConsultar = (vehiculo) => {
-    alert(`Consultando: ${vehiculo.Patente}`);
-  };
-
-  const handleActivarDesactivar = (vehiculo) => {
-    setVehiculos(prev => prev.map(v =>
-      v.IdVehiculo === vehiculo.IdVehiculo ? { ...v, Activo: !v.Activo } : v
-    ));
   };
 
   const handleEliminar = (vehiculo) => {
     if (window.confirm(`¿Estás seguro de eliminar el vehículo ${vehiculo.Patente}?`)) {
-      setVehiculos(prev => prev.filter(v => v.IdVehiculo !== vehiculo.IdVehiculo));
+      setTodosLosVehiculos(prev => prev.filter(v => v.Patente !== vehiculo.Patente));
+      setVehiculos(prev => prev.filter(v => v.Patente !== vehiculo.Patente));
     }
   };
 
-  const handleBuscar = (numPagina) => {
-    setPagina(numPagina);
-  };
+  const handleGuardar = (vehiculoForm) => {
+    const existe = todosLosVehiculos.some(v => v.Patente === vehiculoForm.Patente);
 
-  const handleGuardar = (vehiculo) => {
-    console.log("Guardando:", vehiculo);
-    if (vehiculo.IdVehiculo) {
-      setVehiculos((prev) => prev.map((v) => v.IdVehiculo === vehiculo.IdVehiculo ? vehiculo : v));
+    let nuevaBase;
+    if (vehiculoEditando) {
+      nuevaBase = todosLosVehiculos.map((v) => v.Patente === vehiculoForm.Patente ? vehiculoForm : v);
     } else {
-      vehiculo.IdVehiculo = vehiculos.length + 1;
-      setVehiculos((prev) => [...prev, vehiculo]);
+      if (existe) {
+        alert("Ya existe un vehículo con esa Patente.");
+        return;
+      }
+      nuevaBase = [...todosLosVehiculos, vehiculoForm];
     }
+
+    setTodosLosVehiculos(nuevaBase);
+    setVehiculos(nuevaBase);
+    setFiltroPatente("");
+    setFiltroEstado("");
     setVista("lista");
   };
+
 
   const handleVolverDesdeForm = () => {
     setVista(volverA);
@@ -73,7 +90,6 @@ export default function VehiculosPage() {
         Controlá el estado, modelo y disponibilidad de cada vehículo.
       </p>
 
-      {/* ----------- VISTA MENÚ ----------- */}
       {vista === "menu" && (
         <div className="page-content fade-in">
           <div className="page-card">
@@ -81,7 +97,6 @@ export default function VehiculosPage() {
             <p>Visualizá toda la flota.</p>
             <button className="btn-primary" onClick={() => setVista("lista")}>Ver flota</button>
           </div>
-
           <div className="page-card">
             <h3>Agregar vehículo</h3>
             <p>Cargá un nuevo vehículo.</p>
@@ -90,23 +105,23 @@ export default function VehiculosPage() {
         </div>
       )}
 
-      {/* ----------- VISTA LISTA ----------- */}
       {vista === "lista" && (
         <div className="fade-in">
           <VehiculosList
             Vehiculos={vehiculos}
-            Consultar={handleConsultar}
             Modificar={handleModificar}
-            ActivarDesactivar={handleActivarDesactivar}
             Eliminar={handleEliminar}
             Agregar={() => handleAgregar("lista")}
             Pagina={pagina}
             RegistrosTotal={vehiculos.length}
-            Paginas={[1, 2, 3]}
+            Paginas={[1]}
             Buscar={handleBuscar}
+            FiltroPatente={filtroPatente}
+            setFiltroPatente={setFiltroPatente}
+            FiltroEstado={filtroEstado}
+            setFiltroEstado={setFiltroEstado}
             Volver={() => setVista("menu")}
           />
-
           <div className="text-center mt-4 mb-3">
             <button className="btn btn-secondary px-4" onClick={() => setVista("menu")}>
               <i className="fa-solid fa-arrow-left me-2"></i>Volver al menú
@@ -115,7 +130,6 @@ export default function VehiculosPage() {
         </div>
       )}
 
-      {/* ----------- VISTA FORMULARIO ----------- */}
       {vista === "form" && (
         <div className="fade-in">
           <VehiculosForm
@@ -123,7 +137,6 @@ export default function VehiculosPage() {
             Guardar={handleGuardar}
             Cancelar={handleVolverDesdeForm}
           />
-
           <div className="text-center mt-4 mb-3">
             <button className="btn btn-secondary px-4" onClick={handleVolverDesdeForm}>
               <i className="fa-solid fa-arrow-left me-2"></i>

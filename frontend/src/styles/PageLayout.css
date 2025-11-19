@@ -62,3 +62,19 @@
   background-color: #ffc107;
   transform: scale(1.05);
 }
+
+.btn-secondary {
+  background-color: #b42828;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #e24242;
+  transform: scale(1.05);
+}
