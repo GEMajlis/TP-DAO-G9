@@ -1,32 +1,114 @@
 import "../../styles/PageLayout.css";
 
-export default function Empleados() {
-  return (
-    <div className="page-container">
-      <h2 className="page-title">Gestión de Empleados</h2>
-      <p className="page-subtitle">
-        Administrá la información, roles y tareas del personal de la concesionaria.
-      </p>
+export default function EmpleadosList({
 
-      <div className="page-content">
-        <div className="page-card">
-          <h3>Listado de empleados</h3>
-          <p>Consultá la nómina de empleados registrados.</p>
-          <button className="btn-primary">Ver lista</button>
-        </div>
+  Empleados,
+  Modificar,
+  Eliminar,
+  Agregar,
+  Pagina,
+  RegistrosTotal,
+  Paginas,
+  Buscar,
+}) 
 
-        <div className="page-card">
-          <h3>Agregar empleado</h3>
-          <p>Registrá nuevos empleados y asignales un rol.</p>
-          <button className="btn-primary">Agregar</button>
-        </div>
 
-        <div className="page-card">
-          <h3>Editar información</h3>
-          <p>Actualizá los datos o el puesto de un empleado existente.</p>
-          <button className="btn-primary">Editar</button>
+
+
+  {
+    return (
+        <div className="card border-0 shadow-sm" style={{ borderRadius: "12px" }}>
+            <div className="card-body p-4">
+
+                {/* TÍTULO */}
+                <h4 className="mb-4 fw-semibold text-primary" style={{ display: "flex", alignItems: "center" }}>
+                    <i className="fa-solid fa-car me-2"></i>Empleados
+                </h4>
+
+                {/* TABLA */}
+                <div className="table-responsive">
+                    <table
+                        className="table table-sm table-hover align-middle"
+                        style={{ borderRadius: "10px", overflow: "hidden" }}
+                    >
+                        <thead className="table-primary text-center">
+                            <tr>
+                                <th>DNI</th>
+                                <th>Nombre</th>
+                                <th>Apeliido</th>
+                                <th className="text-nowrap">Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {Empleados?.length > 0 ? (
+                                Empleados.map((empleado) => (
+                                    <tr key={empleado.DNI}>
+                                        <td className="fw-semibold text-center">{empleado.DNI}</td>
+                                        <td>{empleado.Nombre}</td>
+                                        <td>{empleado.Apellido}</td>
+                                        <td className="text-center text-nowrap">
+                                            {/* Modificar */}
+                                            <button
+                                                className="btn btn-sm btn-outline-secondary me-1"
+                                                onClick={() => Modificar(empleado)}
+                                            >
+                                                <i className="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                            {/* Eliminar */}
+                                            <button
+                                                className="btn btn-sm btn-outline-danger"
+                                                onClick={() => Eliminar(empleado)}
+                                            >
+                                                <i className="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" className="text-center p-4">
+                                        <div className="alert alert-secondary mb-0">
+                                            No se encontraron empleados cargados.
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* FOOTER: PAGINACIÓN + BOTÓN */}
+                <div className="d-flex justify-content-between align-items-center mt-3">
+
+                    <span className="badge bg-light text-dark border px-3 py-2 fs-6">
+                        Registros: {RegistrosTotal}
+                    </span>
+
+                    {/* Paginador */}
+                    <div className="input-group input-group-sm" style={{ width: "150px" }}>
+                        <span className="input-group-text bg-light border">Página</span>
+                        <select
+                            className="form-select"
+                            value={Pagina}
+                            onChange={(e) => Buscar(e.target.value)}
+                        >
+                            {Paginas?.map((x) => (
+                                <option key={x} value={x}>{x}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Botón Agregar */}
+                    <button
+                        className="btn-primary"
+                        onClick={Agregar}
+                    >
+                        <i className="fa fa-plus me-2"></i>
+                        Nuevo Empleado
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

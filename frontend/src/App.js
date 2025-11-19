@@ -13,7 +13,7 @@ import Vehiculos from "./pages/Vehiculos/VehiculosPage.jsx";
 import Reservas from "./pages/Reservas/ReservasList";
 import Alquileres from "./pages/Alquileres/AlquileresList.jsx";
 import Danios from "./pages/Danios/DaniosList";
-import Empleados from "./pages/Empleados/EmpleadosList";
+import Empleados from "./pages/Empleados/EmpleadosPage.jsx";
 import Mantenimiento from "./pages/Mantenimientos/MantenimientosList";
 import Multas from "./pages/Multas/MultasList";
 
