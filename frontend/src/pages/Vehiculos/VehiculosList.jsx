@@ -1,4 +1,5 @@
 import React from "react";
+import VehiclesSearch from "./VehiculosSearch"; // <--- Importamos el buscador
 
 export default function VehiculosList({
     Vehiculos,
@@ -10,14 +11,31 @@ export default function VehiculosList({
     RegistrosTotal,
     Paginas,
     Buscar,
+    // Props nuevas para el filtro
+    FiltroPatente,
+    setFiltroPatente,
+    FiltroActivo,
+    setFiltroActivo,
 }) {
     return (
         <div className="card border-0 shadow-sm" style={{ borderRadius: "12px" }}>
             <div className="card-body p-4">
 
+                {/* --- BUSCADOR INTEGRADO --- */}
+                <VehiclesSearch
+                    Patente={FiltroPatente}
+                    setPatente={setFiltroPatente}
+                    Activo={FiltroActivo}
+                    setActivo={setFiltroActivo}
+                    Buscar={Buscar}
+                />
+                <hr />
+                {/* -------------------------- */}
+
                 {/* TÍTULO */}
                 <h4 className="mb-4 fw-semibold text-primary" style={{ display: "flex", alignItems: "center" }}>
-                    <i className="fa-solid fa-car me-2"></i>Flota de Vehículos
+                    <i className="fa-solid fa-car me-2"></i>
+                    Flota de Vehículos
                 </h4>
 
                 {/* TABLA */}
@@ -93,7 +111,7 @@ export default function VehiculosList({
                                 <tr>
                                     <td colSpan="6" className="text-center p-4">
                                         <div className="alert alert-secondary mb-0">
-                                            No se encontraron vehículos cargados.
+                                            No se encontraron vehículos con esos criterios.
                                         </div>
                                     </td>
                                 </tr>

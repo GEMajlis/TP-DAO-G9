@@ -5,10 +5,18 @@ import "../../styles/PageLayout.css";
 
 export default function VehiculosPage() {
   const [vista, setVista] = useState("menu");
+
+  // DATOS: Separamos "Todos" (Base) de "Vehiculos" (Filtrados para mostrar)
+  const [todosLosVehiculos, setTodosLosVehiculos] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
+
   const [vehiculoEditando, setVehiculoEditando] = useState(null);
   const [pagina, setPagina] = useState(1);
   const [volverA, setVolverA] = useState("menu");
+
+  // ESTADOS DEL FILTRO
+  const [filtroPatente, setFiltroPatente] = useState("");
+  const [filtroActivo, setFiltroActivo] = useState("");
 
   useEffect(() => {
     const datosSimulados = [
@@ -16,18 +24,37 @@ export default function VehiculosPage() {
       { IdVehiculo: 2, Patente: "AE555EE", Marca: "Ford", Modelo: "Ranger", Anio: 2021, Activo: true },
       { IdVehiculo: 3, Patente: "ZZ999XX", Marca: "Fiat", Modelo: "Cronos", Anio: 2023, Activo: false },
     ];
-    setVehiculos(datosSimulados);
+    setTodosLosVehiculos(datosSimulados);
+    setVehiculos(datosSimulados); // Al inicio mostramos todo
   }, []);
+
+  // LÓGICA DE BÚSQUEDA Y FILTRADO
+  const handleBuscar = (numPagina) => {
+    setPagina(numPagina || 1);
+
+    // Filtramos sobre la base completa
+    const resultado = todosLosVehiculos.filter((v) => {
+      const cumplePatente = v.Patente.toLowerCase().includes(filtroPatente.toLowerCase());
+      let cumpleActivo = true;
+      if (filtroActivo !== "") {
+        const esActivo = filtroActivo === "true";
+        cumpleActivo = v.Activo === esActivo;
+      }
+      return cumplePatente && cumpleActivo;
+    });
+
+    setVehiculos(resultado);
+  };
 
   const handleAgregar = (origen) => {
     setVehiculoEditando(null);
-    setVolverA(origen); 
+    setVolverA(origen);
     setVista("form");
   };
 
   const handleModificar = (vehiculo) => {
     setVehiculoEditando(vehiculo);
-    setVolverA("lista"); 
+    setVolverA("lista");
     setVista("form");
   };
 
@@ -36,29 +63,49 @@ export default function VehiculosPage() {
   };
 
   const handleActivarDesactivar = (vehiculo) => {
+    const nuevoEstado = !vehiculo.Activo;
+
+    // Actualizamos la base
+    const baseActualizada = todosLosVehiculos.map(v =>
+      v.IdVehiculo === vehiculo.IdVehiculo ? { ...v, Activo: nuevoEstado } : v
+    );
+    setTodosLosVehiculos(baseActualizada);
+
+    // Actualizamos la vista filtrada actual
     setVehiculos(prev => prev.map(v =>
-      v.IdVehiculo === vehiculo.IdVehiculo ? { ...v, Activo: !v.Activo } : v
+      v.IdVehiculo === vehiculo.IdVehiculo ? { ...v, Activo: nuevoEstado } : v
     ));
   };
 
   const handleEliminar = (vehiculo) => {
     if (window.confirm(`¿Estás seguro de eliminar el vehículo ${vehiculo.Patente}?`)) {
+      // Borramos de la base
+      setTodosLosVehiculos(prev => prev.filter(v => v.IdVehiculo !== vehiculo.IdVehiculo));
+      // Borramos de la vista
       setVehiculos(prev => prev.filter(v => v.IdVehiculo !== vehiculo.IdVehiculo));
     }
   };
 
-  const handleBuscar = (numPagina) => {
-    setPagina(numPagina);
-  };
-
   const handleGuardar = (vehiculo) => {
     console.log("Guardando:", vehiculo);
+    let nuevaBase;
+
     if (vehiculo.IdVehiculo) {
-      setVehiculos((prev) => prev.map((v) => v.IdVehiculo === vehiculo.IdVehiculo ? vehiculo : v));
+      // Editar
+      nuevaBase = todosLosVehiculos.map((v) => v.IdVehiculo === vehiculo.IdVehiculo ? vehiculo : v);
     } else {
-      vehiculo.IdVehiculo = vehiculos.length + 1;
-      setVehiculos((prev) => [...prev, vehiculo]);
+      // Nuevo
+      vehiculo.IdVehiculo = todosLosVehiculos.length > 0 ? Math.max(...todosLosVehiculos.map(v => v.IdVehiculo)) + 1 : 1;
+      nuevaBase = [...todosLosVehiculos, vehiculo];
     }
+
+    setTodosLosVehiculos(nuevaBase);
+    setVehiculos(nuevaBase); // Reseteamos filtro al guardar para ver el cambio
+
+    // Limpiamos los campos del filtro
+    setFiltroPatente("");
+    setFiltroActivo("");
+
     setVista("lista");
   };
 
@@ -102,16 +149,17 @@ export default function VehiculosPage() {
             Agregar={() => handleAgregar("lista")}
             Pagina={pagina}
             RegistrosTotal={vehiculos.length}
-            Paginas={[1, 2, 3]}
+            Paginas={[1]}
             Buscar={handleBuscar}
+
+            // Props para el Filtro
+            FiltroPatente={filtroPatente}
+            setFiltroPatente={setFiltroPatente}
+            FiltroActivo={filtroActivo}
+            setFiltroActivo={setFiltroActivo}
+
             Volver={() => setVista("menu")}
           />
-
-          <div className="text-center mt-4 mb-3">
-            <button className="btn btn-secondary px-4" onClick={() => setVista("menu")}>
-              <i className="fa-solid fa-arrow-left me-2"></i>Volver al menú
-            </button>
-          </div>
         </div>
       )}
 

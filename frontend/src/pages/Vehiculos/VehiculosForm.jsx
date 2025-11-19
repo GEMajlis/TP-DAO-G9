@@ -205,7 +205,7 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
                         <div className="d-flex justify-content-end gap-2 pt-2 border-top">
                             <button
                                 type="button"
-                                className="btn btn-secondary px-4 btn-hover-scale btn-lighter-hover"
+                                className="btn btn-secondary px-4 fw-bold"
                                 onClick={Cancelar}
                             >
                                 <i className="fa-solid fa-times me-2"></i>
