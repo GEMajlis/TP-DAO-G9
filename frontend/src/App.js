@@ -9,7 +9,7 @@ import Navbar from "./components/Navbar.jsx";
 // Páginas
 import Home from "./pages/Inicio";
 import Clientes from "./pages/Clientes/ClientesList";
-import Vehiculos from "./pages/Vehiculos/VehiculosList";
+import Vehiculos from "./pages/Vehiculos/VehiculosPage.jsx";
 import Reservas from "./pages/Reservas/ReservasList";
 import Alquileres from "./pages/Alquileres/AlquileresList.jsx";
 import Danios from "./pages/Danios/DaniosList";
