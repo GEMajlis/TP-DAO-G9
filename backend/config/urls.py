@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.urls import path
 from clientes import views as cliente_views
 from vehiculos import views as vehiculo_views
+from empleados import views as empleado_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -33,4 +34,9 @@ urlpatterns = [
     path("vehiculos/patente/<str:patente>/", vehiculo_views.vehiculo_patente, name="vehiculo_patente"),
     path("vehiculos/editar/<str:patente>/", vehiculo_views.vehiculo_edit, name="vehiculo_edit"),
     path("vehiculos/eliminar/<str:patente>/", vehiculo_views.vehiculo_delete, name="vehiculo_delete"),
+    # Empleados URLs
+    path("empleados/nuevo/", empleado_views.empleado_create, name="empleado_create"),
+    path("empleados/", empleado_views.get_empleados, name="get_empleados"), 
+    path("empleados/editar/<int:dni>/", empleado_views.empleado_edit, name="empleado_edit"),
+    path("empleados/eliminar/<int:dni>/", empleado_views.empleado_delete, name="empleado_delete"),
 ]
