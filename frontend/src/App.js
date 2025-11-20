@@ -8,9 +8,9 @@ import Navbar from "./components/Navbar.jsx";
 
 // Páginas
 import Home from "./pages/Inicio";
-import Clientes from "./pages/Clientes/ClientesList";
+import Clientes from "./pages/Clientes/ClientesPage.jsx";
 import Vehiculos from "./pages/Vehiculos/VehiculosPage.jsx";
-import Reservas from "./pages/Reservas/ReservasList";
+import Reservas from "./pages/Reservas/ReservasPage.jsx";
 import Alquileres from "./pages/Alquileres/AlquileresList.jsx";
 import Danios from "./pages/Danios/DaniosList";
 import Empleados from "./pages/Empleados/EmpleadosPage.jsx";
