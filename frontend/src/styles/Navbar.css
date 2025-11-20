@@ -1,60 +1,124 @@
-/* Barra superior estilo Unbounce */
 .navbar {
   background-color: #0b3d5e;
   color: white;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 40px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  padding: 12px 32px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-/* Logo o nombre de la app */
 .navbar-brand {
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #ffffff;
-  letter-spacing: 1px;
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  color: #ffffff !important;
+  transition: 0.2s ease-in-out;
+  padding-left: 8px;
 }
 
-/* Links */
+.navbar-inner {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .navbar-links {
   display: flex;
   list-style: none;
-  gap: 20px;
+  gap: 18px;
   margin: 0;
+  padding: 0;
 }
 
 .navbar-links a {
   text-decoration: none;
   color: #d4e9f7;
   font-weight: 500;
-  transition: color 0.3s;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: 0.25s ease;
 }
 
-.navbar-links a:hover,
+.navbar-links a:hover {
+  color: #f4a300;
+  transform: translateY(-1px);
+}
+
 .navbar-links a.active {
   color: #f4a300;
+  background-color: rgba(244, 163, 0, 0.15);
 }
 
-/* Botones de acción */
-.navbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.navbar-actions button {
-  background-color: transparent;
-  border: 1px solid #f4a300;
-  color: #f4a300;
-  padding: 6px 14px;
-  border-radius: 4px;
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
   cursor: pointer;
-  transition: all 0.3s;
+  width: 30px;
 }
 
-.navbar-actions button:hover {
-  background-color: #f4a300;
-  color: #0b3d5e;
+.hamburger span {
+  height: 3px;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 2px;
+  transition: 0.3s ease;
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+@media (max-width: 1200px) {
+  .navbar {
+    padding: 12px 28px;
+  }
+
+  .navbar-links a:hover {
+    transform: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .navbar-links {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background-color: #0b3d5e;
+    flex-direction: column;
+    width: 100%;
+    max-width: 270px;
+    padding: 20px 0;
+    gap: 16px;
+    transform: translateX(100%);
+    transition: 0.3s ease;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.25);
+  }
+
+  .navbar-links.show {
+    transform: translateX(0);
+  }
+
+  .navbar-links li {
+    text-align: left;
+    padding-left: 20px;
+  }
 }
