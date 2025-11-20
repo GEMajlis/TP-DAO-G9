@@ -118,3 +118,38 @@ def mantenimientos_activos(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
+    
+
+# -------------------------------------------------------------
+# GET: Obtener un mantenimiento por ID
+# -------------------------------------------------------------
+@require_http_methods(["GET"])
+def mantenimiento_por_id(request, id_mantenimiento):
+    try:
+        # Buscar mantenimiento por ID
+        try:
+            m = Mantenimiento.objects.get(id_mantenimiento=id_mantenimiento)
+        except Mantenimiento.DoesNotExist:
+            return JsonResponse(
+                {"error": f"No existe ningún mantenimiento con ID {id_mantenimiento}"},
+                status=404
+            )
+
+        data = {
+            "id_mantenimiento": m.id_mantenimiento,
+            "dni_empleado": m.empleado.dni,
+            "empleado_nombre": m.empleado.nombre,
+            "empleado_apellido": m.empleado.apellido,
+            "patente": m.vehiculo.patente,
+            "marca": m.vehiculo.marca,
+            "modelo": m.vehiculo.modelo,
+            "fecha_inicio": str(m.fecha_inicio),
+            "fecha_fin": str(m.fecha_fin) if m.fecha_fin else None,
+            "estado_mantenimiento": "activo" if m.fecha_fin is None else "finalizado",
+        }
+
+        return JsonResponse(data, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+

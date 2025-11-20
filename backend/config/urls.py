@@ -43,5 +43,6 @@ urlpatterns = [
     # Mantenimiento URLs
     path("mantenimientos/nuevo/", mantenimiento_views.mantenimiento_create, name="mantenimiento_create"),
     path("mantenimientos/finalizar/<str:patente>/", mantenimiento_views.mantenimiento_close, name="mantenimiento_finalizar"),
-    
+    path("mantenimientos/activos/", mantenimiento_views.mantenimientos_activos, name="mantenimientos_activos"),
+    path("mantenimientos/<int:id_mantenimiento>/", mantenimiento_views.mantenimiento_por_id, name="mantenimiento_por_id"),
 ]
