@@ -29,10 +29,10 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
     return (
         <>
             <div
-                className="card shadow-lg border-0 rounded-3 w-100"
-                style={{ maxWidth: "800px", margin: "0 auto" }}
+                className="card shadow-lg border-0 w-100 formulario-container"
+                style={{ maxWidth: "800px", margin: "0 auto", borderRadius: "12px" }}
             >
-                <div className="card-header bg-white border-bottom-0 pt-3 pb-1">
+                <div className="card-header bg-white border-bottom-0 pt-3 pb-1" style={{ borderRadius: "12px" }}>
                     <h4 className="card-title mb-0 text-primary fw-bold">
                         <i
                             className={`fa-solid ${esEdicion ? "fa-pen-to-square" : "fa-plus"} me-2`}

@@ -11,7 +11,7 @@ import Home from "./pages/Inicio";
 import Clientes from "./pages/Clientes/ClientesList";
 import Vehiculos from "./pages/Vehiculos/VehiculosPage.jsx";
 import Reservas from "./pages/Reservas/ReservasList";
-import Alquileres from "./pages/Alquileres/AlquileresList.jsx";
+import Alquileres from "./pages/Alquileres/AlquileresPage.jsx";
 import Danios from "./pages/Danios/DaniosList";
 import Empleados from "./pages/Empleados/EmpleadosList";
 import Mantenimiento from "./pages/Mantenimientos/MantenimientosList";
