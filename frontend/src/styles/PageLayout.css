@@ -78,3 +78,25 @@
   background-color: #e24242;
   transform: scale(1.05);
 }
+
+.tabla-registros {
+  display: inline-block;
+  /* o block según tu diseño */
+}
+
+@media (max-width: 768px) {
+
+  .alquileres-table th:nth-child(3),
+  .alquileres-table td:nth-child(3),
+  .alquileres-table th:nth-child(6),
+  .alquileres-table td:nth-child(6),
+  .alquileres-table th:nth-child(7),
+  .alquileres-table td:nth-child(7),
+  .alquileres-table th:nth-child(8),
+  .alquileres-table td:nth-child(8) {
+    display: none;
+  }
+  .tabla-registros {
+    display: none !important;
+  }
+}

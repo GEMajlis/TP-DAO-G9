@@ -1,0 +1,139 @@
+.footer {
+    background: linear-gradient(135deg, #0b3d5e 0%, #0a2940 100%);
+    color: #d4e9f7;
+    padding: 20px 20px 20px;
+    width: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-sizing: border-box;
+    height: auto !important;
+    min-height: fit-content;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 10px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.footer-brand {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-description {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #b8d4e6;
+    margin: 0;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+.footer-heading {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+.footer-links,
+.footer-contact {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li,
+.footer-contact li {
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+}
+
+.footer-links a {
+    color: #d4e9f7;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+}
+
+.footer-contact span {
+    color: #b8d4e6;
+    font-size: 0.85rem;
+}
+
+.footer-bottom {
+    padding-top: 10px;
+    text-align: center;
+}
+
+.footer-copy {
+    font-size: 0.85rem;
+    color: #8db3cc;
+}
+
+@media (max-width: 768px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .footer-section:not(:first-child) {
+        display: none;
+    }
+
+    .footer-brand {
+        justify-content: center;
+        font-size: 1.6rem;
+    }
+
+    .footer-description {
+        text-align: center;
+        padding: 0 10px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+
+    .footer-content {
+        grid-template-columns: 1.2fr 0.9fr 0.9fr;
+        gap: 20px;
+    }
+
+    .footer-brand {
+        font-size: 1.2rem;
+    }
+
+    .footer-description {
+        font-size: 0.8rem;
+        line-height: 1.4;
+    }
+
+    .footer {
+        padding: 30px 15px 15px;
+    }
+}
