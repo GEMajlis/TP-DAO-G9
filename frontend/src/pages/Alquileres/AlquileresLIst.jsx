@@ -10,42 +10,41 @@ export default function AlquileresList({
   RegistrosTotal,
   Paginas,
   Buscar,
-  FiltroPatente,
-  setFiltroPatente,
-  FiltroDNI,
-  setFiltroDNI,
-  Volver
+  FiltroEstado,
+  setFiltroEstado,
+  FiltroIdAlquiler,
+  setFiltroIdAlquiler
 }) {
   return (
     <div className="card border-0 shadow-sm" style={{ borderRadius: "12px" }}>
       <div className="card-body p-4">
 
         {/* TÍTULO */}
-        <h4 className="mb-4 fw-semibold text-primary" style={{ display: "flex", alignItems: "center" }}>
-          <i className="fa-solid fa-file-contract me-2"></i>
-          Listado de Alquileres
+        <h4 className="card-title mb-0 text-primary fw-bold mb-3">
+          <i className="fa-solid fa-file-contract me-2"></i>Listado de Alquileres
         </h4>
 
-        {/* BUSCADOR INTEGRADO */}
-        {/* Ahora que AlquileresSearch existe, esta importación funcionará */}
+        {/* BUSCADOR */}
         <AlquileresSearch
-          Patente={FiltroPatente}
-          setPatente={setFiltroPatente}
-          DNI={FiltroDNI}
-          setDNI={setFiltroDNI}
+          IdAlquiler={FiltroIdAlquiler}
+          setIdAlquiler={setFiltroIdAlquiler}
+          Estado={FiltroEstado}
+          setEstado={setFiltroEstado}
           Buscar={Buscar}
         />
 
         {/* TABLA */}
-        <div className="table-responsive">
+        <div className="table-responsive ">
           <table
-            className={`table table-sm align-middle ${Alquileres?.length > 0 ? "table-hover" : ""}`}
+            className={`table table-sm align-middle alquileres-table ${Alquileres?.length > 0 ? "table-hover" : ""
+              }`}
             style={{ borderRadius: "10px", overflow: "hidden" }}
           >
             <thead className="table-primary text-center">
               <tr>
+                <th>ID</th>
                 <th>Patente</th>
-                <th>Cliente (DNI)</th>
+                <th>Cliente</th>
                 <th>Desde</th>
                 <th>Hasta</th>
                 <th>Costo</th>
@@ -59,25 +58,14 @@ export default function AlquileresList({
               {Alquileres?.length > 0 ? (
                 Alquileres.map((alquiler) => (
                   <tr key={alquiler.IdAlquiler}>
-                    <td className="fw-semibold text-center text-primary">
-                      {alquiler.Patente}
-                    </td>
+                    <td className="text-center">{alquiler.IdAlquiler}</td>
+                    <td className="text-center">{alquiler.Patente}</td>
                     <td className="text-center">{alquiler.DNICliente}</td>
                     <td className="text-center">{alquiler.FechaInicio}</td>
                     <td className="text-center">{alquiler.FechaFin}</td>
-                    <td className="text-center fw-bold text-success">
-                      ${alquiler.Costo}
-                    </td>
+                    <td className="text-center">${alquiler.Costo}</td>
                     <td className="text-center">{alquiler.DNIEmpleado}</td>
-                    <td className="text-center">
-                      {alquiler.NroReserva ? (
-                        <span className="badge bg-info text-dark">
-                          #{alquiler.NroReserva}
-                        </span>
-                      ) : (
-                        <span className="text-muted">-</span>
-                      )}
-                    </td>
+                    <td className="text-center">{alquiler.NroReserva}</td>
 
                     <td className="text-center text-nowrap">
                       <button
@@ -100,7 +88,7 @@ export default function AlquileresList({
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="text-center py-5 border-0">
+                  <td colSpan="9" className="text-center py-5 border-0">
                     <span className="text-muted fs-6 fst-italic">
                       No se encontraron alquileres registrados.
                     </span>
@@ -113,7 +101,7 @@ export default function AlquileresList({
 
         {/* FOOTER */}
         <div className="d-flex justify-content-between align-items-center mt-3">
-          <span className="badge bg-light text-dark border px-3 py-2 fs-6">
+          <span className="badge bg-light text-dark border px-3 py-2 fs-6 tabla-registros">
             Registros: {RegistrosTotal}
           </span>
 
@@ -130,10 +118,7 @@ export default function AlquileresList({
             </select>
           </div>
 
-          <button
-            className="btn-primary"
-            onClick={Agregar}
-          >
+          <button className="btn-primary" onClick={Agregar}>
             <i className="fa fa-plus me-2"></i>
             Nuevo Alquiler
           </button>

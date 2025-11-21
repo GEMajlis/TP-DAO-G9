@@ -156,7 +156,7 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
                         </div>
 
                         {/* Botones */}
-                        <div className="d-flex justify-content-center gap-3 pt-3 border-top">
+                        <div className="d-flex justify-content-center gap-3 pt-3 pb-2 border-top">
                             <button
                                 type="button"
                                 className="btn-secondary px-4 fw-bold"

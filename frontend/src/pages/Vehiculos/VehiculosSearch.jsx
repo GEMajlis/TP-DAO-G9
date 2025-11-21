@@ -12,7 +12,7 @@ export default function VehiclesSearch({ Patente, setPatente, Estado, setEstado,
     >
       <div className="row align-items-center g-3">
         
-        {/* Grupo Patente */}
+        {/* Patente */}
         <div className="col-12 col-md d-flex align-items-center">
           <label
             className="col-form-label fw-bold text-secondary me-2 text-center"
@@ -33,7 +33,7 @@ export default function VehiclesSearch({ Patente, setPatente, Estado, setEstado,
           </div>
         </div>
 
-        {/* Grupo Estado */}
+        {/* Estado */}
         <div className="col-12 col-md d-flex align-items-center">
           <label
             className="col-form-label fw-bold text-secondary me-2 ms-md-3 text-center"

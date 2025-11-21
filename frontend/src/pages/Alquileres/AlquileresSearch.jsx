@@ -8,11 +8,11 @@ export default function AlquileresSearch({ IdAlquiler, setIdAlquiler, Estado, se
                 e.preventDefault();
                 Buscar(1);
             }}
-            className="bg-light p-3 rounded-3 border mb-4 w-100"
+            className="bg-light p-3 rounded-3 border mb-4"
         >
             <div className="row align-items-center g-3">
 
-                {/* Grupo ID Alquiler */}
+                {/* ID Alquiler */}
                 <div className="col-12 col-md d-flex align-items-center">
                     <label
                         className="col-form-label fw-bold text-secondary me-2 text-center"
@@ -32,7 +32,7 @@ export default function AlquileresSearch({ IdAlquiler, setIdAlquiler, Estado, se
                     </div>
                 </div>
 
-                {/* Grupo Estado (Activo / Finalizado) */}
+                {/* Estado */}
                 <div className="col-12 col-md d-flex align-items-center">
                     <label
                         className="col-form-label fw-bold text-secondary me-2 ms-md-3 text-center"
@@ -55,8 +55,7 @@ export default function AlquileresSearch({ IdAlquiler, setIdAlquiler, Estado, se
                 <div className="col-12 col-md-auto text-center">
                     <button
                         type="button"
-                        className="btn btn-primary fw-bold px-3"
-                        style={{ backgroundColor: "#00aeff", borderColor: "#00aeff" }}
+                        className="btn-primary fw-bold px-3"
                         onClick={() => Buscar(1)}
                         title="Buscar"
                     >
