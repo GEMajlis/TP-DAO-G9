@@ -5,7 +5,15 @@ import "../../styles/PageLayout.css";
 
 export default function ReservasPage() {
   const [vista, setVista] = useState("menu");
-  const [reservas, setReservas] = useState([]);
+
+  // ----- INICIO DE CAMBIOS (Lógica de Filtro) -----
+  const [todasLasReservas, setTodasLasReservas] = useState([]); // Base de datos completa
+  const [reservas, setReservas] = useState([]); // Lista filtrada para mostrar
+  const [filtroDNI, setFiltroDNI] = useState("");
+  const [filtroPatente, setFiltroPatente] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("");
+  // ----- FIN DE CAMBIOS -----
+
   const [reservaEditando, setReservaEditando] = useState(null);
   const [pagina, setPagina] = useState(1);
   const [volverA, setVolverA] = useState("menu");
@@ -17,6 +25,8 @@ export default function ReservasPage() {
       { IdReserva: 3, DNICliente: 55447722, Patente: "GHI789", FechaInicio: "2024-07-10", FechaFin: "2024-07-20", Estado: "Activa" },
       { IdReserva: 4, DNICliente: 55990011, Patente: "JKL012", FechaInicio: "2024-07-15", FechaFin: "2024-07-25", Estado: "Fallida" },
     ];
+    // ----- CAMBIO: Llenamos ambas listas -----
+    setTodasLasReservas(datosSimulados);
     setReservas(datosSimulados);
   }, []);
 
@@ -36,31 +46,64 @@ export default function ReservasPage() {
     alert(`Consultando: ${reserva.IdReserva}`);
   };
 
+  // ----- CAMBIO: handleCancelar debe actualizar ambas listas -----
   const handleCancelar = (reserva) => {
-  if (window.confirm(`¿Estás seguro de que deseas CANCELAR la reserva ${reserva.IdReserva}?`)) {
-    
-    setReservas(prev => prev.map(v =>
-      v.IdReserva === reserva.IdReserva 
-        // 👇 Esta es la línea clave: siempre establece 'false'
-        ? { ...v, Estado: "Cancelada" } 
-        : v
-    ));
-  }
-};
+    if (window.confirm(`¿Estás seguro de que deseas CANCELAR la reserva ${reserva.IdReserva}?`)) {
+      
+      const logicaMap = (v) => 
+        v.IdReserva === reserva.IdReserva 
+          ? { ...v, Estado: "Cancelada" } 
+          : v;
 
-
-  const handleBuscar = (numPagina) => {
-    setPagina(numPagina);
+      setTodasLasReservas(prev => prev.map(logicaMap));
+      setReservas(prev => prev.map(logicaMap));
+    }
   };
 
-  const handleGuardar = (reserva) => {
-    console.log("Guardando:", reserva);
-    if (reserva.IdReserva) {
-      setReservas((prev) => prev.map((v) => v.IdReserva === reserva.IdReserva ? reserva : v));
-    } else {
-      reserva.IdReserva = reservas.length + 1;
-      setReservas((prev) => [...prev, reserva]);
+  // ----- CAMBIO: Reemplazamos tu 'handleBuscar' por la versión con filtro -----
+  const handleBuscar = (numPagina) => {
+    setPagina(numPagina || 1);
+
+    const resultado = todasLasReservas.filter((r) => {
+      // Convertimos a string para búsquedas seguras
+      const dniString = String(r.DNICliente);
+      const patenteString = String(r.Patente);
+
+      const cumpleDNI = dniString.toLowerCase().includes(filtroDNI.toLowerCase());
+      const cumplePatente = patenteString.toLowerCase().includes(filtroPatente.toLowerCase());
+      
+      let cumpleEstado = true;
+      if (filtroEstado !== "") {
+        cumpleEstado = r.Estado === filtroEstado;
+      }
+      
+      return cumpleDNI && cumplePatente && cumpleEstado;
+    });
+
+    setReservas(resultado);
+  };
+
+  // ----- CAMBIO: Lógica de guardado actualizada -----
+  const handleGuardar = (reservaForm) => {
+    let nuevaBase;
+    if (reservaForm.IdReserva) { 
+      // Modificando
+      nuevaBase = todasLasReservas.map((v) => v.IdReserva === reservaForm.IdReserva ? reservaForm : v);
+    } else { 
+      // Agregando
+      // (Simulamos un nuevo ID)
+      const newId = Math.max(...todasLasReservas.map(r => r.IdReserva)) + 1;
+      reservaForm.IdReserva = newId;
+      nuevaBase = [...todasLasReservas, reservaForm];
     }
+
+    setTodasLasReservas(nuevaBase);
+    setReservas(nuevaBase);
+    // Reseteamos filtros
+    setFiltroDNI("");
+    setFiltroPatente("");
+    setFiltroEstado("");
+
     setVista("lista");
   };
 
@@ -69,13 +112,14 @@ export default function ReservasPage() {
   };
 
   return (
+    // ESTA ESTRUCTURA DE RETURN ES LA TUYA ORIGINAL (que se ve bien)
     <div className="page-container">
       <h2 className="page-title">Gestión de reservas</h2>
       <p className="page-subtitle">
         Controlá el estado y los datos de cada reserva.
       </p>
 
-      {/* ----------- VISTA MENÚ ----------- */}
+      {/* ----------- VISTA MENÚ (SIN CAMBIOS) ----------- */}
       {vista === "menu" && (
         <div className="page-content fade-in">
           <div className="page-card">
@@ -92,7 +136,7 @@ export default function ReservasPage() {
         </div>
       )}
 
-      {/* ----------- VISTA LISTA ----------- */}
+      {/* ----------- VISTA LISTA (CON CAMBIOS) ----------- */}
       {vista === "lista" && (
         <div className="fade-in">
           <ReservasList
@@ -103,9 +147,18 @@ export default function ReservasPage() {
             Agregar={() => handleAgregar("lista")}
             Pagina={pagina}
             RegistrosTotal={reservas.length}
-            Paginas={[1, 2, 3]}
+            Paginas={[1]} // Ajustado a [1] (la paginación real no está implementada)
             Buscar={handleBuscar}
             Volver={() => setVista("menu")}
+
+            // ----- INICIO DE CAMBIOS (Nuevas props) -----
+            FiltroDNI={filtroDNI}
+            setFiltroDNI={setFiltroDNI}
+            FiltroPatente={filtroPatente}
+            setFiltroPatente={setFiltroPatente}
+            FiltroEstado={filtroEstado}
+            setFiltroEstado={setFiltroEstado}
+            // ----- FIN DE CAMBIOS -----
           />
 
           <div className="text-center mt-4 mb-3">
@@ -116,18 +169,18 @@ export default function ReservasPage() {
         </div>
       )}
 
-      {/* ----------- VISTA FORMULARIO ----------- */}
+      {/* ----------- VISTA FORMULARIO (SIN CAMBIOS) ----------- */}
       {vista === "form" && (
         <div className="fade-in">
           <ReservasForm
-            Reserva={reservaEditando}
+            Reserva={reservaEditando} // Tu prop original
             Guardar={handleGuardar}
             Cancelar={handleVolverDesdeForm}
           />
 
           <div className="text-center mt-4 mb-3">
             <button className="btn btn-secondary px-4" onClick={handleVolverDesdeForm}>
-              <i className="fa-solid fa-arrow-left me-2"></i>
+              <i className="fa-solid fa.fa-arrow-left me-2"></i>
               {volverA === "menu" ? "Volver al menú" : "Volver al listado"}
             </button>
           </div>

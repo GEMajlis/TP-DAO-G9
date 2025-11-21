@@ -1,4 +1,5 @@
 import React from "react";
+import ReservasSearch from "./ReservasSearch"; // <-- CAMBIO: Importado
 
 export default function ReservasList({
     Reservas,
@@ -9,6 +10,14 @@ export default function ReservasList({
     RegistrosTotal,
     Paginas,
     Buscar,
+    // ----- INICIO CAMBIOS: Props nuevas -----
+    FiltroDNI,
+    setFiltroDNI,
+    FiltroPatente,
+    setFiltroPatente,
+    FiltroEstado,
+    setFiltroEstado,
+    // ----- FIN CAMBIOS -----
 }) {
     return (
         
@@ -17,8 +26,21 @@ export default function ReservasList({
 
                 {/* TÍTULO */}
                 <h4 className="mb-4 fw-semibold text-primary" style={{ display: "flex", alignItems: "center" }}>
-                    <i className="fa-solid fa-car me-2"></i>Reservas
+                    <i className="fa-solid fa-calendar-check me-2"></i>Reservas {/* CAMBIO: Icono */}
                 </h4>
+
+                {/* ----- INICIO CAMBIO: Barra de Búsqueda ----- */}
+                <ReservasSearch
+                    DNI={FiltroDNI}
+                    setDNI={setFiltroDNI}
+                    Patente={FiltroPatente}
+                    setPatente={setFiltroPatente}
+                    Estado={FiltroEstado}
+                    setEstado={setFiltroEstado}
+                    Buscar={Buscar}
+                />
+                {/* ----- FIN CAMBIO ----- */}
+
 
                 {/* TABLA */}
                 <div className="table-responsive">
@@ -43,7 +65,7 @@ export default function ReservasList({
                                 Reservas.map((reserva) => (
                                     <tr key={reserva.IdReserva}>
                                         <td className="fw-semibold text-center">{reserva.IdReserva}</td>
-                                        <td>{reserva.DNICLiente}</td>
+                                        <td>{reserva.DNICliente}</td>
                                         <td>{reserva.Patente}</td>
                                         <td className="text-center">{reserva.FechaInicio}</td>
                                         <td className="text-center">{reserva.FechaFin}</td>
@@ -55,21 +77,21 @@ export default function ReservasList({
 
                                                 // 2. Asignamos la clase de Bootstrap según el texto del estado
                                                 switch (reserva.Estado) {
-                                                case "Exitosa":
-                                                    claseDeBadge = "bg-success"; // Verde
-                                                    break;
-                                                case "Activa":
-                                                    claseDeBadge = "bg-warning"; // Amarillo
-                                                    break;
-                                                case "Fallida":
-                                                    claseDeBadge = "bg-dark";    // Negro
-                                                    break;
-                                                case "Cancelada":
-                                                    claseDeBadge = "bg-danger";  // Rojo
-                                                    break;
-                                                default:
-                                                    // Un color por defecto si el estado no es ninguno de los esperados
-                                                    claseDeBadge = "bg-secondary";
+                                                    case "Exitosa":
+                                                        claseDeBadge = "bg-success"; // Verde
+                                                        break;
+                                                    case "Activa":
+                                                        claseDeBadge = "bg-warning"; // Amarillo
+                                                        break;
+                                                    case "Fallida":
+                                                        claseDeBadge = "bg-dark";   // Negro
+                                                        break;
+                                                    case "Cancelada":
+                                                        claseDeBadge = "bg-danger";  // Rojo
+                                                        break;
+                                                    default:
+                                                        // Un color por defecto si el estado no es ninguno de los esperados
+                                                        claseDeBadge = "bg-secondary";
                                                 }
 
                                                 // 3. Devolvemos el <span> con la clase y el texto correctos
@@ -80,7 +102,7 @@ export default function ReservasList({
                                                 );
                                             })()}
                                             </td>
-                                            
+                                        
                                         <td className="text-center text-nowrap">
                                             {/* Modificar */}
                                             <button
@@ -92,29 +114,24 @@ export default function ReservasList({
                                             </button>
 
                                             {/* Cancelar*/}
-                                            {/* 👇 ¡ESTA ES LA CORRECCIÓN! 
-                                              Cambiamos 'reserva.Estado &&' por 'reserva.Estado === "Activa" &&'
-                                            */}
                                             {reserva.Estado === "Activa" && (
                                                 <button
-                                                    className="btn btn-sm btn-outline-danger me-1" // Color rojo fijo (Peligro/Cancelar)
+                                                    className="btn btn-sm btn-outline-danger me-1" 
                                                     onClick={() => Cancelar(reserva)}
                                                     title="Cancelar Reserva"
                                                 >
-                                                    <i className="fa-solid fa-ban"></i> {/* Icono fijo de prohibido/cancelar */}
+                                                    <i className="fa-solid fa-ban"></i>
                                                 </button>
                                             )}
-
-            
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    {/* 👇 Corregido a 7 columnas */}
                                     <td colSpan="7" className="text-center p-4">
                                         <div className="alert alert-secondary mb-0">
-                                            No se encontraron reservas cargadas.
+                                            {/* CAMBIO: Texto actualizado */}
+                                            No se encontraron reservas con esos criterios.
                                         </div>
                                     </td>
                                 </tr>
