@@ -5,17 +5,26 @@ import "../../styles/PageLayout.css";
 
 export default function ClientesPage() {
   const [vista, setVista] = useState("menu");
-  const [clientes, setClientes] = useState([]);
+  
+  // ----- INICIO DE CAMBIOS (Lógica de Filtro) -----
+  const [todosLosClientes, setTodosLosClientes] = useState([]); // Base de datos completa
+  const [clientes, setClientes] = useState([]); // Lista filtrada para mostrar
+  const [filtroDNI, setFiltroDNI] = useState("");
+  const [filtroNombre, setFiltroNombre] = useState("");
+  // ----- FIN DE CAMBIOS -----
+
   const [clienteEditando, setClienteEditando] = useState(null);
   const [pagina, setPagina] = useState(1);
   const [volverA, setVolverA] = useState("menu");
 
   useEffect(() => {
     const datosSimulados = [
-      { DNI: 55669988, Nombre: "Luis", Apellido: "Dominguez", Telefono: 3515566896 },
-      { DNI: 44778855, Nombre: "Gustavo", Apellido: "Amaya", Telefono: 3512233112 },
-      { DNI: 55882211, Nombre: "Leonel", Apellido: "Diaz", Telefono: 3516699332 },
+      { DNI: "12345678", Nombre: "Juan", Apellido: "Perez", Email: "juan@mail.com", Telefono: "11223344" },
+      { DNI: "87654321", Nombre: "Maria", Apellido: "Gomez", Email: "maria@mail.com", Telefono: "55667788" },
+      { DNI: "11223344", Nombre: "Carlos", Apellido: "Lopez", Email: "carlos@mail.com", Telefono: "99001122" },
     ];
+    // ----- CAMBIO: Llenamos ambas listas -----
+    setTodosLosClientes(datosSimulados); 
     setClientes(datosSimulados);
   }, []);
 
@@ -31,29 +40,52 @@ export default function ClientesPage() {
     setVista("form");
   };
 
+  // (Mantenemos tu 'handleConsultar' por si ClientesList lo usa)
   const handleConsultar = (cliente) => {
     alert(`Consultando: ${cliente.DNI}`);
   };
 
-
   const handleEliminar = (cliente) => {
-    if (window.confirm(`¿Estás seguro de eliminar el cliente ${cliente.DNI}?`)) {
-      setClientes(prev => prev.filter(v => v.DNI !== cliente.DNI));
+    if (window.confirm(`¿Estás seguro de eliminar al cliente ${cliente.Nombre} ${cliente.Apellido}?`)) {
+      // ----- CAMBIO: Actualizamos ambas listas -----
+      setTodosLosClientes(prev => prev.filter(c => c.DNI !== cliente.DNI));
+      setClientes(prev => prev.filter(c => c.DNI !== cliente.DNI));
     }
   };
 
+  // ----- CAMBIO: Reemplazamos tu 'handleBuscar' por la versión con filtro -----
   const handleBuscar = (numPagina) => {
-    setPagina(numPagina);
+    setPagina(numPagina || 1);
+
+    const resultado = todosLosClientes.filter((c) => {
+      const cumpleDNI = c.DNI.toLowerCase().includes(filtroDNI.toLowerCase());
+      const cumpleNombre = c.Nombre.toLowerCase().includes(filtroNombre.toLowerCase());
+      return cumpleDNI && cumpleNombre;
+    });
+
+    setClientes(resultado);
   };
 
-  const handleGuardar = (cliente) => {
-    console.log("Guardando:", cliente);
-    if (cliente.DNI) {
-      setClientes((prev) => prev.map((v) => v.DNI === cliente.DNI ? cliente : v));
+  const handleGuardar = (clienteForm) => {
+    let nuevaBase;
+    if (clienteEditando) { 
+      // Modificando
+      nuevaBase = todosLosClientes.map((c) => (c.DNI === clienteForm.DNI ? clienteForm : c));
     } else {
-      cliente.DNI = clientes.length + 1;
-      setClientes((prev) => [...prev, cliente]);
+      // Agregando
+      const existe = todosLosClientes.some(c => c.DNI === clienteForm.DNI);
+      if (existe) {
+        alert("Ya existe un cliente con ese DNI.");
+        return;
+      }
+      nuevaBase = [...todosLosClientes, clienteForm];
     }
+
+    // ----- CAMBIO: Actualizamos ambas listas y reseteamos filtros -----
+    setTodosLosClientes(nuevaBase);
+    setClientes(nuevaBase);
+    setFiltroDNI("");
+    setFiltroNombre("");
     setVista("lista");
   };
 
@@ -62,13 +94,14 @@ export default function ClientesPage() {
   };
 
   return (
+    // ESTA ESTRUCTURA DE RETURN ES LA DE TU CÓDIGO "VIEJO" (que se ve bien)
     <div className="page-container">
       <h2 className="page-title">Gestión de clientes</h2>
       <p className="page-subtitle">
         Controlá clientes.
       </p>
 
-      {/* ----------- VISTA MENÚ ----------- */}
+      {/* ----------- VISTA MENÚ (SIN CAMBIOS) ----------- */}
       {vista === "menu" && (
         <div className="page-content fade-in">
           <div className="page-card">
@@ -85,20 +118,27 @@ export default function ClientesPage() {
         </div>
       )}
 
-      {/* ----------- VISTA LISTA ----------- */}
+      {/* ----------- VISTA LISTA (CON CAMBIOS) ----------- */}
       {vista === "lista" && (
         <div className="fade-in">
           <ClientesList
             Clientes={clientes}
-            Consultar={handleConsultar}
+            Consultar={handleConsultar} // (Dejamos tus props originales)
             Modificar={handleModificar}
             Eliminar={handleEliminar}
             Agregar={() => handleAgregar("lista")}
             Pagina={pagina}
             RegistrosTotal={clientes.length}
-            Paginas={[1, 2, 3]}
+            Paginas={[1]} // (Lo ajusté a [1] como en Vehiculos, ya que la paginación no está implementada)
             Buscar={handleBuscar}
-            Volver={() => setVista("menu")}
+            Volver={() => setVista("menu")} // (Dejamos tus props originales)
+
+            // ----- INICIO DE CAMBIOS (Nuevas props) -----
+            FiltroDNI={filtroDNI}
+            setFiltroDNI={setFiltroDNI}
+            FiltroNombre={filtroNombre}
+            setFiltroNombre={setFiltroNombre}
+            // ----- FIN DE CAMBIOS -----
           />
 
           <div className="text-center mt-4 mb-3">
@@ -109,11 +149,11 @@ export default function ClientesPage() {
         </div>
       )}
 
-      {/* ----------- VISTA FORMULARIO ----------- */}
+      {/* ----------- VISTA FORMULARIO (SIN CAMBIOS) ----------- */}
       {vista === "form" && (
         <div className="fade-in">
           <ClientesForm
-            cliente={clienteEditando}
+            cliente={clienteEditando} // (Usa 'cliente' como en tu código viejo)
             Guardar={handleGuardar}
             Cancelar={handleVolverDesdeForm}
           />

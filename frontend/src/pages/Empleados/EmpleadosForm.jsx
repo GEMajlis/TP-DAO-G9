@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 export default function EmpleadoForm({ Empleado, Guardar, Cancelar }) {
     const [form, setForm] = useState({
-        DNI: Empleado?.DNI || null,
+        DNI: Empleado?.DNI || "",
         Nombre: Empleado?.Nombre || "",
         Apellido: Empleado?.Apellido || "",
     });
@@ -58,8 +58,8 @@ export default function EmpleadoForm({ Empleado, Guardar, Cancelar }) {
                                         <input
                                             type="number"
                                             className="form-control border-start-0 ps-2"
-                                            id="inputDni"
-                                            name="Dni"
+                                            id="inputDNI"
+                                            name="DNI"
                                             placeholder="Ej: 30000000"
                                             value={form.DNI} // Usar DNI mayúscula si es la propiedad del estado
                                             onChange={handleChange}
