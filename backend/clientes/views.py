@@ -55,6 +55,28 @@ def cliente_dni(request, dni):
 
 
 @require_http_methods(["GET"])
+def get_clientes(request):
+    try:
+        conexion = sqlite3.connect("db.sqlite3")
+        cursor = conexion.cursor()
+        clientes = cursor.execute("SELECT * FROM CLIENTES").fetchall()
+        conexion.close()
+
+        clientes_list = [
+            {
+                "dni": cliente[0],
+                "nombre": cliente[1],
+                "apellido": cliente[2],
+                "telefono": cliente[3],
+            }
+            for cliente in clientes
+        ]
+
+        return JsonResponse({"clientes": clientes_list}, status=200)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+@require_http_methods(["GET"])
 def cliente_nombre(request, nombre):
     conexion = sqlite3.connect("db.sqlite3")
     cursor = conexion.cursor()
