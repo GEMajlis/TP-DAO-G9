@@ -13,7 +13,7 @@ import {
 
 
 export default function EmpleadosPage() {
-  const [vista, setVista] = useState("menu");
+  const [vista, setVista] = useState("lista");
   const [todosLosEmpleados, setTodosLosEmpleados] = useState([]); 
   const [empleados, setEmpleados] = useState([]); 
   const [filtroDNI, setFiltroDNI] = useState("");
@@ -151,22 +151,7 @@ export default function EmpleadosPage() {
         Controlá empleados.
       </p>
 
-      {/* ----------- VISTA MENÚ (SIN CAMBIOS) ----------- */}
-      {vista === "menu" && (
-        <div className="page-content fade-in">
-          <div className="page-card">
-            <h3>Listado de empleados</h3>
-            <p>Visualizá todos los empleados.</p>
-            <button className="btn-primary" onClick={() => setVista("lista")}>Ver empleados</button>
-          </div>
-
-          <div className="page-card">
-            <h3>Agregar empleado</h3>
-            <p>Cargá un nuevo empleado.</p>
-            <button className="btn-primary" onClick={() => handleAgregar("menu")}>Agregar</button>
-          </div>
-        </div>
-      )}
+      
 
       {/* ----------- VISTA LISTA (SIN CAMBIOS) ----------- */}
       {vista === "lista" && (
@@ -187,12 +172,6 @@ export default function EmpleadosPage() {
             FiltroNombre={filtroNombre}
             setFiltroNombre={setFiltroNombre}
           />
-
-          <div className="text-center mt-4 mb-3">
-            <button className="btn btn-secondary px-4" onClick={() => setVista("menu")}>
-              <i className="fa-solid fa-arrow-left me-2"></i>Volver al menú
-            </button>
-          </div>
         </div>
       )}
 

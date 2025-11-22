@@ -4,7 +4,7 @@ import ReservasForm from "./ReservasForm";
 import "../../styles/PageLayout.css";
 
 export default function ReservasPage() {
-  const [vista, setVista] = useState("menu");
+  const [vista, setVista] = useState("lista");
 
   // ----- INICIO DE CAMBIOS (Lógica de Filtro) -----
   const [todasLasReservas, setTodasLasReservas] = useState([]); // Base de datos completa
@@ -119,23 +119,6 @@ export default function ReservasPage() {
         Controlá el estado y los datos de cada reserva.
       </p>
 
-      {/* ----------- VISTA MENÚ (SIN CAMBIOS) ----------- */}
-      {vista === "menu" && (
-        <div className="page-content fade-in">
-          <div className="page-card">
-            <h3>Listado de reservas</h3>
-            <p>Visualizá todas las reservas.</p>
-            <button className="btn-primary" onClick={() => setVista("lista")}>Ver reservas</button>
-          </div>
-
-          <div className="page-card">
-            <h3>Agregar reserva</h3>
-            <p>Cargá una nueva reserva.</p>
-            <button className="btn-primary" onClick={() => handleAgregar("menu")}>Agregar</button>
-          </div>
-        </div>
-      )}
-
       {/* ----------- VISTA LISTA (CON CAMBIOS) ----------- */}
       {vista === "lista" && (
         <div className="fade-in">
@@ -161,11 +144,6 @@ export default function ReservasPage() {
             // ----- FIN DE CAMBIOS -----
           />
 
-          <div className="text-center mt-4 mb-3">
-            <button className="btn btn-secondary px-4" onClick={() => setVista("menu")}>
-              <i className="fa-solid fa-arrow-left me-2"></i>Volver al menú
-            </button>
-          </div>
         </div>
       )}
 

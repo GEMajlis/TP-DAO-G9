@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 export default function ClienteForm({ Cliente, Guardar, Cancelar }) {
     const [form, setForm] = useState({
-        DNI: Cliente?.DNI || null,
+        DNI: Cliente?.DNI || "",
         Nombre: Cliente?.Nombre || "",
         Apellido: Cliente?.Apellido || "",
         Telefono: Cliente?.Telefono || null,
@@ -61,7 +61,7 @@ export default function ClienteForm({ Cliente, Guardar, Cancelar }) {
                                             type="number"
                                             className="form-control border-start-0 ps-2"
                                             id="inputDni"
-                                            name="Dni"
+                                            name="DNI"
                                             placeholder="Ej: 30000000"
                                             value={form.DNI} // Usar DNI mayúscula si es la propiedad del estado
                                             onChange={handleChange}
