@@ -102,6 +102,30 @@ def vehiculo_patente(request, patente):
         return JsonResponse({"error": str(e)}, status=400)
     
 
+@require_http_methods(["GET"])
+def get_vehiculos(request):
+    try:
+        conexion = sqlite3.connect("db.sqlite3")
+        cursor = conexion.cursor()
+        vehiculos = cursor.execute("SELECT * FROM VEHICULOS").fetchall()
+        conexion.close()
+
+        vehiculos_list = []
+        for vehiculo in vehiculos:
+            vehiculos_list.append(
+                {
+                    "patente": vehiculo[0],
+                    "marca": vehiculo[1],
+                    "modelo": vehiculo[2],
+                    "color": vehiculo[3],
+                    "estado": vehiculo[4],
+                }
+            )
+
+        return JsonResponse({"vehiculos": vehiculos_list})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
 @csrf_exempt
 @require_http_methods(["PUT"])
 def vehiculo_edit(request, patente):
