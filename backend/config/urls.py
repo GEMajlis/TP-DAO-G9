@@ -30,6 +30,7 @@ urlpatterns = [
     path("clientes/editar/<int:dni>/", cliente_views.cliente_edit, name="cliente_edit"),
     path("clientes/eliminar/<int:dni>/", cliente_views.cliente_delete, name="cliente_delete"),
     # Vehículos URLs
+    path("vehiculos/", vehiculo_views.vehiculos_list, name="vehiculos_list"),
     path("vehiculos/nuevo/", vehiculo_views.vehiculo_create, name="vehiculo_create"),
     path("vehiculos/patente/<str:patente>/", vehiculo_views.vehiculo_patente, name="vehiculo_patente"),
     path("vehiculos/editar/<str:patente>/", vehiculo_views.vehiculo_edit, name="vehiculo_edit"),
