@@ -10,7 +10,6 @@ import Navbar from "./components/Navbar.jsx";
 import Home from "./pages/Inicio";
 import Clientes from "./pages/Clientes/ClientesList";
 import Vehiculos from "./pages/Vehiculos/VehiculosPage.jsx";
-import Reservas from "./pages/Reservas/ReservasList";
 import Alquileres from "./pages/Alquileres/AlquileresPage.jsx";
 import Reservas from "./pages/Reservas/ReservasPage.jsx";
 import Danios from "./pages/Danios/DaniosPage.jsx";

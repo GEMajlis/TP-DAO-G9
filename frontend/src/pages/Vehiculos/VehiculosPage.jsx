@@ -61,7 +61,8 @@ export default function VehiculosPage() {
   const handleModificar = async (vehiculo) => {
     try {
       const data = await obtenerVehiculo(vehiculo.patente);
-      setVehiculoSeleccionado(data);
+      const vehiculoData = data.vehiculos?.[0] || data;
+      setVehiculoSeleccionado(vehiculoData);
       setVista("form");
     } catch (err) {
       console.error(err);
@@ -70,34 +71,44 @@ export default function VehiculosPage() {
   };
  
 
-  const handleEliminar = (vehiculo) => {
-    if (window.confirm(`¿Estás seguro de eliminar el vehículo ${vehiculo.Patente}?`)) {
-      setTodosLosVehiculos(prev => prev.filter(v => v.Patente !== vehiculo.Patente));
-      setVehiculos(prev => prev.filter(v => v.Patente !== vehiculo.Patente));
+  const handleEliminar = async (vehiculo) => {
+    if (window.confirm(`¿Estás seguro de eliminar el vehículo ${vehiculo.patente}?`)) {
+      try {
+        await eliminarVehiculo(vehiculo.patente);
+        await cargarVehiculos(); 
+      } catch (err) {
+        console.error("Error eliminando vehículo:", err);
+        alert("No se pudo eliminar el vehículo.");
+      }
     }
   };
 
   const handleGuardar = async (vehiculoForm) => {
-    const existe = todosLosVehiculos.some(v => v.Patente === vehiculoForm.Patente);
-
-    let nuevaBase;
-    if (vehiculoSeleccionado) {
-      nuevaBase = todosLosVehiculos.map((v) => v.Patente === vehiculoForm.Patente ? vehiculoForm : v);
-    } else {
-      if (existe) {
-        alert("Ya existe un vehículo con esa Patente.");
-        return;
+    try {
+      if (vehiculoSeleccionado) {
+        await actualizarVehiculo(vehiculoForm.patente, {
+          color: vehiculoForm.color,
+          marca: vehiculoForm.marca,
+          modelo: vehiculoForm.modelo,
+          estado: vehiculoForm.estado
+        });
+      } else {
+        await crearVehiculo({
+          patente: vehiculoForm.patente,
+          color: vehiculoForm.color,
+          marca: vehiculoForm.marca,
+          modelo: vehiculoForm.modelo,
+          estado: vehiculoForm.estado
+        });
       }
-      nuevaBase = [...todosLosVehiculos, vehiculoForm];
+
+      await cargarVehiculos(); 
+      setVista("lista");
+    } catch (err) {
+      console.error("Error guardando vehículo:", err);
+      alert(err.message || "No se pudo guardar el vehículo.");
     }
-
-    setTodosLosVehiculos(nuevaBase);
-    setVehiculos(nuevaBase);
-    setFiltroPatente("");
-    setFiltroEstado("");
-    setVista("lista");
   };
-
 
   const handleVolverALista = () => {
     setVista("lista");

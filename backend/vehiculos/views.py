@@ -106,18 +106,25 @@ def vehiculo_patente(request, patente):
 @require_http_methods(["PUT"])
 def vehiculo_edit(request, patente):
     try:
-        # Obtén la instancia real de Django
         vehiculo = Vehiculo.objects.get(patente=patente)
         
         data = json.loads(request.body)
-        form = VehiculoForm(data, instance=vehiculo)
-        if form.is_valid():
-            form.save()
-            return JsonResponse(
-                {"message": "Vehículo editado correctamente"}, status=200
-            )
-        else:
-            return JsonResponse({"error": form.errors}, status=400)
+        
+        if 'color' in data:
+            vehiculo.color = data['color']
+        if 'marca' in data:
+            vehiculo.marca = data['marca']
+        if 'modelo' in data:
+            vehiculo.modelo = data['modelo']
+        if 'estado' in data:
+            vehiculo.estado = data['estado']
+        
+        vehiculo.save()
+        
+        return JsonResponse(
+            {"message": "Vehículo editado correctamente"}, status=200
+        )
+        
     except Vehiculo.DoesNotExist:
         return JsonResponse({"error": "Vehículo no encontrado"}, status=404)
     except json.JSONDecodeError:

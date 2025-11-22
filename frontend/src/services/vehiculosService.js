@@ -13,13 +13,13 @@ export const obtenerVehiculo = async (patente) => {
 };
 
 export const crearVehiculo = async (data) => {
-    return await axios.post(API_URL, data);
+    return await axios.post(`${API_URL}nuevo/`, data);
 };
 
 export const actualizarVehiculo = async (patente, data) => {
-    return await axios.put(`${API_URL}${patente}/`, data);
+    return await axios.put(`${API_URL}editar/${patente}/`, data);
 };
 
 export const eliminarVehiculo = async (patente) => {
-    return await axios.delete(`${API_URL}${patente}/`);
+    return await axios.delete(`${API_URL}eliminar/${patente}/`);
 };
