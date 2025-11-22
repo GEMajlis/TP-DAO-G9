@@ -3,169 +3,213 @@ import ClientesList from "./ClientesList";
 import ClientesForm from "./ClientesForm";
 import "../../styles/PageLayout.css";
 
+// ----- 🔴 CAMBIO: Importamos las nuevas funciones del servicio 🔴 -----
+import {
+  getClientes,
+  createCliente,
+  updateCliente,
+  deleteCliente
+} from "../../services/clientesService"; // (¡Ajustá esta ruta si es necesario!)
+
+
 export default function ClientesPage() {
-  const [vista, setVista] = useState("menu");
-  
-  // ----- INICIO DE CAMBIOS (Lógica de Filtro) -----
-  const [todosLosClientes, setTodosLosClientes] = useState([]); // Base de datos completa
-  const [clientes, setClientes] = useState([]); // Lista filtrada para mostrar
-  const [filtroDNI, setFiltroDNI] = useState("");
-  const [filtroNombre, setFiltroNombre] = useState("");
-  // ----- FIN DE CAMBIOS -----
+  const [vista, setVista] = useState("lista");
+  const [todosLosClientes, setTodosLosClientes] = useState([]); 
+  const [clientes, setClientes] = useState([]); 
+  const [filtroDNI, setFiltroDNI] = useState("");
+  const [filtroNombre, setFiltroNombre] = useState("");
+  const [clienteEditando, setClienteEditando] = useState(null);
+  const [pagina, setPagina] = useState(1);
+  
+  // ----- 🔴 CAMBIO: 'volverA' ahora empieza en "lista" 🔴 -----
+  const [volverA, setVolverA] = useState("lista"); 
 
-  const [clienteEditando, setClienteEditando] = useState(null);
-  const [pagina, setPagina] = useState(1);
-  const [volverA, setVolverA] = useState("menu");
+  
+  // ----- 🔴 CAMBIO: useEffect ahora carga datos de la API 🔴 -----
+  useEffect(() => {
+    // 1. Definimos una función async para cargar datos
+    const cargarClientes = async () => {
+      try {
+        // 2. Llamamos a la API
+        const data = await getClientes(); // Esto ya devuelve el array
+        
+        // 3. Actualizamos ambos estados con los datos reales
+        setTodosLosClientes(data);
+        setClientes(data);
+      } catch (error) {
+        console.error("No se pudieron cargar los clientes:", error);
+        alert("Error al cargar clientes: " + error.message);
+        setTodosLosClientes([]); 
+        setClientes([]);
+      }
+    };
 
-  useEffect(() => {
-    const datosSimulados = [
-      { DNI: "12345678", Nombre: "Juan", Apellido: "Perez", Email: "juan@mail.com", Telefono: "11223344" },
-      { DNI: "87654321", Nombre: "Maria", Apellido: "Gomez", Email: "maria@mail.com", Telefono: "55667788" },
-      { DNI: "11223344", Nombre: "Carlos", Apellido: "Lopez", Email: "carlos@mail.com", Telefono: "99001122" },
-    ];
-    // ----- CAMBIO: Llenamos ambas listas -----
-    setTodosLosClientes(datosSimulados); 
-    setClientes(datosSimulados);
-  }, []);
+    // 4. Llamamos a la función de carga solo si la vista es "lista"
+    if (vista === "lista") {
+      cargarClientes();
+    }
+    // Se ejecutará cada vez que volvamos a la vista "lista"
+  }, [vista]); 
 
-  const handleAgregar = (origen) => {
-    setClienteEditando(null);
-    setVolverA(origen); 
-    setVista("form");
-  };
 
-  const handleModificar = (cliente) => {
-    setClienteEditando(cliente);
-    setVolverA("lista"); 
-    setVista("form");
-  };
+  const handleAgregar = (origen) => {
+    setClienteEditando(null);
+    // ----- 🔴 CAMBIO: Simplificado, siempre vuelve a "lista" 🔴 -----
+    setVolverA("lista"); 
+    setVista("form");
+  };
 
-  // (Mantenemos tu 'handleConsultar' por si ClientesList lo usa)
-  const handleConsultar = (cliente) => {
-    alert(`Consultando: ${cliente.DNI}`);
-  };
+  const handleModificar = (cliente) => {
+    setClienteEditando(cliente);
+    setVolverA("lista"); 
+    setVista("form");
+  };
 
-  const handleEliminar = (cliente) => {
-    if (window.confirm(`¿Estás seguro de eliminar al cliente ${cliente.Nombre} ${cliente.Apellido}?`)) {
-      // ----- CAMBIO: Actualizamos ambas listas -----
-      setTodosLosClientes(prev => prev.filter(c => c.DNI !== cliente.DNI));
-      setClientes(prev => prev.filter(c => c.DNI !== cliente.DNI));
-    }
-  };
+  const handleConsultar = (cliente) => {
+    alert(`Consultando: ${cliente.DNI}`);
+  };
 
-  // ----- CAMBIO: Reemplazamos tu 'handleBuscar' por la versión con filtro -----
-  const handleBuscar = (numPagina) => {
-    setPagina(numPagina || 1);
 
-    const resultado = todosLosClientes.filter((c) => {
-      const cumpleDNI = c.DNI.toLowerCase().includes(filtroDNI.toLowerCase());
-      const cumpleNombre = c.Nombre.toLowerCase().includes(filtroNombre.toLowerCase());
-      return cumpleDNI && cumpleNombre;
-    });
+  // ----- 🔴 CAMBIO: handleEliminar ahora es 'async' y llama a la API 🔴 -----
+  const handleEliminar = async (cliente) => {
+    if (window.confirm(`¿Estás seguro de eliminar al cliente ${cliente.Nombre} ${cliente.Apellido}?`)) {
+      try {
+        // 1. Llamamos a la API para eliminar
+        await deleteCliente(cliente.DNI);
+        
+        // 2. Si la API tiene éxito, actualizamos el estado local (la UI)
+        setTodosLosClientes(prev => prev.filter(c => c.DNI !== cliente.DNI));
+        setClientes(prev => prev.filter(c => c.DNI !== cliente.DNI));
 
-    setClientes(resultado);
-  };
+      } catch (error) {
+        // 3. Si la API falla, mostramos un error
+        console.error("Error al eliminar cliente:", error);
+        alert("Error al eliminar el cliente: " + error.message);
+      }
+    }
+  };
 
-  const handleGuardar = (clienteForm) => {
-    let nuevaBase;
-    if (clienteEditando) { 
-      // Modificando
-      nuevaBase = todosLosClientes.map((c) => (c.DNI === clienteForm.DNI ? clienteForm : c));
-    } else {
-      // Agregando
-      const existe = todosLosClientes.some(c => c.DNI === clienteForm.DNI);
-      if (existe) {
-        alert("Ya existe un cliente con ese DNI.");
-        return;
-      }
-      nuevaBase = [...todosLosClientes, clienteForm];
-    }
+  // (handleBuscar se queda igual, sigue filtrando localmente)
+  const handleBuscar = (numPagina) => {
+    setPagina(numPagina || 1);
+    const resultado = todosLosClientes.filter((c) => {
+      // Convertimos a String para evitar errores si DNI es numérico
+      const dniString = String(c.DNI); 
+      const nombreString = String(c.Nombre);
+      const cumpleDNI = dniString.toLowerCase().includes(filtroDNI.toLowerCase());
+      const cumpleNombre = nombreString.toLowerCase().includes(filtroNombre.toLowerCase());
+      return cumpleDNI && cumpleNombre;
+    });
+    setClientes(resultado);
+  };
 
-    // ----- CAMBIO: Actualizamos ambas listas y reseteamos filtros -----
-    setTodosLosClientes(nuevaBase);
-    setClientes(nuevaBase);
-    setFiltroDNI("");
-    setFiltroNombre("");
-    setVista("lista");
-  };
+  
+  // ----- 🔴 CAMBIO: handleGuardar ahora es 'async' y llama a la API 🔴 -----
+  const handleGuardar = async (clienteForm) => {
+    try {
+      let nuevaBase;
 
-  const handleVolverDesdeForm = () => {
-    setVista(volverA);
-  };
+      if (clienteEditando) { 
+        // --- Lógica de Edición ---
+        // 1. Llamamos a la API para actualizar
+        // (Asegúrate que el DNI no sea editable en el form, o pásalo por separado)
+        await updateCliente(clienteEditando.DNI, clienteForm); 
+        // 2. Si tiene éxito, actualizamos el estado local
+        nuevaBase = todosLosClientes.map((c) => (c.DNI === clienteEditando.DNI ? clienteForm : c));
+      
+      } else {
+        // --- Lógica de Creación ---
+        // 1. (Quitamos la validación local, el backend debería hacerlo)
+        // 2. Llamamos a la API para crear
+        await createCliente(clienteForm);
+        // 3. Si tiene éxito, actualizamos el estado local
+        // (Nota: Idealmente la API devolvería el nuevo objeto creado)
+        nuevaBase = [...todosLosClientes, clienteForm];
+      }
 
-  return (
-    // ESTA ESTRUCTURA DE RETURN ES LA DE TU CÓDIGO "VIEJO" (que se ve bien)
-    <div className="page-container">
-      <h2 className="page-title">Gestión de clientes</h2>
-      <p className="page-subtitle">
-        Controlá clientes.
-      </p>
+      // 4. Sincronizamos el estado y cambiamos de vista
+      setTodosLosClientes(nuevaBase);
+      setClientes(nuevaBase);
+      setFiltroDNI("");
+      setFiltroNombre("");
+      setVista("lista");
 
-      {/* ----------- VISTA MENÚ (SIN CAMBIOS) ----------- */}
-      {vista === "menu" && (
-        <div className="page-content fade-in">
-          <div className="page-card">
-            <h3>Listado de clientes</h3>
-            <p>Visualizá todos los clientes.</p>
-            <button className="btn-primary" onClick={() => setVista("lista")}>Ver clientes</button>
-          </div>
+    } catch (error) {
+      // 5. Si la API falla (Crear o Editar), mostramos un error
+      console.error("Error al guardar cliente:", error);
+      alert("Error al guardar el cliente: " + error.message);
+    }
+  };
 
-          <div className="page-card">
-            <h3>Agregar cliente</h3>
-            <p>Cargá un nuevo cliente.</p>
-            <button className="btn-primary" onClick={() => handleAgregar("menu")}>Agregar</button>
-          </div>
-        </div>
-      )}
+  const handleVolverDesdeForm = () => {
+    setVista(volverA);
+  };
 
-      {/* ----------- VISTA LISTA (CON CAMBIOS) ----------- */}
-      {vista === "lista" && (
-        <div className="fade-in">
-          <ClientesList
-            Clientes={clientes}
-            Consultar={handleConsultar} // (Dejamos tus props originales)
-            Modificar={handleModificar}
-            Eliminar={handleEliminar}
-            Agregar={() => handleAgregar("lista")}
-            Pagina={pagina}
-            RegistrosTotal={clientes.length}
-            Paginas={[1]} // (Lo ajusté a [1] como en Vehiculos, ya que la paginación no está implementada)
-            Buscar={handleBuscar}
-            Volver={() => setVista("menu")} // (Dejamos tus props originales)
+  
+  //
+  // --- TU JSX DE 'return' QUEDA EXACTAMENTE IGUAL ---
+  // ... solo ajusté el botón "Volver" para que ya no dependa de "menu"
+  //
 
-            // ----- INICIO DE CAMBIOS (Nuevas props) -----
-            FiltroDNI={filtroDNI}
-            setFiltroDNI={setFiltroDNI}
-            FiltroNombre={filtroNombre}
-            setFiltroNombre={setFiltroNombre}
-            // ----- FIN DE CAMBIOS -----
-          />
+  return (
+    <div className="page-container">
+      <h2 className="page-title">Gestión de clientes</h2>
+      <p className="page-subtitle">
+        Controlá clientes.
+      </p>
 
-          <div className="text-center mt-4 mb-3">
-            <button className="btn btn-secondary px-4" onClick={() => setVista("menu")}>
-              <i className="fa-solid fa-arrow-left me-2"></i>Volver al menú
-            </button>
-          </div>
-        </div>
-      )}
+      {/* (Ya no hay VISTA MENÚ) */}
 
-      {/* ----------- VISTA FORMULARIO (SIN CAMBIOS) ----------- */}
-      {vista === "form" && (
-        <div className="fade-in">
-          <ClientesForm
-            cliente={clienteEditando} // (Usa 'cliente' como en tu código viejo)
-            Guardar={handleGuardar}
-            Cancelar={handleVolverDesdeForm}
-          />
+      {/* ----------- VISTA LISTA ----------- */}
+      {vista === "lista" && (
+        <div className="fade-in">
+          <ClientesList
+            Clientes={clientes}
+            Consultar={handleConsultar}
+            Modificar={handleModificar}
+            Eliminar={handleEliminar}
+            Agregar={() => handleAgregar("lista")}
+            Pagina={pagina}
+            RegistrosTotal={clientes.length} 
+            Paginas={[1]} 
+            Buscar={handleBuscar}
+            // ----- 🔴 CAMBIO: 'Volver' ya no es necesario si no hay menú 🔴 -----
+            // Volver={() => setVista("menu")} // (Podés borrar esta prop de ClientesList)
 
-          <div className="text-center mt-4 mb-3">
-            <button className="btn btn-secondary px-4" onClick={handleVolverDesdeForm}>
-              <i className="fa-solid fa-arrow-left me-2"></i>
-              {volverA === "menu" ? "Volver al menú" : "Volver al listado"}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+            FiltroDNI={filtroDNI}
+            setFiltroDNI={setFiltroDNI}
+            FiltroNombre={filtroNombre}
+            setFiltroNombre={setFiltroNombre}
+          />
+        
+        {/* ----- 🔴 CAMBIO: Eliminamos el botón 'Volver al menú' 🔴 ----- */}
+        {/* (Si querés podés dejar este div, pero ya no tiene sentido) */}
+          {/* <div className="text-center mt-4 mb-3">
+            <button className="btn btn-secondary px-4" onClick={() => setVista("menu")}>
+              <i className="fa-solid fa-arrow-left me-2"></i>Volver al menú
+            </button>
+          </div> */}
+        </div>
+      )}
+
+      {/* ----------- VISTA FORMULARIO ----------- */}
+      {vista === "form" && (
+        <div className="fade-in">
+          <ClientesForm
+            Cliente={clienteEditando} 
+            Guardar={handleGuardar}
+            Cancelar={handleVolverDesdeForm}
+          />
+
+          <div className="text-center mt-4 mb-3">
+            {/* ----- 🔴 CAMBIO: Botón "Volver" simplificado 🔴 ----- */}
+            <button className="btn-secondary px-4" onClick={handleVolverDesdeForm}>
+              <i className="fa-solid fa-arrow-left me-2"></i>
+              Volver al listado
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

@@ -54,7 +54,6 @@ export default function ClientesList({
                                 <th>DNI</th>
                                 <th>Nombre</th>
                                 <th>Apellido</th> {/* Asumiendo que tienes nombre y apellido separados */}
-                                <th>Email</th>
                                 <th>Teléfono</th>
                                 {/* <th>Estado</th> */}
                                 <th className="text-nowrap">Acciones</th>
@@ -69,7 +68,6 @@ export default function ClientesList({
                                         <td className="fw-semibold text-center">{cliente.DNI}</td>
                                         <td>{cliente.Nombre}</td>
                                         <td>{cliente.Apellido}</td>
-                                        <td className="text-center">{cliente.Email}</td>
                                         <td className="text-center">{cliente.Telefono}</td>
                                         {/* <td className="text-center">
                                             <span className={`badge rounded-pill px-3 py-2 ${getBadgeColor(cliente.Estado)}`}>
@@ -97,7 +95,7 @@ export default function ClientesList({
                             ) : (
                                 <tr>
                                     {/* Ajusta el colSpan al número de columnas (ej. 6 si incluyes estado) */}
-                                    <td colSpan="6" className="text-center py-5 border-0">
+                                    <td colSpan="5" className="text-center py-5 border-0">
                                         <span className="text-muted fs-6 fst-italic">
                                             No se encontraron clientes con esos criterios.
                                         </span>
