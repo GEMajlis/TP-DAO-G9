@@ -88,14 +88,26 @@
 
   .alquileres-table th:nth-child(3),
   .alquileres-table td:nth-child(3),
-  .alquileres-table th:nth-child(6),
-  .alquileres-table td:nth-child(6),
   .alquileres-table th:nth-child(7),
   .alquileres-table td:nth-child(7),
+  .alquileres-table th:nth-child(6),
+  .alquileres-table td:nth-child(6),
   .alquileres-table th:nth-child(8),
-  .alquileres-table td:nth-child(8) {
+  .alquileres-table td:nth-child(8)
+  {
     display: none;
   }
+
+  .vehiculos-table th:nth-child(2),
+  .vehiculos-table td:nth-child(2),
+  .vehiculos-table th:nth-child(3),
+  .vehiculos-table td:nth-child(3),
+  .vehiculos-table th:nth-child(4),
+  .vehiculos-table td:nth-child(4)
+  {
+    display: none;
+  }
+
   .tabla-registros {
     display: none !important;
   }

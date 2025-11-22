@@ -1,15 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
     const esEdicion = !!Vehiculo;
 
     const [form, setForm] = useState({
-        Patente: Vehiculo?.Patente || "",
-        Color: Vehiculo?.Color || "",
-        Marca: Vehiculo?.Marca || "",
-        Modelo: Vehiculo?.Modelo || "",
-        Estado: Vehiculo?.Estado || "Disponible", 
+        patente: Vehiculo?.patente || "",
+        color: Vehiculo?.color || "",
+        marca: Vehiculo?.marca || "",
+        modelo: Vehiculo?.modelo || "",
+        estado: Vehiculo?.estado || "disponible", 
     });
+
+    useEffect(() => {
+        if (Vehiculo) {
+            setForm({
+                patente: Vehiculo.patente || "",
+                color: Vehiculo.color || "",
+                marca: Vehiculo.marca || "",
+                modelo: Vehiculo.modelo || "",
+                estado: Vehiculo.estado || "disponible",
+            });
+        } else {
+            setForm({
+                patente: "",
+                color: "",
+                marca: "",
+                modelo: "",
+                estado: "disponible",
+            });
+        }
+    }, [Vehiculo]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -60,9 +80,9 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
                                             type="text"
                                             className={`form-control border-start-0 ps-2 ${esEdicion ? "bg-light" : ""}`}
                                             id="inputPatente"
-                                            name="Patente"
+                                            name="patente"
                                             placeholder="Ej: AA123BB"
-                                            value={form.Patente}
+                                            value={form.patente}
                                             onChange={handleChange}
                                             required
                                             autoFocus={!esEdicion}
@@ -87,9 +107,9 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
                                             type="text"
                                             className="form-control border-start-0 ps-2"
                                             id="inputColor"
-                                            name="Color"
+                                            name="color"
                                             placeholder="Ej: Rojo"
-                                            value={form.Color}
+                                            value={form.color}
                                             onChange={handleChange}
                                             required
                                             style={{ zIndex: 0 }}
@@ -115,9 +135,9 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
                                             type="text"
                                             className="form-control border-start-0 ps-2"
                                             id="inputMarca"
-                                            name="Marca"
+                                            name="marca"
                                             placeholder="Marca"
-                                            value={form.Marca}
+                                            value={form.marca}
                                             onChange={handleChange}
                                             required
                                             style={{ zIndex: 0 }}
@@ -140,9 +160,9 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
                                             type="text"
                                             className="form-control border-start-0 ps-2"
                                             id="inputModelo"
-                                            name="Modelo"
+                                            name="modelo"
                                             placeholder="Modelo"
-                                            value={form.Modelo}
+                                            value={form.modelo}
                                             onChange={handleChange}
                                             required
                                             style={{ zIndex: 0 }}

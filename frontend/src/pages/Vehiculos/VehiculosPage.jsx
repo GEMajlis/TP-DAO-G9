@@ -2,108 +2,124 @@ import React, { useState, useEffect } from "react";
 import VehiculosList from "./VehiculosList";
 import VehiculosForm from "./VehiculosForm";
 import "../../styles/PageLayout.css";
+import { obtenerVehiculos, obtenerVehiculo, crearVehiculo, actualizarVehiculo, eliminarVehiculo } from "../../services/vehiculosService";
 
 export default function VehiculosPage() {
-  const [vista, setVista] = useState("menu");
+  const [vista, setVista] = useState("lista");
+
   const [todosLosVehiculos, setTodosLosVehiculos] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
-  const [vehiculoEditando, setVehiculoEditando] = useState(null);
+  const [vehiculoSeleccionado, setVehiculoSeleccionado] = useState(null);
   const [pagina, setPagina] = useState(1);
-  const [volverA, setVolverA] = useState("menu");
+  const [RegistrosTotal, setRegistrosTotal] = useState(0); 
+  const [Paginas, setPaginas] = useState([]);
+
   const [filtroPatente, setFiltroPatente] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
 
   useEffect(() => {
-    const datosSimulados = [
-      { Patente: "AB123CD", Marca: "Toyota", Modelo: "Corolla", Color: "Negro", Estado: "Disponible" },
-      { Patente: "AE555EE", Marca: "Ford", Modelo: "Ranger", Color: "Rojo", Estado: "Alquilado" },
-      { Patente: "ZZ999XX", Marca: "Fiat", Modelo: "Cronos", Color: "Blanco", Estado: "En Mantenimiento" },
-    ];
-    setTodosLosVehiculos(datosSimulados);
-    setVehiculos(datosSimulados);
+    cargarVehiculos();
   }, []);
 
-  const handleBuscar = (numPagina) => {
-    setPagina(numPagina || 1);
+  const cargarVehiculos = async () => {
+    try {
+      const data = await obtenerVehiculos(1, 5); 
 
-    const resultado = todosLosVehiculos.filter((v) => {
-    const cumplePatente = v.Patente.toLowerCase().includes(filtroPatente.toLowerCase());
-    let cumpleEstado = true;
-    if (filtroEstado !== "") {
-      cumpleEstado = v.Estado === filtroEstado;
+      setVehiculos(data.vehiculos);
+      setTodosLosVehiculos(data.vehiculos);
+
+      setRegistrosTotal(data.total);
+      setPaginas(Array.from({ length: data.total_pages }, (_, i) => i + 1));
+      setPagina(data.page);
+
+    } catch (err) {
+      console.error("Error cargando vehículos:", err);
+      alert("No se pudieron cargar los vehículos.");
     }
-    return cumplePatente && cumpleEstado;
-    });
+  };
 
-    setVehiculos(resultado);
+  const handleBuscar = async (numPagina = 1) => {
+    try {
+      setPagina(numPagina);
+
+      const data = await obtenerVehiculos(numPagina, 5); 
+
+      setVehiculos(data.vehiculos);
+      setRegistrosTotal(data.total);
+      setPaginas(Array.from({ length: data.total_pages }, (_, i) => i + 1));
+
+    } catch (err) {
+      console.error("Error filtrando o paginando vehículos:", err);
+    }
   };
 
   const handleAgregar = (origen) => {
-    setVehiculoEditando(null);
-    setVolverA(origen);
+    setVehiculoSeleccionado(null);
     setVista("form");
   };
 
-  const handleModificar = (vehiculo) => {
-    setVehiculoEditando(vehiculo);
-    setVolverA("lista");
-    setVista("form");
-  };
-
-  const handleEliminar = (vehiculo) => {
-    if (window.confirm(`¿Estás seguro de eliminar el vehículo ${vehiculo.Patente}?`)) {
-      setTodosLosVehiculos(prev => prev.filter(v => v.Patente !== vehiculo.Patente));
-      setVehiculos(prev => prev.filter(v => v.Patente !== vehiculo.Patente));
+  const handleModificar = async (vehiculo) => {
+    try {
+      const data = await obtenerVehiculo(vehiculo.patente);
+      const vehiculoData = data.vehiculos?.[0] || data;
+      setVehiculoSeleccionado(vehiculoData);
+      setVista("form");
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo cargar el vehículo.");
     }
   };
+ 
 
-  const handleGuardar = (vehiculoForm) => {
-    const existe = todosLosVehiculos.some(v => v.Patente === vehiculoForm.Patente);
-
-    let nuevaBase;
-    if (vehiculoEditando) {
-      nuevaBase = todosLosVehiculos.map((v) => v.Patente === vehiculoForm.Patente ? vehiculoForm : v);
-    } else {
-      if (existe) {
-        alert("Ya existe un vehículo con esa Patente.");
-        return;
+  const handleEliminar = async (vehiculo) => {
+    if (window.confirm(`¿Estás seguro de eliminar el vehículo ${vehiculo.patente}?`)) {
+      try {
+        await eliminarVehiculo(vehiculo.patente);
+        await cargarVehiculos(); 
+      } catch (err) {
+        console.error("Error eliminando vehículo:", err);
+        alert("No se pudo eliminar el vehículo.");
       }
-      nuevaBase = [...todosLosVehiculos, vehiculoForm];
     }
-
-    setTodosLosVehiculos(nuevaBase);
-    setVehiculos(nuevaBase);
-    setFiltroPatente("");
-    setFiltroEstado("");
-    setVista("lista");
   };
 
+  const handleGuardar = async (vehiculoForm) => {
+    try {
+      if (vehiculoSeleccionado) {
+        await actualizarVehiculo(vehiculoForm.patente, {
+          patente: vehiculoForm.patente,
+          color: vehiculoForm.color,
+          marca: vehiculoForm.marca,
+          modelo: vehiculoForm.modelo
+        });
+      } else {
+        await crearVehiculo({
+          patente: vehiculoForm.patente,
+          color: vehiculoForm.color,
+          marca: vehiculoForm.marca,
+          modelo: vehiculoForm.modelo,
+          estado: vehiculoForm.estado
+        });
+      }
 
-  const handleVolverDesdeForm = () => {
-    setVista(volverA);
+      await cargarVehiculos(); 
+      setVista("lista");
+    } catch (err) {
+      console.error("Error guardando vehículo:", err);
+      alert(err.message || "No se pudo guardar el vehículo.");
+    }
+  };
+
+  const handleVolverALista = () => {
+    setVista("lista");
   };
 
   return (
     <div className="page-container">
       <h2 className="page-title">Gestión de Vehículos</h2>
       <p className="page-subtitle">
-        Controlá el estado, modelo y disponibilidad de cada vehículo.
+        Accedé a la información clave de cada vehículo y mantené la operación siempre en movimiento.
       </p>
-
-      {vista === "menu" && (
-        <div className="page-content fade-in">
-          <div className="page-card">
-            <h3>Listado de vehículos</h3>
-            <p>Visualizá toda la flota.</p>
-            <button className="btn-primary" onClick={() => setVista("lista")}>Ver flota</button>
-          </div>
-          <div className="page-card">
-            <h3>Agregar vehículo</h3>
-            <p>Cargá un nuevo vehículo.</p>
-            <button className="btn-primary" onClick={() => handleAgregar("menu")}>Agregar</button>
-          </div>
-        </div>
-      )}
 
       {vista === "lista" && (
         <div className="fade-in">
@@ -113,36 +129,35 @@ export default function VehiculosPage() {
             Eliminar={handleEliminar}
             Agregar={() => handleAgregar("lista")}
             Pagina={pagina}
-            RegistrosTotal={vehiculos.length}
-            Paginas={[1]}
+            RegistrosTotal={RegistrosTotal}
+            Paginas={Paginas}
             Buscar={handleBuscar}
             FiltroPatente={filtroPatente}
             setFiltroPatente={setFiltroPatente}
             FiltroEstado={filtroEstado}
             setFiltroEstado={setFiltroEstado}
-            Volver={() => setVista("menu")}
           />
-          <div className="text-center mt-4 mb-3">
-            <button className="btn btn-secondary px-4" onClick={() => setVista("menu")}>
+          {/* <div className="text-center mt-4 mb-3">
+            <button className="btn btn-secondary px-4" onClick={() => window.location.href = "/"}>
               <i className="fa-solid fa-arrow-left me-2"></i>Volver al menú
             </button>
-          </div>
+          </div> */}
         </div>
       )}
 
       {vista === "form" && (
         <div className="fade-in">
           <VehiculosForm
-            Vehiculo={vehiculoEditando}
+            Vehiculo={vehiculoSeleccionado}
             Guardar={handleGuardar}
-            Cancelar={handleVolverDesdeForm}
+            Cancelar={handleVolverALista}
           />
-          <div className="text-center mt-4 mb-3">
-            <button className="btn btn-secondary px-4" onClick={handleVolverDesdeForm}>
+          {/* <div className="text-center mt-4 mb-3">
+            <button className="btn btn-secondary px-4" onClick={handleVolverALista}>
               <i className="fa-solid fa-arrow-left me-2"></i>
               {volverA === "menu" ? "Volver al menú" : "Volver al listado"}
             </button>
-          </div>
+          </div> */}
         </div>
       )}
     </div>
