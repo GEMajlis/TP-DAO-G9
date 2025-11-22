@@ -17,9 +17,9 @@ export default function VehiculosList({
 }) {
     const getBadgeColor = (estado) => {
         switch (estado) {
-            case "Disponible": return "bg-success";
-            case "Alquilado": return "bg-warning text-dark";
-            case "En Mantenimiento": return "bg-danger";
+            case "disponible": return "bg-success";
+            case "alquilado": return "bg-warning text-dark";
+            case "mantenimiento": return "bg-danger";
             default: return "bg-secondary";
         }
     };
@@ -43,7 +43,7 @@ export default function VehiculosList({
 
                 <div className="table-responsive">
                     <table
-                        className={`table table-sm align-middle ${Vehiculos?.length > 0 ? "table-hover" : ""}`}
+                        className={`table vehiculos-table table-sm align-middle ${Vehiculos?.length > 0 ? "table-hover" : ""}`}
                         style={{ borderRadius: "10px", overflow: "hidden" }}
                     >
                         <thead className="table-primary text-center">
@@ -60,14 +60,14 @@ export default function VehiculosList({
                         <tbody>
                             {Vehiculos?.length > 0 ? (
                                 Vehiculos.map((vehiculo) => (
-                                    <tr key={vehiculo.Patente}>
-                                        <td className="fw-semibold text-center">{vehiculo.Patente}</td>
-                                        <td>{vehiculo.Marca}</td>
-                                        <td>{vehiculo.Modelo}</td>
-                                        <td className="text-center">{vehiculo.Color}</td>
+                                    <tr key={vehiculo.patente}>
+                                        <td className="text-center">{vehiculo.patente}</td>
+                                        <td>{vehiculo.marca}</td>
+                                        <td>{vehiculo.modelo}</td>
+                                        <td className="text-center">{vehiculo.color}</td>
                                         <td className="text-center">
-                                            <span className={`badge rounded-pill px-3 py-2 ${getBadgeColor(vehiculo.Estado)}`}>
-                                                {vehiculo.Estado}
+                                            <span className={`badge rounded-pill py-2 ${getBadgeColor(vehiculo.estado)}`}>
+                                                {vehiculo.estado}
                                             </span>
                                         </td>
                                         <td className="text-center text-nowrap">
@@ -102,31 +102,39 @@ export default function VehiculosList({
                 </div>
 
                 {/* FOOTER */}
-                <div className="d-flex justify-content-between align-items-center mt-3">
-                    <span className="badge bg-light text-dark border px-3 py-2 fs-6 tabla-registros">
-                        Registros: {RegistrosTotal}
-                    </span>
+                <div className="row mt-3 align-items-center text-center">
 
-                    <div className="input-group input-group-sm" style={{ width: "150px" }}>
-                        <span className="input-group-text bg-light border">Página</span>
-                        <select
-                            className="form-select"
-                            value={Pagina}
-                            onChange={(e) => Buscar(e.target.value)}
-                        >
-                            {Paginas?.map((x) => (
-                                <option key={x} value={x}>{x}</option>
-                            ))}
-                        </select>
+                    <div className="col-12 col-md-4 mb-2 mb-md-0 d-flex justify-content-md-start justify-content-center">
+                        <span className="badge bg-light text-dark border px-3 py-2 fs-6 tabla-registros">
+                            Registros: {RegistrosTotal}
+                        </span>
                     </div>
 
-                    <button
-                        className="btn-primary"
-                        onClick={Agregar}
-                    >
-                        <i className="fa fa-plus me-2"></i>
-                        Nuevo Vehículo
-                    </button>
+                    <div className="col-12 col-md-4 mb-2 mb-md-0 d-flex justify-content-center">
+                        <div className="input-group input-group-sm" style={{ width: "150px" }}>
+                            <span className="input-group-text bg-light border">Página</span>
+                            <select
+                                className="form-select"
+                                value={Pagina}
+                                onChange={(e) => Buscar(e.target.value)}
+                            >
+                                {Paginas?.map((x) => (
+                                    <option key={x} value={x}>{x}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="col-12 col-md-4 d-flex justify-content-md-end justify-content-center">
+                        <button
+                            className="btn-primary"
+                            onClick={Agregar}
+                        >
+                            <i className="fa fa-plus me-2"></i>
+                            Nuevo Vehículo
+                        </button>
+                    </div>
+
                 </div>
             </div>
         </div>

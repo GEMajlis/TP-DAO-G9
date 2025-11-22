@@ -4,12 +4,13 @@ import AlquileresForm from "./AlquileresForm";
 import "../../styles/PageLayout.css";
 
 export default function AlquileresPage() {
-    const [vista, setVista] = useState("menu");
+    const [vista, setVista] = useState("lista");
+
     const [todosLosAlquileres, setTodosLosAlquileres] = useState([]);
     const [alquileres, setAlquileres] = useState([]);
     const [alquilerEditando, setAlquilerEditando] = useState(null);
     const [pagina, setPagina] = useState(1);
-    const [volverA, setVolverA] = useState("menu");
+
     const [filtroIdAlquiler, setFiltroIdAlquiler] = useState("");
     const [filtroEstado, setFiltroEstado] = useState("");
 
@@ -21,14 +22,11 @@ export default function AlquileresPage() {
         ];
 
         setTodosLosAlquileres(datosSimulados);
-
-        const alquileresConEstado = calcularEstados(datosSimulados);
-        setAlquileres(alquileresConEstado);
+        setAlquileres(calcularEstados(datosSimulados));
     }, []);
 
     const calcularEstados = (listaAlquileres) => {
         const hoy = new Date().toISOString().split('T')[0];
-
         return listaAlquileres.map(a => {
             let estadoCalculado = "Finalizado";
             if (a.FechaFin >= hoy) {
@@ -40,35 +38,22 @@ export default function AlquileresPage() {
 
     const handleBuscar = (numPagina) => {
         setPagina(numPagina || 1);
-
         const listaConEstados = calcularEstados(todosLosAlquileres);
-
         const resultado = listaConEstados.filter((a) => {
-
-            const cumpleId =
-                filtroIdAlquiler === "" ||
-                a.IdAlquiler === Number(filtroIdAlquiler);
-
-            const cumpleEstado =
-                filtroEstado === "" || filtroEstado === "Todos"
-                    ? true
-                    : a.Estado === filtroEstado;
-
+            const cumpleId = filtroIdAlquiler === "" || a.IdAlquiler.toString().includes(filtroIdAlquiler);
+            const cumpleEstado = filtroEstado === "" || filtroEstado === "Todos" ? true : a.Estado === filtroEstado;
             return cumpleId && cumpleEstado;
         });
-
         setAlquileres(resultado);
     };
 
-    const handleAgregar = (origen) => {
+    const handleAgregar = () => {
         setAlquilerEditando(null);
-        setVolverA(origen);
         setVista("form");
     };
 
     const handleModificar = (alquiler) => {
         setAlquilerEditando(alquiler);
-        setVolverA("lista");
         setVista("form");
     };
 
@@ -76,9 +61,7 @@ export default function AlquileresPage() {
         if (window.confirm(`¿Estás seguro de eliminar el alquiler del vehículo ${alquiler.Patente}?`)) {
             const nuevaLista = todosLosAlquileres.filter(a => a.IdAlquiler !== alquiler.IdAlquiler);
             setTodosLosAlquileres(nuevaLista);
-
-            const listaConEstados = calcularEstados(nuevaLista);
-            setAlquileres(listaConEstados);
+            setAlquileres(calcularEstados(nuevaLista));
         }
     };
 
@@ -96,45 +79,23 @@ export default function AlquileresPage() {
         }
 
         setTodosLosAlquileres(nuevaBase);
-
-        const listaConEstados = calcularEstados(nuevaBase);
-        setAlquileres(listaConEstados);
+        setAlquileres(calcularEstados(nuevaBase));
 
         setFiltroIdAlquiler("");
         setFiltroEstado("");
-
         setVista("lista");
     };
 
-    const handleVolverDesdeForm = () => {
-        setVista(volverA);
+    const handleVolverALista = () => {
+        setVista("lista");
     };
 
     return (
         <div className="page-container">
             <h2 className="page-title">Gestión de Alquileres</h2>
             <p className="page-subtitle">
-                Administración de contratos de alquiler y reservas.
+                Controlá de principio a fin cada alquiler para mantener un flujo ordenado.
             </p>
-
-            {vista === "menu" && (
-                <div className="page-content fade-in">
-                    <div className="page-card">
-                        <h3>Listado de Alquileres</h3>
-                        <p>Historial y alquileres vigentes.</p>
-                        <button className="btn-primary" onClick={() => setVista("lista")}>
-                            Ver listado
-                        </button>
-                    </div>
-                    <div className="page-card">
-                        <h3>Nuevo Alquiler</h3>
-                        <p>Registrar una salida de vehículo.</p>
-                        <button className="btn-primary" onClick={() => handleAgregar("menu")}>
-                            Registrar
-                        </button>
-                    </div>
-                </div>
-            )}
 
             {vista === "lista" && (
                 <div className="fade-in">
@@ -142,7 +103,7 @@ export default function AlquileresPage() {
                         Alquileres={alquileres}
                         Modificar={handleModificar}
                         Eliminar={handleEliminar}
-                        Agregar={() => handleAgregar("lista")}
+                        Agregar={handleAgregar}
                         Pagina={pagina}
                         RegistrosTotal={alquileres.length}
                         Paginas={[1]}
@@ -151,13 +112,13 @@ export default function AlquileresPage() {
                         setFiltroIdAlquiler={setFiltroIdAlquiler}
                         FiltroEstado={filtroEstado}
                         setFiltroEstado={setFiltroEstado}
-                        Volver={() => setVista("menu")}
                     />
-                    <div className="text-center mt-4 mb-3">
-                        <button className="btn btn-secondary px-4" onClick={() => setVista("menu")}>
-                            <i className="fa-solid fa-arrow-left me-2"></i>Volver al menú
+
+                    {/* <div className="text-center mt-4 mb-3">
+                        <button className="btn btn-secondary px-4" onClick={() => window.location.href = "/"}>
+                            <i className="fa-solid fa-arrow-left me-2"></i> Volver al Inicio
                         </button>
-                    </div>
+                    </div> */}
                 </div>
             )}
 
@@ -166,15 +127,15 @@ export default function AlquileresPage() {
                     <AlquileresForm
                         Alquiler={alquilerEditando}
                         Guardar={handleGuardar}
-                        Cancelar={handleVolverDesdeForm}
+                        Cancelar={handleVolverALista}
                     />
 
-                    <div className="text-center mt-4 mb-3">
-                        <button className="btn btn-secondary px-4" onClick={handleVolverDesdeForm}>
+                    {/* <div className="text-center mt-4 mb-3">
+                        <button className="btn btn-secondary px-4" onClick={handleVolverALista}>
                             <i className="fa-solid fa-arrow-left me-2"></i>
-                            {volverA === "menu" ? "Volver al menú" : "Volver al listado"}
+                            Volver al listado
                         </button>
-                    </div>
+                    </div> */}
                 </div>
             )}
         </div>

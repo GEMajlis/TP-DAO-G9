@@ -4,11 +4,11 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
     const esEdicion = !!Vehiculo;
 
     const [form, setForm] = useState({
-        Patente: Vehiculo?.Patente || "",
-        Color: Vehiculo?.Color || "",
-        Marca: Vehiculo?.Marca || "",
-        Modelo: Vehiculo?.Modelo || "",
-        Estado: Vehiculo?.Estado || "Disponible", 
+        Patente: Vehiculo?.patente || "",
+        Color: Vehiculo?.color || "",
+        Marca: Vehiculo?.marca || "",
+        Modelo: Vehiculo?.modelo || "",
+        Estado: Vehiculo?.estado || "disponible", 
     });
 
     const handleChange = (e) => {
