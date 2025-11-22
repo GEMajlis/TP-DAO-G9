@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AlquileresList from "./AlquileresList";
+import AlquileresList from "./AlquileresLIst";
 import AlquileresForm from "./AlquileresForm";
 import "../../styles/PageLayout.css";
 

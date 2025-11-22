@@ -87,10 +87,10 @@ export default function VehiculosPage() {
     try {
       if (vehiculoSeleccionado) {
         await actualizarVehiculo(vehiculoForm.patente, {
+          patente: vehiculoForm.patente,
           color: vehiculoForm.color,
           marca: vehiculoForm.marca,
-          modelo: vehiculoForm.modelo,
-          estado: vehiculoForm.estado
+          modelo: vehiculoForm.modelo
         });
       } else {
         await crearVehiculo({

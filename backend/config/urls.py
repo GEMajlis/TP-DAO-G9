@@ -37,7 +37,6 @@ urlpatterns = [
     path("vehiculos/patente/<str:patente>/", vehiculo_views.vehiculo_patente, name="vehiculo_patente"),
     path("vehiculos/editar/<str:patente>/", vehiculo_views.vehiculo_edit, name="vehiculo_edit"),
     path("vehiculos/eliminar/<str:patente>/", vehiculo_views.vehiculo_delete, name="vehiculo_delete"),
-    path("vehiculos/", vehiculo_views.get_vehiculos, name="get_vehiculos"),
     # Empleados URLs
     path("empleados/nuevo/", empleado_views.empleado_create, name="empleado_create"),
     path("empleados/", empleado_views.get_empleados, name="get_empleados"), 

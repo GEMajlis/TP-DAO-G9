@@ -100,54 +100,23 @@ def vehiculo_patente(request, patente):
         )
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
-    
-
-@require_http_methods(["GET"])
-def get_vehiculos(request):
-    try:
-        conexion = sqlite3.connect("db.sqlite3")
-        cursor = conexion.cursor()
-        vehiculos = cursor.execute("SELECT * FROM VEHICULOS").fetchall()
-        conexion.close()
-
-        vehiculos_list = []
-        for vehiculo in vehiculos:
-            vehiculos_list.append(
-                {
-                    "patente": vehiculo[0],
-                    "marca": vehiculo[1],
-                    "modelo": vehiculo[2],
-                    "color": vehiculo[3],
-                    "estado": vehiculo[4],
-                }
-            )
-
-        return JsonResponse({"vehiculos": vehiculos_list})
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
 
 @csrf_exempt
 @require_http_methods(["PUT"])
 def vehiculo_edit(request, patente):
     try:
+        # Obtén la instancia real de Django
         vehiculo = Vehiculo.objects.get(patente=patente)
         
         data = json.loads(request.body)
-        
-        if 'color' in data:
-            vehiculo.color = data['color']
-        if 'marca' in data:
-            vehiculo.marca = data['marca']
-        if 'modelo' in data:
-            vehiculo.modelo = data['modelo']
-        if 'estado' in data:
-            vehiculo.estado = data['estado']
-        
-        vehiculo.save()
-        
-        return JsonResponse(
-            {"message": "Vehículo editado correctamente"}, status=200
-        )
+        form = VehiculoForm(data, instance=vehiculo)
+        if form.is_valid():
+            form.save()
+            return JsonResponse(
+                {"message": "Vehículo editado correctamente"}, status=200
+            )
+        else:
+            return JsonResponse({"error": form.errors}, status=400)
         
     except Vehiculo.DoesNotExist:
         return JsonResponse({"error": "Vehículo no encontrado"}, status=404)
