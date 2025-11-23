@@ -100,28 +100,39 @@ export default function AlquileresList({
         </div>
 
         {/* FOOTER */}
-        <div className="d-flex justify-content-between align-items-center mt-3">
-          <span className="badge bg-light text-dark border px-3 py-2 fs-6 tabla-registros">
-            Registros: {RegistrosTotal}
-          </span>
+        <div className="row mt-3 align-items-center text-center">
 
-          <div className="input-group input-group-sm" style={{ width: "150px" }}>
-            <span className="input-group-text bg-light border">Página</span>
-            <select
-              className="form-select"
-              value={Pagina}
-              onChange={(e) => Buscar(e.target.value)}
-            >
-              {Paginas?.map((x) => (
-                <option key={x} value={x}>{x}</option>
-              ))}
-            </select>
+          <div className="col-12 col-md-4 mb-2 mb-md-0 d-flex justify-content-md-start justify-content-center">
+            <span className="badge bg-light text-dark border px-3 py-2 fs-6 tabla-registros">
+              Registros: {RegistrosTotal}
+            </span>
           </div>
 
-          <button className="btn-primary" onClick={Agregar}>
-            <i className="fa fa-plus me-2"></i>
-            Nuevo Alquiler
-          </button>
+          <div className="col-12 col-md-4 mb-2 mb-md-0 d-flex justify-content-center">
+            <div className="input-group input-group-sm" style={{ width: "150px" }}>
+              <span className="input-group-text bg-light border">Página</span>
+              <select
+                className="form-select"
+                value={Pagina}
+                onChange={(e) => Buscar(e.target.value)}
+              >
+                {Paginas?.map((x) => (
+                  <option key={x} value={x}>{x}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="col-12 col-md-4 d-flex justify-content-md-end justify-content-center">
+            <button
+              className="btn-primary"
+              onClick={Agregar}
+            >
+              <i className="fa fa-plus me-2"></i>
+              Nuevo Alquiler
+            </button>
+          </div>
+
         </div>
       </div>
     </div>
