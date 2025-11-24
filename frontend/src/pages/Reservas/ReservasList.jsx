@@ -1,6 +1,7 @@
 import React from "react";
-import ReservasSearch from "./ReservasSearch"; // <-- CAMBIO: Importado
+import ReservasSearch from "./ReservasSearch"; 
 
+// ----- INICIO CAMBIOS: Se eliminan props de filtros locales -----
 export default function ReservasList({
     Reservas,
     Modificar,
@@ -9,37 +10,35 @@ export default function ReservasList({
     Pagina,
     RegistrosTotal,
     Paginas,
-    Buscar,
-    // ----- INICIO CAMBIOS: Props nuevas -----
-    FiltroDNI,
-    setFiltroDNI,
-    FiltroPatente,
-    setFiltroPatente,
-    FiltroEstado,
-    setFiltroEstado,
-    // ----- FIN CAMBIOS -----
+    // (Se fueron Buscar, FiltroDNI, setFiltroDNI, etc.)
+
+    // Props de Búsqueda Backend
+    FiltroID,
+    setFiltroID,
+    BuscarPorID,
+    BuscarDelDia,
+    Limpiar,
 }) {
+// ----- FIN CAMBIOS -----
     return (
         
         <div className="card border-0 shadow-sm" style={{ borderRadius: "12px" }}>
             <div className="card-body p-4">
 
-                {/* TÍTULO */}
                 <h4 className="mb-4 fw-semibold text-primary" style={{ display: "flex", alignItems: "center" }}>
-                    <i className="fa-solid fa-calendar-check me-2"></i>Reservas {/* CAMBIO: Icono */}
+                    <i className="fa-solid fa-calendar-check me-2"></i>Reservas
                 </h4>
 
-                {/* ----- INICIO CAMBIO: Barra de Búsqueda ----- */}
+                {/* BARRA DE BÚSQUEDA */}
+                {/* ----- INICIO CAMBIOS: Se actualiza el pase de props ----- */}
                 <ReservasSearch
-                    DNI={FiltroDNI}
-                    setDNI={setFiltroDNI}
-                    Patente={FiltroPatente}
-                    setPatente={setFiltroPatente}
-                    Estado={FiltroEstado}
-                    setEstado={setFiltroEstado}
-                    Buscar={Buscar}
+                    ID={FiltroID}
+                    setID={setFiltroID}
+                    BuscarPorID={BuscarPorID}
+                    BuscarDelDia={BuscarDelDia}
+                    Limpiar={Limpiar}
                 />
-                {/* ----- FIN CAMBIO ----- */}
+                {/* ----- FIN CAMBIOS ----- */}
 
 
                 {/* TABLA */}
@@ -48,11 +47,15 @@ export default function ReservasList({
                         className="table table-sm table-hover align-middle"
                         style={{ borderRadius: "10px", overflow: "hidden" }}
                     >
+                        {/* ... (El <thead> de la tabla se queda igual) ... */}
                         <thead className="table-primary text-center">
                             <tr>
                                 <th>Id</th>
                                 <th>DNI Cliente</th>
+                                <th style={{ textAlign: "left" }}>Nombre Cliente</th>
                                 <th>Patente</th>
+                                <th style={{ textAlign: "left" }}>Vehículo</th>
+                                <th>Fecha Reserva</th>
                                 <th>Fecha de Inicio</th>
                                 <th>Fecha de Fin</th>
                                 <th>Estado</th>
@@ -63,38 +66,41 @@ export default function ReservasList({
                         <tbody>
                             {Reservas?.length > 0 ? (
                                 Reservas.map((reserva) => (
-                                    <tr key={reserva.IdReserva}>
+                                    <tr key={reserva.IdReserva}> 
+                                        {/* ... (Celdas de Id, DNI, Nombre, Patente, etc. se quedan igual) ... */}
                                         <td className="fw-semibold text-center">{reserva.IdReserva}</td>
                                         <td>{reserva.DNICliente}</td>
+                                        <td>{reserva.ClienteNombre}</td> 
                                         <td>{reserva.Patente}</td>
+                                        <td>{reserva.VehiculoModelo}</td>
+                                        <td className="text-center">{reserva.FechaReserva}</td>
                                         <td className="text-center">{reserva.FechaInicio}</td>
                                         <td className="text-center">{reserva.FechaFin}</td>
                                         <td className="text-center">
                                             {(() => {
-                                                // 1. Definimos las variables
                                                 let claseDeBadge = "";
-                                                const textoDelEstado = reserva.Estado;
+                                                // Capitalizamos la primera letra
+                                                const textoDelEstado = reserva.Estado.charAt(0).toUpperCase() + reserva.Estado.slice(1);
 
-                                                // 2. Asignamos la clase de Bootstrap según el texto del estado
+                                                // ----- INICIO CAMBIOS: Switch de colores actualizado -----
                                                 switch (reserva.Estado) {
-                                                    case "Exitosa":
-                                                        claseDeBadge = "bg-success"; // Verde
+                                                    case "completado":
+                                                        claseDeBadge = "bg-success"; 
                                                         break;
-                                                    case "Activa":
-                                                        claseDeBadge = "bg-warning"; // Amarillo
+                                                    case "confirmado":
+                                                        claseDeBadge = "bg-primary";
                                                         break;
-                                                    case "Fallida":
-                                                        claseDeBadge = "bg-dark";   // Negro
+                                                    case "pendiente":
+                                                        claseDeBadge = "bg-warning"; 
                                                         break;
-                                                    case "Cancelada":
-                                                        claseDeBadge = "bg-danger";  // Rojo
+                                                    case "cancelado":
+                                                        claseDeBadge = "bg-danger";  
                                                         break;
                                                     default:
-                                                        // Un color por defecto si el estado no es ninguno de los esperados
                                                         claseDeBadge = "bg-secondary";
                                                 }
+                                                // ----- FIN CAMBIOS -----
 
-                                                // 3. Devolvemos el <span> con la clase y el texto correctos
                                                 return (
                                                 <span className={`badge rounded-pill ${claseDeBadge} px-3 py-2`}>
                                                     {textoDelEstado}
@@ -104,7 +110,7 @@ export default function ReservasList({
                                             </td>
                                         
                                         <td className="text-center text-nowrap">
-                                            {/* Modificar */}
+                                            {/* Modificar (sin cambios) */}
                                             <button
                                                 className="btn btn-sm btn-outline-secondary me-1"
                                                 onClick={() => Modificar(reserva)}
@@ -113,8 +119,9 @@ export default function ReservasList({
                                                 <i className="fa-solid fa-pen-to-square"></i>
                                             </button>
 
-                                            {/* Cancelar*/}
-                                            {reserva.Estado === "Activa" && (
+                                            {/* ----- INICIO CAMBIOS: Lógica de Cancelar actualizada ----- */}
+                                            {/* Solo se pueden cancelar 'pendientes' o 'confirmadas' */}
+                                            {(reserva.Estado === "pendiente" || reserva.Estado === "confirmado") && (
                                                 <button
                                                     className="btn btn-sm btn-outline-danger me-1" 
                                                     onClick={() => Cancelar(reserva)}
@@ -123,14 +130,14 @@ export default function ReservasList({
                                                     <i className="fa-solid fa-ban"></i>
                                                 </button>
                                             )}
+                                            {/* ----- FIN CAMBIOS ----- */}
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="7" className="text-center p-4">
+                                    <td colSpan="10" className="text-center p-4">
                                         <div className="alert alert-secondary mb-0">
-                                            {/* CAMBIO: Texto actualizado */}
                                             No se encontraron reservas con esos criterios.
                                         </div>
                                     </td>
@@ -147,21 +154,23 @@ export default function ReservasList({
                         Registros: {RegistrosTotal}
                     </span>
 
-                    {/* Paginador */}
-                    <div className="input-group input-group-sm" style={{ width: "150px" }}>
+                    {/* ----- INICIO CAMBIOS: Paginador deshabilitado ----- */}
+                    {/* El paginador local no tiene sentido si los datos vienen del backend */}
+                    <div className="input-group input-group-sm" style={{ width: "150px", visibility: "hidden" }}>
                         <span className="input-group-text bg-light border">Página</span>
                         <select
                             className="form-select"
                             value={Pagina}
-                            onChange={(e) => Buscar(e.target.value)}
+                            disabled={true} // Deshabilitado
+                            // onChange={(e) => Buscar(e.target.value)} // 'Buscar' ya no existe
                         >
                             {Paginas?.map((x) => (
                                 <option key={x} value={x}>{x}</option>
                             ))}
                         </select>
                     </div>
+                    {/* ----- FIN CAMBIOS ----- */}
 
-                    {/* Botón Agregar */}
                     <button
                         className="btn-primary"
                         onClick={Agregar}
