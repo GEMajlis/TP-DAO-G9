@@ -16,7 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from clientes import views as cliente_views
 from vehiculos import views as vehiculo_views
 from empleados import views as empleado_views
@@ -47,4 +47,8 @@ urlpatterns = [
     path("mantenimientos/finalizar/<str:patente>/", mantenimiento_views.mantenimiento_close, name="mantenimiento_finalizar"),
     path("mantenimientos/activos/", mantenimiento_views.mantenimientos_activos, name="mantenimientos_activos"),
     path("mantenimientos/<int:id_mantenimiento>/", mantenimiento_views.mantenimiento_por_id, name="mantenimiento_por_id"),
+    # Reservas URLs
+    path("reservas/", include('reservas.urls')),
+    # Alquileres URLs
+    path("alquileres/", include('alquileres.urls')),
 ]
