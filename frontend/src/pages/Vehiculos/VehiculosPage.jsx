@@ -37,10 +37,6 @@ export default function VehiculosPage() {
     }
   }, [filtroPatente, filtroEstado]);
 
-  useEffect(() => {
-    cargarVehiculos();
-  }, [cargarVehiculos]);
-
   const handleBuscar = async (numPagina = 1) => {
     try {
       setPagina(numPagina);
@@ -55,6 +51,10 @@ export default function VehiculosPage() {
       console.error("Error filtrando o paginando vehículos:", err);
     }
   };
+
+  useEffect(() => {
+    handleBuscar(1);     // búsqueda automática
+  }, [filtroPatente, filtroEstado]);
 
   const handleAgregar = (origen) => {
     setVehiculoSeleccionado(null);
