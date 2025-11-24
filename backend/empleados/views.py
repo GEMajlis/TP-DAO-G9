@@ -48,7 +48,68 @@ def get_empleados(request):
         return JsonResponse({"empleados": empleados_list})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
-    
+
+
+# POR DNI
+@require_http_methods(["GET"])
+def empleado_dni(request, dni):
+    try:
+        conexion = sqlite3.connect("db.sqlite3")
+        cursor = conexion.cursor()
+        empleado = cursor.execute(
+            "SELECT * FROM EMPLEADOS WHERE dni = ?", (dni,)
+        ).fetchone()
+        conexion.close()
+
+        if not empleado:
+            return JsonResponse({"error": "Empleado no encontrado"}, status=404)
+
+        return JsonResponse(
+            {
+                "empleados": [
+                    {
+                        "dni": empleado[0],
+                        "nombre": empleado[1],
+                        "apellido": empleado[2]
+                    }
+                ]
+            },
+            status=200
+        )
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+# POR NOMBRE
+@require_http_methods(["GET"])
+def empleado_nombre(request, nombre):
+    try:
+        conexion = sqlite3.connect("db.sqlite3")
+        cursor = conexion.cursor()
+        empleados = cursor.execute(
+            "SELECT * FROM EMPLEADOS WHERE nombre LIKE ?", (f"%{nombre}%",)
+        ).fetchall()
+        conexion.close()
+
+        if not empleados:
+            return JsonResponse({"error": "Empleado no encontrado"}, status=404)
+
+        return JsonResponse(
+            {
+                "empleados": [
+                    {
+                        "dni": e[0],
+                        "nombre": e[1],
+                        "apellido": e[2]
+                    }
+                    for e in empleados
+                ]
+            },
+            status=200
+        )
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
 
 @csrf_exempt
 @require_http_methods(["PUT"])
