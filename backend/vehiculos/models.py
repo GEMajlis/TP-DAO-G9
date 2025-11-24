@@ -12,6 +12,7 @@ class Vehiculo(models.Model):
     marca = models.CharField(max_length=50)
     modelo = models.CharField(max_length=50)
     color = models.CharField(max_length=30)
+    precio_por_dia = models.DecimalField(max_digits=10, decimal_places=2, default=100)
     estado = models.CharField(max_length=20, default=ESTADO_DISPONIBLE)  # e.g., 'disponible', 'en mantenimiento', etc.
 
     def puede_alquilarse(self):

@@ -30,21 +30,40 @@ def vehiculos_list(request):
     try:
         page = int(request.GET.get("page", 1))
         page_size = int(request.GET.get("page_size", 5))
+        patente_filtro = request.GET.get("patente", "").strip()
+        estado_filtro = request.GET.get("estado", "").strip()
+        
         offset = (page - 1) * page_size
 
         conexion = sqlite3.connect("db.sqlite3")
         cursor = conexion.cursor()
 
-        total = cursor.execute("SELECT COUNT(*) FROM VEHICULOS").fetchone()[0]
+        # Construir query con filtros
+        where_clauses = []
+        params = []
+        
+        if patente_filtro:
+            where_clauses.append("patente LIKE ?")
+            params.append(f"%{patente_filtro}%")
+        
+        if estado_filtro:
+            where_clauses.append("estado = ?")
+            params.append(estado_filtro)
+        
+        where_sql = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
 
-        vehiculos = cursor.execute(
-            """
-            SELECT patente, marca, modelo, color, estado
+        # Contar total con filtros
+        count_query = f"SELECT COUNT(*) FROM VEHICULOS{where_sql}"
+        total = cursor.execute(count_query, params).fetchone()[0]
+
+        # Obtener vehículos con filtros y paginación
+        query = f"""
+            SELECT patente, marca, modelo, color, precio_por_dia, estado
             FROM VEHICULOS
+            {where_sql}
             LIMIT ? OFFSET ?
-            """,
-            (page_size, offset)
-        ).fetchall()
+        """
+        vehiculos = cursor.execute(query, params + [page_size, offset]).fetchall()
 
         conexion.close()
 
@@ -54,7 +73,8 @@ def vehiculos_list(request):
                 "marca": v[1],
                 "modelo": v[2],
                 "color": v[3],
-                "estado": v[4],
+                "precio_por_dia": str(v[4]),
+                "estado": v[5],
             }
             for v in vehiculos
         ]
@@ -78,7 +98,7 @@ def vehiculo_patente(request, patente):
         conexion = sqlite3.connect("db.sqlite3")
         cursor = conexion.cursor()
         vehiculo = cursor.execute(
-            "SELECT * FROM VEHICULOS WHERE patente = ?", (patente,)
+            "SELECT patente, marca, modelo, color, precio_por_dia, estado FROM VEHICULOS WHERE patente = ?", (patente,)
         ).fetchone()
         conexion.close()
 
@@ -93,7 +113,8 @@ def vehiculo_patente(request, patente):
                         "marca": vehiculo[1],
                         "modelo": vehiculo[2],
                         "color": vehiculo[3],
-                        "estado": vehiculo[4],
+                        "precio_por_dia": str(vehiculo[4]),
+                        "estado": vehiculo[5],
                     }
                 ]
             }
