@@ -1,7 +1,8 @@
 import React from "react";
-import EmpleadosSearch from "./EmpleadosSearch"; // <-- CAMBIO: Importado
+import EmpleadosSearch from "./EmpleadosSearch";
 import "../../styles/PageLayout.css";
 
+// ----- INICIO CAMBIOS: Recibimos las nuevas props del "cerebro" -----
 export default function EmpleadosList({
   Empleados,
   Modificar,
@@ -10,30 +11,40 @@ export default function EmpleadosList({
   Pagina,
   RegistrosTotal,
   Paginas,
-  Buscar,
-  // ----- INICIO CAMBIOS: Props nuevas -----
+  // Se fue 'Buscar' (la lupa)
   FiltroDNI,
   setFiltroDNI,
   FiltroNombre,
   setFiltroNombre,
-  // ----- FIN CAMBIOS -----
+
+  // ¡Nuevas props de backend!
+  BuscarPorDNI,
+  BuscarPorNombre,
+  Limpiar,
 }) {
+// ----- FIN CAMBIOS -----
   return (
     <div className="card border-0 shadow-sm" style={{ borderRadius: "12px" }}>
       <div className="card-body p-4">
 
         {/* TÍTULO */}
         <h4 className="mb-4 fw-semibold text-primary" style={{ display: "flex", alignItems: "center" }}>
-          <i className="fa-solid fa-user-tie me-2"></i>Empleados {/* CAMBIO: Icono */}
+          <i className="fa-solid fa-user-tie me-2"></i>Empleados
         </h4>
 
         {/* ----- INICIO CAMBIO: Barra de Búsqueda ----- */}
+        {/* Ahora pasamos las nuevas funciones al Search */}
         <EmpleadosSearch
           DNI={FiltroDNI}
           setDNI={setFiltroDNI}
           Nombre={FiltroNombre}
           setNombre={setFiltroNombre}
-          Buscar={Buscar}
+          // Se fue 'Buscar={Buscar}'
+          
+          // ¡Nuevas props!
+          BuscarPorDNI={BuscarPorDNI}
+          BuscarPorNombre={BuscarPorNombre}
+          Limpiar={Limpiar}
         />
         {/* ----- FIN CAMBIO ----- */}
 
@@ -47,7 +58,7 @@ export default function EmpleadosList({
               <tr>
                 <th>DNI</th>
                 <th>Nombre</th>
-                <th>Apellido</th> {/* CAMBIO: Typo corregido */}
+                <th>Apellido</th>
                 <th className="text-nowrap">Acciones</th>
               </tr>
             </thead>
@@ -79,7 +90,6 @@ export default function EmpleadosList({
                 ))
               ) : (
                 <tr>
-                  {/* CAMBIO: ColSpan a 4 y texto actualizado */}
                   <td colSpan="4" className="text-center p-4">
                     <div className="alert alert-secondary mb-0">
                       No se encontraron empleados con esos criterios.
@@ -98,19 +108,22 @@ export default function EmpleadosList({
             Registros: {RegistrosTotal}
           </span>
 
-          {/* Paginador */}
-          <div className="input-group input-group-sm" style={{ width: "150px" }}>
+          {/* ----- INICIO CAMBIOS: Ocultamos el paginador local ----- */}
+          {/* (Ya no aplica, la búsqueda es por backend) */}
+          <div className="input-group input-group-sm" style={{ width: "150px", visibility: "hidden" }}>
             <span className="input-group-text bg-light border">Página</span>
             <select
               className="form-select"
               value={Pagina}
-              onChange={(e) => Buscar(e.target.value)}
+              // onChange={(e) => Buscar(e.target.value)} // 'Buscar' ya no existe
+              disabled={true}
             >
               {Paginas?.map((x) => (
                 <option key={x} value={x}>{x}</option>
               ))}
             </select>
           </div>
+          {/* ----- FIN CAMBIOS ----- */}
 
           {/* Botón Agregar */}
           <button

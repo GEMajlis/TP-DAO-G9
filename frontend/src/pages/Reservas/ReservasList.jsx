@@ -85,19 +85,28 @@ export default function ReservasList({
                                                 // ----- INICIO CAMBIOS: Switch de colores actualizado -----
                                                 switch (reserva.Estado) {
                                                     case "completado":
-                                                        claseDeBadge = "bg-success"; 
+                                                        claseDeBadge = "bg-success"; // Verde
                                                         break;
                                                     case "confirmado":
-                                                        claseDeBadge = "bg-primary";
+                                                        claseDeBadge = "bg-primary"; // Azul
                                                         break;
                                                     case "pendiente":
-                                                        claseDeBadge = "bg-warning"; 
+                                                        claseDeBadge = "bg-warning"; // Amarillo
                                                         break;
+                                                    
+                                                    // Agregamos ambas variaciones para 'cancelado'
+                                                    case "cancelada":
                                                     case "cancelado":
-                                                        claseDeBadge = "bg-danger";  
+                                                        claseDeBadge = "bg-danger";  // Rojo
                                                         break;
+                                                    
+                                                    // Agregamos el nuevo estado 'expirada'
+                                                    case "expirada":
+                                                        claseDeBadge = "bg-dark"; // Negro/Gris Oscuro
+                                                        break;
+
                                                     default:
-                                                        claseDeBadge = "bg-secondary";
+                                                        claseDeBadge = "bg-secondary"; // Gris
                                                 }
                                                 // ----- FIN CAMBIOS -----
 

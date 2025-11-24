@@ -247,7 +247,7 @@ export default function ClientesPage() {
 
           <div className="text-center mt-4 mb-3">
             <button 
-              className="btn-secondary px-4" 
+              className="btn btn-secondary px-4" 
               onClick={handleVolverDesdeForm}
               disabled={loading} // Deshabilitamos si está guardando
             >

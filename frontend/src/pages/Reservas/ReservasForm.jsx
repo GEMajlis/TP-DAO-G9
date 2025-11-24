@@ -235,7 +235,7 @@ export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
 
                             <button
                                 type="submit"
-                                className="btn-primary px-4"
+                                className="btn btn-primary px-4"
                             >
                                 <i className="fa-solid fa-save me-2"></i>
                                 {form.IdReserva ? "Guardar Cambios" : "Registrar"}

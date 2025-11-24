@@ -21,6 +21,8 @@ from clientes import views as cliente_views
 from vehiculos import views as vehiculo_views
 from empleados import views as empleado_views
 from mantenimiento import views as mantenimiento_views
+from multas import views as multa_views
+from danios import views as danio_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -40,8 +42,11 @@ urlpatterns = [
     # Empleados URLs
     path("empleados/nuevo/", empleado_views.empleado_create, name="empleado_create"),
     path("empleados/", empleado_views.get_empleados, name="get_empleados"), 
+    path("empleados/dni/<int:dni>/", empleado_views.empleado_dni, name="empleado_dni"),
+    path("empleados/nombre/<str:nombre>/", empleado_views.empleado_nombre, name="empleado_nombre"),
     path("empleados/editar/<int:dni>/", empleado_views.empleado_edit, name="empleado_edit"),
     path("empleados/eliminar/<int:dni>/", empleado_views.empleado_delete, name="empleado_delete"),
+
     # Mantenimiento URLs
     path("mantenimientos/nuevo/", mantenimiento_views.mantenimiento_create, name="mantenimiento_create"),
     path("mantenimientos/finalizar/<str:patente>/", mantenimiento_views.mantenimiento_close, name="mantenimiento_finalizar"),
@@ -51,4 +56,12 @@ urlpatterns = [
     path("reservas/", include('reservas.urls')),
     # Alquileres URLs
     path("alquileres/", include('alquileres.urls')),
+    # Multas URLs
+    path("multas/nuevo/", multa_views.multa_create, name="multa_create"),
+    path("multas/<int:id_alquiler>/", multa_views.multas_por_alquiler, name="multas_por_alquiler"),
+    path("multas/<int:id_alquiler>/<int:id_multa>/", multa_views.multa_update, name="multa_update"),
+    # Daños URLs
+    path('danio/nuevo/', danio_views.danio_create, name='danio_create'),
+    path('danio/<int:id_alquiler>/', danio_views.danios_por_alquiler, name='danios_por_alquiler'),
+    path('danio/<int:id_alquiler>/<int:id_danio>/', danio_views.danio_update, name='danio_update'),
 ]

@@ -216,7 +216,7 @@ export default function ReservasPage() {
                         onClick={handleVolverDesdeForm}
                         disabled={loading} 
                     >
-                        <i className="fa-solid fa.fa-arrow-left me-2"></i>
+                        <i className="fa-solid fa-arrow-left me-2"></i>
                         {volverA === "menu" ? "Volver al menú" : "Volver al listado"}
                     </button>
                 </div>
