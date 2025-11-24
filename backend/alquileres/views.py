@@ -20,37 +20,87 @@ def alquiler_create(request):
     """Crear un nuevo alquiler"""
     try:
         data = json.loads(request.body)
+
+        print("BODY CRUDO:", request.body)
+        print("DATA PARSEADO:", data)
+        print("TIPOS:", {k: type(v) for k, v in data.items()})
+        
+        # Obtener los valores del request
+        cliente_dni = data.get('cliente')
+        vehiculo_patente = data.get('vehiculo')
+        empleado_dni = data.get('empleado')
+        reserva_id = data.get('reserva')
+        
+        # Validar que los campos requeridos estén presentes
+        if not all([cliente_dni, vehiculo_patente, empleado_dni]):
+            return JsonResponse({
+                "error": "Faltan campos requeridos: cliente, vehiculo, empleado"
+            }, status=400)
+        
+        # Convertir a los tipos correctos de manera segura
+        try:
+            # Convertir DNIs a entero (maneja int, str, float)
+            if isinstance(cliente_dni, str):
+                cliente_dni = int(float(cliente_dni))
+            elif isinstance(cliente_dni, float):
+                cliente_dni = int(cliente_dni)
+            else:
+                cliente_dni = int(cliente_dni)
+                
+            if isinstance(empleado_dni, str):
+                empleado_dni = int(float(empleado_dni))
+            elif isinstance(empleado_dni, float):
+                empleado_dni = int(empleado_dni)
+            else:
+                empleado_dni = int(empleado_dni)
+            
+            # La patente siempre debe ser string
+            vehiculo_patente = str(vehiculo_patente)
+            
+        except (ValueError, TypeError) as e:
+            return JsonResponse({
+                "error": f"Error en formato de datos: {str(e)}. "
+                        f"Cliente: {type(cliente_dni)}, Empleado: {type(empleado_dni)}"
+            }, status=400)
+        
+        print(f"DNI Cliente: {cliente_dni} (tipo: {type(cliente_dni)})")
+        print(f"DNI Empleado: {empleado_dni} (tipo: {type(empleado_dni)})")
+        print(f"Patente: {vehiculo_patente} (tipo: {type(vehiculo_patente)})")
         
         # Obtener los objetos relacionados
         try:
-            cliente_dni = data.get('cliente')
-            vehiculo_patente = data.get('vehiculo')
-            empleado_dni = data.get('empleado')
-            
-            # Convertir DNIs a entero si vienen como string
-            if isinstance(cliente_dni, str):
-                cliente_dni = int(cliente_dni)
-            if isinstance(empleado_dni, str):
-                empleado_dni = int(empleado_dni)
-            
             cliente = Cliente.objects.get(dni=cliente_dni)
-            vehiculo = Vehiculo.objects.get(patente=vehiculo_patente)
-            empleado = Empleado.objects.get(dni=empleado_dni)
-            reserva = None
-            
-            if data.get('reserva'):
-                reserva = Reserva.objects.get(id=data.get('reserva'))
-                
+            print(f"Cliente encontrado: {cliente}")
         except Cliente.DoesNotExist:
-            return JsonResponse({"error": f"Cliente con DNI {cliente_dni} no encontrado"}, status=404)
+            return JsonResponse({
+                "error": f"Cliente con DNI {cliente_dni} no encontrado"
+            }, status=404)
+        
+        try:
+            vehiculo = Vehiculo.objects.get(patente=vehiculo_patente)
+            print(f"Vehículo encontrado: {vehiculo}")
         except Vehiculo.DoesNotExist:
-            return JsonResponse({"error": f"Vehículo con patente {vehiculo_patente} no encontrado"}, status=404)
+            return JsonResponse({
+                "error": f"Vehículo con patente {vehiculo_patente} no encontrado"
+            }, status=404)
+        
+        try:
+            empleado = Empleado.objects.get(dni=empleado_dni)
+            print(f"Empleado encontrado: {empleado}")
         except Empleado.DoesNotExist:
-            return JsonResponse({"error": f"Empleado con DNI {empleado_dni} no encontrado"}, status=404)
-        except Reserva.DoesNotExist:
-            return JsonResponse({"error": "Reserva no encontrada"}, status=404)
-        except (ValueError, TypeError) as e:
-            return JsonResponse({"error": f"Error en formato de datos: {str(e)}"}, status=400)
+            return JsonResponse({
+                "error": f"Empleado con DNI {empleado_dni} no encontrado"
+            }, status=404)
+        
+        # Manejar reserva opcional
+        reserva = None
+        if reserva_id:
+            try:
+                reserva = Reserva.objects.get(id=reserva_id)
+            except Reserva.DoesNotExist:
+                return JsonResponse({
+                    "error": f"Reserva con ID {reserva_id} no encontrada"
+                }, status=404)
         
         # Crear el alquiler usando el método de clase
         try:
@@ -61,7 +111,8 @@ def alquiler_create(request):
                         reserva.confirmar()
                     elif reserva.estado != Reserva.ESTADO_CONFIRMADA:
                         return JsonResponse({
-                            "error": f"La reserva está en estado '{reserva.estado}'. Solo se pueden usar reservas pendientes o confirmadas."
+                            "error": f"La reserva está en estado '{reserva.estado}'. "
+                                   f"Solo se pueden usar reservas pendientes o confirmadas."
                         }, status=400)
                 
                 # Crear el alquiler
@@ -81,8 +132,10 @@ def alquiler_create(request):
                     "alquiler": {
                         "id": alquiler.id,
                         "cliente": f"{alquiler.cliente.nombre} {alquiler.cliente.apellido}",
+                        "cliente_dni": alquiler.cliente.dni,
                         "vehiculo": alquiler.vehiculo.patente,
                         "empleado": f"{alquiler.empleado.nombre} {alquiler.empleado.apellido}",
+                        "empleado_dni": alquiler.empleado.dni,
                         "fecha_inicio": alquiler.fecha_inicio.isoformat(),
                         "activo": alquiler.esta_activo(),
                         "reserva_completada": reserva.id if reserva else None
@@ -92,10 +145,16 @@ def alquiler_create(request):
         except ValidationError as e:
             return JsonResponse({"error": str(e)}, status=400)
             
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "JSON inválido"}, status=400)
+    except json.JSONDecodeError as e:
+        return JsonResponse({
+            "error": f"JSON inválido: {str(e)}"
+        }, status=400)
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        import traceback
+        return JsonResponse({
+            "error": f"Error inesperado: {str(e)}",
+            "traceback": traceback.format_exc()
+        }, status=500)
 
 
 @require_http_methods(["GET"])
