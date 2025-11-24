@@ -2,12 +2,18 @@ import React, { useState } from "react";
 
 export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
     const [form, setForm] = useState({
-        IdReserva: Reserva?.IdReserva || null,
-        DNICLiente: Reserva?.DNICLiente || null,
+        IdReserva: Reserva?.IdReserva || "",
+        DNICLiente: Reserva?.DNICLiente || "",
         Patente: Reserva?.Patente || "",
         FechaInicio: Reserva?.FechaInicio || "",
         FechaFin: Reserva?.FechaFin || "",
-        Estado: Reserva?.Estado ?? true,
+        // ----- INICIO CAMBIOS -----
+        // Añadimos los campos que faltaban (para ver en modo edición)
+        FechaReserva: Reserva?.FechaReserva || "",
+        Estado: Reserva?.Estado || "",
+        // El 'Estado' se quita de la lógica de creación,
+        // el backend lo setea por defecto (ej: "Pendiente").
+        // ----- FIN CAMBIOS -----
     });
 
     const handleChange = (e) => {
@@ -20,7 +26,9 @@ export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        Guardar(form);
+        // Filtramos los campos de solo lectura (Estado, FechaReserva) antes de guardar
+        const { Estado, FechaReserva, ...dataAGuardar } = form;
+        Guardar(dataAGuardar);
     };
 
     // Estilo inline para forzar transparencia en labels
@@ -39,7 +47,9 @@ export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
                             className={`fa-solid ${form.IdReserva ? "fa-pen-to-square" : "fa-plus"
                                 } me-2`}
                         ></i>
-                        {form.IdReserva ? "Modificar Vehículo" : "Registrar Nuevo Vehículo"}
+                        {/* ----- INICIO CAMBIO: Título corregido ----- */}
+                        {form.IdReserva ? "Modificar Reserva" : "Registrar Nueva Reserva"}
+                        {/* ----- FIN CAMBIO ----- */}
                     </h4>
                     <p className="text-muted small mb-0 mt-1 ms-4">
                         Complete los datos de la Reserva a continuación.
@@ -49,26 +59,64 @@ export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
                 {/* Cuerpo */}
                 <div className="card-body p-4 pt-2">
                     <form onSubmit={handleSubmit}>
-                        {/* Fila 1: DNI del Cliente y Patente del Vehículo */}
+                        
+                        {/* ----- INICIO CAMBIO: Fila de solo lectura para MODO EDICIÓN ----- */}
+                        {form.IdReserva && (
+                            <div className="row g-3 mb-3">
+                                {/* Columna 1: Fecha de Reserva */}
+                                <div className="col-md-6">
+                                    <div className="form-floating">
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="inputFechaReserva"
+                                            value={form.FechaReserva || "N/A"}
+                                            readOnly
+                                            disabled
+                                        />
+                                        <label htmlFor="inputFechaReserva">
+                                            Fecha de Creación
+                                        </label>
+                                    </div>
+                                </div>
+                                {/* Columna 2: Estado */}
+                                <div className="col-md-6">
+                                    <div className="form-floating">
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="inputEstado"
+                                            value={form.Estado || "N/A"}
+                                            readOnly
+                                            disabled
+                                        />
+                                        <label htmlFor="inputEstado">Estado Actual</label>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {/* ----- FIN CAMBIO ----- */}
+
+
+                        {/* Fila 1 (ahora Fila 2): DNI del Cliente y Patente del Vehículo */}
                         <div className="row g-3 mb-3">
-                            {/* Columna 1: DNI del Cliente (Ocupa 6 columnas) */}
+                            {/* Columna 1: DNI del Cliente */}
                             <div className="col-md-6">
                                 <div className="input-group">
                                     <span className="input-group-text bg-light text-secondary">
-                                        {/* Icono de DNI/Cédula */}
                                         <i className="fa-solid fa-id-card"></i>
                                     </span>
                                     <div className="form-floating">
                                         <input
-                                            type="number" // El DNI suele ser numérico
+                                            type="number" 
                                             className="form-control border-start-0 ps-2"
                                             id="inputDniCliente"
-                                            name="DNICLiente" // Importante: usar el nombre de la propiedad del estado
+                                            name="DNICLiente" 
                                             placeholder="DNI del Cliente"
-                                            value={form.DNICLiente}
+                                            value={form.DNICLiente || ''} // Evitar 'null' en input
                                             onChange={handleChange}
                                             required
-                                            autoFocus // Dejamos el autoFocus en el primer campo de la fila
+                                            autoFocus 
                                             style={{ zIndex: 0 }}
                                         />
                                         <label
@@ -82,11 +130,10 @@ export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
                                 </div>
                             </div>
 
-                            {/* Columna 2: Patente del Vehículo (Ocupa 6 columnas) */}
+                            {/* Columna 2: Patente del Vehículo */}
                             <div className="col-md-6">
                                 <div className="input-group">
                                     <span className="input-group-text bg-light text-secondary">
-                                        {/* Icono de Patente/Vehículo */}
                                         <i className="fa-solid fa-barcode"></i>
                                     </span>
                                     <div className="form-floating">
@@ -94,7 +141,7 @@ export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
                                             type="text"
                                             className="form-control border-start-0 ps-2"
                                             id="inputPatente"
-                                            name="Patente" // Importante: usar el nombre de la propiedad del estado
+                                            name="Patente" 
                                             placeholder="Patente del Vehículo"
                                             value={form.Patente}
                                             onChange={handleChange}
@@ -111,66 +158,64 @@ export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-
-
-                            {/* Fila 2: Fecha de Inicio y Fecha de Fin */}
-                            <div className="row g-3 mb-3">
-                                {/* Columna 1: Fecha de Inicio (Ocupa 6 columnas) */}
-                                <div className="col-md-6">
-                                    <div className="input-group">
-                                        <span className="input-group-text bg-light text-secondary">
-                                            <i className="fa-solid fa-calendar-days"></i>
-                                        </span>
-                                        <div className="form-floating">
-                                            <input
-                                                type="date" // <--- CAMBIO CLAVE: type="date"
-                                                className="form-control border-start-0 ps-2"
-                                                id="inputFechaInicio"
-                                                name="FechaInicio"
-                                                placeholder="Fecha de Inicio"
-                                                value={form.FechaInicio}
-                                                onChange={handleChange}
-                                                required
-                                                style={{ zIndex: 0 }}
-                                            />
-                                            <label
-                                                htmlFor="inputFechaInicio"
-                                                style={labelStyle}
-                                                className="ps-2"
-                                            >
-                                                Fecha de Inicio
-                                            </label>
-                                        </div>
+                        {/* Fila 2 (ahora Fila 3): Fecha de Inicio y Fecha de Fin */}
+                        <div className="row g-3 mb-3">
+                            {/* Columna 1: Fecha de Inicio */}
+                            <div className="col-md-6">
+                                <div className="input-group">
+                                    <span className="input-group-text bg-light text-secondary">
+                                        <i className="fa-solid fa-calendar-days"></i>
+                                    </span>
+                                    <div className="form-floating">
+                                        <input
+                                            type="date"
+                                            className="form-control border-start-0 ps-2"
+                                            id="inputFechaInicio"
+                                            name="FechaInicio"
+                                            placeholder="Fecha de Inicio"
+                                            value={form.FechaInicio}
+                                            onChange={handleChange}
+                                            required
+                                            style={{ zIndex: 0 }}
+                                        />
+                                        <label
+                                            htmlFor="inputFechaInicio"
+                                            style={labelStyle}
+                                            className="ps-2"
+                                        >
+                                            Fecha de Inicio
+                                        </label>
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Columna 2: Fecha de Fin (Ocupa 6 columnas) */}
-                                <div className="col-md-6">
-                                    <div className="input-group">
-                                        <span className="input-group-text bg-light text-secondary">
-                                            <i className="fa-solid fa-calendar-days"></i>
-                                        </span>
-                                        <div className="form-floating">
-                                            <input
-                                                type="date" // <--- CAMBIO CLAVE: type="date"
-                                                className="form-control border-start-0 ps-2"
-                                                id="inputFechaFin"
-                                                name="FechaFin"
-                                                placeholder="Fecha de Fin"
-                                                value={form.FechaFin}
-                                                onChange={handleChange}
-                                                required
-                                                style={{ zIndex: 0 }}
-                                            />
-                                            <label
-                                                htmlFor="inputFechaFin"
-                                                style={labelStyle}
-                                                className="ps-2"
-                                            >
-                                                Fecha de Fin
-                                            </label>
-                                        </div>
+                            {/* Columna 2: Fecha de Fin */}
+                            <div className="col-md-6">
+                                <div className="input-group">
+                                    <span className="input-group-text bg-light text-secondary">
+                                        <i className="fa-solid fa-calendar-days"></i>
+                                    </span>
+                                    <div className="form-floating">
+                                        <input
+                                            type="date"
+                                            className="form-control border-start-0 ps-2"
+                                            id="inputFechaFin"
+                                            name="FechaFin"
+                                            placeholder="Fecha de Fin"
+                                            value={form.FechaFin}
+                                            onChange={handleChange}
+                                            required
+                                            style={{ zIndex: 0 }}
+                                        />
+                                        <label
+                                            htmlFor="inputFechaFin"
+                                            style={labelStyle}
+                                            className="ps-2"
+                                        >
+                                            Fecha de Fin
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -190,7 +235,7 @@ export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
 
                             <button
                                 type="submit"
-                                className="btn-primary px-4"
+                                className="btn btn-primary px-4"
                             >
                                 <i className="fa-solid fa-save me-2"></i>
                                 {form.IdReserva ? "Guardar Cambios" : "Registrar"}

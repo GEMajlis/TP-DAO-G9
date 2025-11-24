@@ -1,97 +1,78 @@
 import React from "react";
 
+// ----- INICIO CAMBIOS: Se eliminan props de filtros locales -----
 export default function ReservasSearch({
-  DNI,
-  setDNI,
-  Patente,
-  setPatente,
-  Estado,
-  setEstado,
-  Buscar,
+  ID,
+  setID,
+  BuscarPorID,
+  BuscarDelDia,
+  Limpiar,
 }) {
+// ----- FIN CAMBIOS -----
   return (
     <form
       name="FormBusqueda"
-      onSubmit={(e) => {
-        e.preventDefault();
-        Buscar(1);
-      }}
+      onSubmit={(e) => e.preventDefault()}
       className="bg-light p-3 rounded-3 border mb-4"
     >
-      <div className="row align-items-center g-3">
-        
-        {/* --- Grupo DNI --- */}
-        <div className="col-12 col-lg d-flex align-items-center">
-          <label
-            className="col-form-label fw-bold text-secondary me-2 text-center"
-            style={{ minWidth: "80px" }} // Ancho mínimo reducido para que quepan
-          >
-            DNI
+      {/* ----- INICIO CAMBIOS: Reorganizamos la fila ----- */}
+      <div className="row g-3 align-items-end">
+        {/* --- Grupo Búsqueda por ID --- */}
+        <div className="col-12 col-lg-5">
+          <label className="col-form-label fw-bold text-secondary">
+            Búsqueda Específica por ID
           </label>
-          <div className="input-group flex-grow-1">
+          <div className="input-group">
             <input
-              type="text"
+              type="number"
               className="form-control"
-              onChange={(e) => setDNI(e.target.value)}
-              value={DNI}
-              placeholder="Ingrese DNI..."
-              maxLength="15"
-              autoFocus
+              placeholder="Ingrese N° de Reserva..."
+              onChange={(e) => setID(e.target.value)}
+              value={ID}
             />
+            <button
+              type="button"
+              className="btn btn-info fw-bold"
+              onClick={BuscarPorID}
+              title="Buscar por ID"
+            >
+              <i className="fa-solid fa-ticket me-2"></i>
+              Buscar ID
+            </button>
           </div>
         </div>
 
-        {/* --- Grupo Patente --- */}
-        <div className="col-12 col-lg d-flex align-items-center">
-          <label
-            className="col-form-label fw-bold text-secondary me-2 ms-lg-2 text-center"
-            style={{ minWidth: "80px" }}
-          >
-            Patente
-          </label>
-          <input
-            type="text"
-            className="form-control flex-grow-1"
-            onChange={(e) => setPatente(e.target.value)}
-            value={Patente}
-            placeholder="Ingrese patente..."
-            maxLength="15"
-          />
-        </div>
-
-        {/* --- Grupo Estado --- */}
-        <div className="col-12 col-lg d-flex align-items-center">
-          <label
-            className="col-form-label fw-bold text-secondary me-2 ms-lg-2 text-center"
-            style={{ minWidth: "80px" }}
-          >
-            Estado
-          </label>
-          <select
-            className="form-select flex-grow-1"
-            onChange={(e) => setEstado(e.target.value)}
-            value={Estado}
-          >
-            <option value="">Todos</option>
-            <option value="Pendiente">Pendiente</option>
-            <option value="Activa">Activa</option>
-            <option value="Finalizada">Finalizada</option>
-            <option value="Cancelada">Cancelada</option>
-          </select>
-        </div>
-
-        {/* --- Botón Buscar --- */}
-        <div className="col-12 col-lg-auto text-center">
+        {/* --- Grupo Búsqueda del Día --- */}
+        <div className="col-12 col-lg-4">
           <button
             type="button"
-            className="btn-primary fw-bold px-3 w-100 w-lg-auto mt-2 mt-lg-0" // Ancho completo en móvil, auto en desktop
-            onClick={() => Buscar(1)}
-            title="Buscar"
+            className="btn btn-success fw-bold w-100"
+            onClick={BuscarDelDia}
+            title="Buscar Reservas del Día"
           >
-            <i className="fa fa-search"></i>
+            <i className="fa-solid fa-sun me-2"></i>
+            Ver Reservas del Día
+          </button>
+        </div>
+
+        {/* --- Botón Limpiar --- */}
+        <div className="col-12 col-lg-3">
+          <button
+            type="button"
+            className="btn btn-outline-secondary fw-bold w-100"
+            onClick={Limpiar}
+            title="Limpiar búsqueda y recargar todo"
+          >
+            <i className="fa-solid fa-eraser me-2"></i>
+            Limpiar
           </button>
         </div>
       </div>
+      {/* ----- FIN CAMBIOS ----- */}
+
+      {/* ----- INICIO CAMBIOS: Se elimina toda la fila de filtros locales ----- */}
+      {/* ... (Toda la fila de DNI, Patente, Estado y Lupa se fue) ... */}
+      {/* ----- FIN CAMBIOS ----- */}
     </form>
   );
 }
