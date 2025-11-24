@@ -81,7 +81,7 @@ def cliente_nombre(request, nombre):
     conexion = sqlite3.connect("db.sqlite3")
     cursor = conexion.cursor()
     cliente = cursor.execute(
-        "SELECT * FROM CLIENTES WHERE nombre = ?", (nombre,)
+        "SELECT * FROM CLIENTES WHERE nombre LIKE ?", (f"%{nombre}%",)
     ).fetchall()
     conexion.close()
 
