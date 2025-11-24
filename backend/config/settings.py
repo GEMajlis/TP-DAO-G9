@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "reportes",
     "vehiculos",
     "reservas",
+    "multas",
+    "danios",
 ]
 
 MIDDLEWARE = [
