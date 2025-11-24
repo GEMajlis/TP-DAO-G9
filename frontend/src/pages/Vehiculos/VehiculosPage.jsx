@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import VehiculosList from "./VehiculosList";
 import VehiculosForm from "./VehiculosForm";
 import "../../styles/PageLayout.css";
@@ -21,12 +21,11 @@ export default function VehiculosPage() {
     cargarVehiculos();
   }, []);
 
-  const cargarVehiculos = async () => {
+  const cargarVehiculos = useCallback(async (paginaActual = 1) => {
     try {
-      const data = await obtenerVehiculos(1, 5); 
+      const data = await obtenerVehiculos(paginaActual, 5, filtroPatente, filtroEstado);
 
       setVehiculos(data.vehiculos);
-      setTodosLosVehiculos(data.vehiculos);
 
       setRegistrosTotal(data.total);
       setPaginas(Array.from({ length: data.total_pages }, (_, i) => i + 1));
@@ -36,13 +35,17 @@ export default function VehiculosPage() {
       console.error("Error cargando vehículos:", err);
       alert("No se pudieron cargar los vehículos.");
     }
-  };
+  }, [filtroPatente, filtroEstado]);
+
+  useEffect(() => {
+    cargarVehiculos();
+  }, [cargarVehiculos]);
 
   const handleBuscar = async (numPagina = 1) => {
     try {
       setPagina(numPagina);
 
-      const data = await obtenerVehiculos(numPagina, 5); 
+      const data = await obtenerVehiculos(numPagina, 5, filtroPatente, filtroEstado);
 
       setVehiculos(data.vehiculos);
       setRegistrosTotal(data.total);
@@ -86,26 +89,33 @@ export default function VehiculosPage() {
   const handleGuardar = async (vehiculoForm) => {
     try {
       if (vehiculoSeleccionado) {
-        await actualizarVehiculo(vehiculoForm.patente, {
+        const dataToSend = {
           patente: vehiculoForm.patente,
           color: vehiculoForm.color,
           marca: vehiculoForm.marca,
-          modelo: vehiculoForm.modelo
-        });
+          precio_por_dia: vehiculoForm.precio_por_dia,
+          modelo: vehiculoForm.modelo,
+          estado: vehiculoForm.estado
+        };
+        await actualizarVehiculo(vehiculoForm.patente, dataToSend);
+        await cargarVehiculos(pagina); // ← CAMBIO: Mantener página actual
       } else {
-        await crearVehiculo({
+        const dataToSend = {
           patente: vehiculoForm.patente,
           color: vehiculoForm.color,
           marca: vehiculoForm.marca,
           modelo: vehiculoForm.modelo,
+          precio_por_dia: vehiculoForm.precio_por_dia,
           estado: vehiculoForm.estado
-        });
+        };
+        await crearVehiculo(dataToSend);
+        await cargarVehiculos(1); // ← CAMBIO: Para nuevos vehículos ir a página 1
       }
 
-      await cargarVehiculos(); 
       setVista("lista");
     } catch (err) {
       console.error("Error guardando vehículo:", err);
+      console.error("Error completo:", err.response?.data);
       alert(err.message || "No se pudo guardar el vehículo.");
     }
   };

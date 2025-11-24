@@ -6,12 +6,11 @@ export default function VehiclesSearch({ Patente, setPatente, Estado, setEstado,
       name="FormBusqueda"
       onSubmit={(e) => {
         e.preventDefault();
-        Buscar(1);
       }}
       className="bg-light p-3 rounded-3 border mb-4"
     >
       <div className="row align-items-center g-3">
-        
+
         {/* Patente */}
         <div className="col-12 col-md d-flex align-items-center">
           <label
@@ -47,23 +46,12 @@ export default function VehiclesSearch({ Patente, setPatente, Estado, setEstado,
             value={Estado}
           >
             <option value="">Todos</option>
-            <option value="Disponible">Disponible</option>
-            <option value="Alquilado">Alquilado</option>
-            <option value="En Mantenimiento">En Mantenimiento</option>
+            <option value="disponible">Disponible</option>
+            <option value="alquilado">Alquilado</option>
+            <option value="mantenimiento">En Mantenimiento</option>
           </select>
         </div>
 
-        {/* Botón Buscar */}
-        <div className="col-12 col-md-auto text-center">
-          <button
-            type="button"
-            className="btn-primary fw-bold px-3"
-            onClick={() => Buscar(1)}
-            title="Buscar"
-          >
-            <i className="fa fa-search"></i>
-          </button>
-        </div>
       </div>
     </form>
   );

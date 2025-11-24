@@ -52,6 +52,7 @@ export default function VehiculosList({
                                 <th>Marca</th>
                                 <th>Modelo</th>
                                 <th>Color</th>
+                                <th>Precio por día</th>
                                 <th>Estado</th>
                                 <th className="text-nowrap">Acciones</th>
                             </tr>
@@ -62,9 +63,10 @@ export default function VehiculosList({
                                 Vehiculos.map((vehiculo) => (
                                     <tr key={vehiculo.patente}>
                                         <td className="text-center">{vehiculo.patente}</td>
-                                        <td>{vehiculo.marca}</td>
-                                        <td>{vehiculo.modelo}</td>
+                                        <td className="text-center">{vehiculo.marca}</td>
+                                        <td className="text-center">{vehiculo.modelo}</td>
                                         <td className="text-center">{vehiculo.color}</td>
+                                        <td className="text-center">${vehiculo.precio_por_dia}</td>
                                         <td className="text-center">
                                             <span className={`badge rounded-pill py-2 ${getBadgeColor(vehiculo.estado)}`}>
                                                 {vehiculo.estado}
