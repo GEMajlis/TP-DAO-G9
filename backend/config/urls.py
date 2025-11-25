@@ -23,6 +23,7 @@ from empleados import views as empleado_views
 from mantenimiento import views as mantenimiento_views
 from multas import views as multa_views
 from danios import views as danio_views
+from reportes import views as reporte_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -46,7 +47,6 @@ urlpatterns = [
     path("empleados/nombre/<str:nombre>/", empleado_views.empleado_nombre, name="empleado_nombre"),
     path("empleados/editar/<int:dni>/", empleado_views.empleado_edit, name="empleado_edit"),
     path("empleados/eliminar/<int:dni>/", empleado_views.empleado_delete, name="empleado_delete"),
-
     # Mantenimiento URLs
     path("mantenimientos/nuevo/", mantenimiento_views.mantenimiento_create, name="mantenimiento_create"),
     path("mantenimientos/finalizar/<str:patente>/", mantenimiento_views.mantenimiento_close, name="mantenimiento_finalizar"),
@@ -64,4 +64,8 @@ urlpatterns = [
     path('danio/nuevo/', danio_views.danio_create, name='danio_create'),
     path('danio/<int:id_alquiler>/', danio_views.danios_por_alquiler, name='danios_por_alquiler'),
     path('danio/<int:id_alquiler>/<int:id_danio>/', danio_views.danio_update, name='danio_update'),
-]
+    # REPORTES URLs
+    path("reporte/vehiculos/", reporte_views.reporte_vehiculos_mas_alquileres),
+    path("reporte/facturacion/", reporte_views.reporte_facturacion_mensual),
+    path("reporte/alquileres/<str:fecha_inicio>/<str:fecha_fin>/", reporte_views.reporte_alquileres_periodo, name="alquileres_por_periodo",),
+]   
