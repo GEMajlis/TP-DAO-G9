@@ -4,7 +4,6 @@ import DaniosSearch from "./DaniosSearch";
 export default function DaniosList({
   Danios,
   Modificar,
-  Eliminar,
   Agregar,
   Pagina,
   RegistrosTotal,
@@ -60,13 +59,6 @@ export default function DaniosList({
                         title="Modificar"
                       >
                         <i className="fa-solid fa-pen-to-square"></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => Eliminar(danio)}
-                        title="Eliminar"
-                      >
-                        <i className="fa-solid fa-trash"></i>
                       </button>
                     </td>
                   </tr>

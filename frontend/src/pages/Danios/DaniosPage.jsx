@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import DaniosList from "./DaniosList";
 import DaniosForm from "./DaniosForm";
 import "../../styles/PageLayout.css";
-import { obtenerDanios } from "../../services/daniosService";
+import { obtenerDanios, crearDanio, actualizarDanio } from "../../services/daniosService";
 
 export default function DaniosPage() {
     const [vista, setVista] = useState("lista");
@@ -42,23 +42,30 @@ export default function DaniosPage() {
         setVista("form");
     };
 
-    const handleEliminar = (danio) => {
-        if (window.confirm(`¿Eliminar daño ID ${danio.id_danio}?`)) {
-            setDanios(danios.filter(d => d.id_danio !== danio.id_danio));
-        }
-    };
+    const handleGuardar = async (danioForm) => {
+        try {
+            if (danioSeleccionado) {
+                await actualizarDanio(
+                    danioForm.id_alquiler,
+                    danioForm.id_danio,
+                    { descripcion: danioForm.descripcion, monto: Number(danioForm.monto) }
+                );
+            } else {
+                await crearDanio({
+                    id_alquiler: danioForm.id_alquiler,
+                    descripcion: danioForm.descripcion,
+                    monto: Number(danioForm.monto)
+                });
+            }
 
-    const handleGuardar = (danioForm) => {
-        let nuevaLista;
-        if (danioForm.id_danio) {
-            nuevaLista = danios.map(d => (d.id_danio === danioForm.id_danio ? danioForm : d));
-        } else {
-            danioForm.id_danio = Date.now(); // temporal
-            nuevaLista = [...danios, danioForm];
-        }
+            await cargarDanios(pagina);
 
-        setDanios(nuevaLista);
-        setVista("lista");
+            setVista("lista");
+
+        } catch (err) {
+            console.error("Error guardando daño:", err);
+            alert("No se pudo guardar el daño.");
+        }
     };
 
     const handleVolverALista = () => setVista("lista");
@@ -71,30 +78,25 @@ export default function DaniosPage() {
             </p>
 
             {vista === "lista" && (
-                <div className="fade-in">
-                    <DaniosList
-                        Danios={danios}
-                        Modificar={handleModificar}
-                        Eliminar={handleEliminar}
-                        Agregar={handleAgregar}
-                        Pagina={pagina}
-                        RegistrosTotal={RegistrosTotal}
-                        Paginas={Paginas}
-                        Buscar={cargarDanios}
-                        FiltroPatente={filtroPatente}
-                        setFiltroPatente={setFiltroPatente}
-                    />
-                </div>
+                <DaniosList
+                    Danios={danios}
+                    Modificar={handleModificar}
+                    Agregar={handleAgregar}
+                    Pagina={pagina}
+                    RegistrosTotal={RegistrosTotal}
+                    Paginas={Paginas}
+                    Buscar={cargarDanios}
+                    FiltroPatente={filtroPatente}
+                    setFiltroPatente={setFiltroPatente}
+                />
             )}
 
             {vista === "form" && (
-                <div className="fade-in">
-                    <DaniosForm
-                        Danio={danioSeleccionado}
-                        Guardar={handleGuardar}
-                        Cancelar={handleVolverALista}
-                    />
-                </div>
+                <DaniosForm
+                    Danio={danioSeleccionado}
+                    Guardar={handleGuardar}
+                    Cancelar={handleVolverALista}
+                />
             )}
         </div>
     );

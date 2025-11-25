@@ -15,7 +15,7 @@ export const obtenerDaniosPorAlquiler = async (idAlquiler) => {
 };
 
 export const crearDanio = async ({ id_alquiler, descripcion, monto }) => {
-    return await axios.post(`${API_URL}`, { id_alquiler, descripcion, monto });
+    return await axios.post(`${API_URL}nuevo/`, { id_alquiler, descripcion, monto });
 };
 
 export const actualizarDanio = async (id_alquiler, id_danio, { descripcion, monto }) => {

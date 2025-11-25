@@ -21,7 +21,7 @@ def danio_create(request):
         descripcion = data.get("descripcion")
         monto = data.get("monto")
 
-        if not id_alquiler or not descripcion or not monto:
+        if id_alquiler is None or descripcion is None or monto is None:
             return JsonResponse(
                 {"error": "Se requieren id_alquiler, descripcion y monto"},
                 status=400
@@ -102,7 +102,7 @@ def danio_update(request, id_alquiler, id_danio):
         descripcion = data.get("descripcion")
         monto = data.get("monto")
 
-        if not descripcion and not monto:
+        if descripcion is None and monto is None:
             return JsonResponse(
                 {"error": "Se requiere descripcion o monto para actualizar"},
                 status=400
@@ -152,9 +152,6 @@ def danio_update(request, id_alquiler, id_danio):
 # -----------------------------------------------------------
 @require_http_methods(["GET"])
 def danios_list(request):
-    """
-    GET /danios/?page=1&page_size=5&patente=ABC123
-    """
     try:
         page = int(request.GET.get("page", 1))
         page_size = int(request.GET.get("page_size", 5))

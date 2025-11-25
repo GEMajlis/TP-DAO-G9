@@ -17,7 +17,6 @@ export default function AlquileresForm({ Guardar, Cancelar }) {
     const [clientes, setClientes] = useState([]);
     const [empleados, setEmpleados] = useState([]);
 
-    // Traer vehículos disponibles
     useEffect(() => {
         const fetchVehiculos = async () => {
             try {
