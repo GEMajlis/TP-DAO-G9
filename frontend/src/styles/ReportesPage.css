@@ -1,0 +1,31 @@
+.reportes-page-container {
+max-width: 1400px;
+}
+
+.report-section {
+height: 100%;
+}
+
+.chart-container {
+position: relative;
+height: 350px;
+margin-bottom: 15px;
+}
+
+.alquileres-results p {
+font-size: 1.1rem;
+}
+
+.table-sm th, .table-sm td {
+padding-top: 0.5rem;
+padding-bottom: 0.5rem;
+}
+
+.card.shadow-sm {
+border: 1px solid #e9ecef;
+transition: transform 0.2s;
+}
+
+.card.shadow-sm:hover {
+transform: translateY(-2px);
+}

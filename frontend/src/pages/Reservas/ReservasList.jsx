@@ -81,8 +81,8 @@ export default function ReservasList({
 
                                                 // (El switch de colores se queda igual)
                                                 switch (reserva.Estado) {
-                                                    case "completado": claseDeBadge = "bg-success"; break;
-                                                    case "confirmado": claseDeBadge = "bg-primary"; break;
+                                                    case "completada": claseDeBadge = "bg-success"; break;
+                                                    case "confirmada": claseDeBadge = "bg-primary"; break;
                                                     case "pendiente": claseDeBadge = "bg-warning"; break;
                                                     case "cancelada":
                                                     case "cancelado": claseDeBadge = "bg-danger"; break;
