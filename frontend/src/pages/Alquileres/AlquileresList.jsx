@@ -3,8 +3,7 @@ import AlquileresSearch from "./AlquileresSearch";
 
 export default function AlquileresList({
   Alquileres,
-  Modificar,
-  Eliminar,
+  Finalizar,
   Agregar,
   Pagina,
   RegistrosTotal,
@@ -12,8 +11,8 @@ export default function AlquileresList({
   Buscar,
   FiltroEstado,
   setFiltroEstado,
-  FiltroIdAlquiler,
-  setFiltroIdAlquiler
+  FiltroPatente,
+  setFiltroPatente
 }) {
   return (
     <div className="card border-0 shadow-sm" style={{ borderRadius: "12px" }}>
@@ -26,8 +25,8 @@ export default function AlquileresList({
 
         {/* BUSCADOR */}
         <AlquileresSearch
-          IdAlquiler={FiltroIdAlquiler}
-          setIdAlquiler={setFiltroIdAlquiler}
+          Patente={FiltroPatente}
+          setPatente={setFiltroPatente}
           Estado={FiltroEstado}
           setEstado={setFiltroEstado}
           Buscar={Buscar}
@@ -42,7 +41,6 @@ export default function AlquileresList({
           >
             <thead className="table-primary text-center">
               <tr>
-                <th>ID</th>
                 <th>Patente</th>
                 <th>Cliente</th>
                 <th>Desde</th>
@@ -57,31 +55,27 @@ export default function AlquileresList({
             <tbody>
               {Alquileres?.length > 0 ? (
                 Alquileres.map((alquiler) => (
-                  <tr key={alquiler.IdAlquiler}>
-                    <td className="text-center">{alquiler.IdAlquiler}</td>
-                    <td className="text-center">{alquiler.Patente}</td>
-                    <td className="text-center">{alquiler.DNICliente}</td>
-                    <td className="text-center">{alquiler.FechaInicio}</td>
-                    <td className="text-center">{alquiler.FechaFin}</td>
-                    <td className="text-center">${alquiler.Costo}</td>
-                    <td className="text-center">{alquiler.DNIEmpleado}</td>
-                    <td className="text-center">{alquiler.NroReserva}</td>
+                  <tr key={alquiler.id}>
+                    <td className="text-center">{alquiler.vehiculo_patente}</td>
+                    <td className="text-center">{alquiler.cliente_nombre}</td>
+                    <td className="text-center">
+                      {alquiler.fecha_inicio ? new Date(alquiler.fecha_inicio).toLocaleDateString("es-AR") : "-"}
+                    </td>
+                    <td className="text-center">
+                      {alquiler.fecha_fin ? new Date(alquiler.fecha_fin).toLocaleDateString("es-AR") : "-"}
+                    </td>
+                    <td className="text-center">${alquiler.total_pago || "-"}</td>
+                    <td className="text-center">{alquiler.empleado_nombre}</td>
+                    <td className="text-center">{alquiler.reserva_id || "-"}</td>
 
                     <td className="text-center text-nowrap">
                       <button
-                        className="btn btn-sm btn-outline-secondary me-1"
-                        onClick={() => Modificar(alquiler)}
-                        title="Modificar"
+                        className="btn btn-sm btn-outline-success"
+                        onClick={() => Finalizar(alquiler)}
+                        title="Finalizar"
+                        disabled={!alquiler.activo}
                       >
-                        <i className="fa-solid fa-pen-to-square"></i>
-                      </button>
-
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => Eliminar(alquiler)}
-                        title="Eliminar"
-                      >
-                        <i className="fa-solid fa-trash"></i>
+                        <i className="fa-solid fa-check"></i>
                       </button>
                     </td>
                   </tr>
