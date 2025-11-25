@@ -26,10 +26,10 @@ def alquiler_create(request):
         print("TIPOS:", {k: type(v) for k, v in data.items()})
         
         # Obtener los valores del request
-        cliente_dni = data.get('cliente')
-        vehiculo_patente = data.get('vehiculo')
-        empleado_dni = data.get('empleado')
-        reserva_id = data.get('reserva')
+        cliente_dni = data.get('cliente_dni')
+        vehiculo_patente = data.get('vehiculo_patente')
+        empleado_dni = data.get('empleado_dni')
+        reserva_id = data.get('reserva_id')
         
         # Validar que los campos requeridos estén presentes
         if not all([cliente_dni, vehiculo_patente, empleado_dni]):

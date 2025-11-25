@@ -41,7 +41,7 @@ export default function AlquileresList({
           >
             <thead className="table-primary text-center">
               <tr>
-                <th>Patente</th>
+                <th>Vehículo</th>
                 <th>Cliente</th>
                 <th>Desde</th>
                 <th>Hasta</th>
