@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+// import { obtenerVehiculos } from "../../services/vehiculosService";
+// // import { obtenerEmpleados } from "../../services/empleadosService";
 
 export default function AlquileresForm({ Alquiler, Guardar, Cancelar }) {
     const esEdicion = !!Alquiler;
@@ -14,6 +16,24 @@ export default function AlquileresForm({ Alquiler, Guardar, Cancelar }) {
         Costo: Alquiler?.Costo || "",
         DNIEmpleado: Alquiler?.DNIEmpleado || "",
     });
+
+    // const [vehiculos, setVehiculos] = useState([]);
+    // const [empleados, setEmpleados] = useState([]);
+
+    // useEffect(() => {
+    //     async function cargarOpciones() {
+    //         try {
+    //             const vehiculosData = await obtenerVehiculos();
+    //             setVehiculos(vehiculosData.vehiculos);
+
+    //             // const empleadosData = await obtenerEmpleados();
+    //             // setEmpleados(empleadosData.empleados);
+    //         } catch (err) {
+    //             console.error("Error cargando opciones:", err);
+    //         }
+    //     }
+    //     cargarOpciones();
+    // }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -56,9 +76,25 @@ export default function AlquileresForm({ Alquiler, Guardar, Cancelar }) {
                         <div className="row g-3 mb-3">
                             <div className="col-md-6">
                                 <div className="form-floating">
-                                    <input type="text" className="form-control ps-3" id="inPatente" name="Patente"
+                                    {/* <label className="col-form-label fw-bold text-secondary me-2" style={{ minWidth: "100px" }}>
+                                        Vehículo
+                                    </label>
+                                    <select
+                                        className="form-select flex-grow-1"
+                                        name="vehiculo"
+                                        value={form.vehiculo}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">Seleccione un vehículo</option>
+                                        {vehiculos.map((v) => (
+                                            <option key={v.patente} value={v.patente}>
+                                                {v.patente} - {v.modelo}
+                                            </option>
+                                        ))}
+                                    </select> */}
+                                    <input type="text" className="form-control ps-3" id="Patente" name="Patente"
                                         value={form.Patente} onChange={handleChange} required placeholder="Patente" />
-                                    <label htmlFor="inPatente" style={labelStyle}>Patente Vehículo</label>
+                                    <label htmlFor="Patente" style={labelStyle}>Patente</label>
                                 </div>
                             </div>
                             <div className="col-md-6">

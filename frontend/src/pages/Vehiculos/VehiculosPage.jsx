@@ -11,49 +11,40 @@ export default function VehiculosPage() {
   const [vehiculos, setVehiculos] = useState([]);
   const [vehiculoSeleccionado, setVehiculoSeleccionado] = useState(null);
   const [pagina, setPagina] = useState(1);
-  const [RegistrosTotal, setRegistrosTotal] = useState(0); 
+  const [RegistrosTotal, setRegistrosTotal] = useState(0);
   const [Paginas, setPaginas] = useState([]);
 
   const [filtroPatente, setFiltroPatente] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
 
-  useEffect(() => {
-    cargarVehiculos();
-  }, []);
-
-  const cargarVehiculos = async () => {
+  const cargarVehiculos = async (numPagina = 1, pageSize = 5, aplicarFiltros = true) => {
     try {
-      const data = await obtenerVehiculos(1, 5); 
+      const filtroPatenteActual = aplicarFiltros ? filtroPatente : "";
+      const filtroEstadoActual = aplicarFiltros ? filtroEstado : "";
+
+      const data = await obtenerVehiculos(numPagina, pageSize, filtroPatenteActual, filtroEstadoActual);
 
       setVehiculos(data.vehiculos);
-      setTodosLosVehiculos(data.vehiculos);
+      if (!aplicarFiltros) setTodosLosVehiculos(data.vehiculos);
 
       setRegistrosTotal(data.total);
       setPaginas(Array.from({ length: data.total_pages }, (_, i) => i + 1));
       setPagina(data.page);
-
     } catch (err) {
       console.error("Error cargando vehículos:", err);
       alert("No se pudieron cargar los vehículos.");
     }
   };
 
-  const handleBuscar = async (numPagina = 1) => {
-    try {
-      setPagina(numPagina);
+  useEffect(() => {
+    cargarVehiculos(1, 5, false);
+  }, []);
 
-      const data = await obtenerVehiculos(numPagina, 5); 
+  useEffect(() => {
+    cargarVehiculos(1);
+  }, [filtroPatente, filtroEstado]);
 
-      setVehiculos(data.vehiculos);
-      setRegistrosTotal(data.total);
-      setPaginas(Array.from({ length: data.total_pages }, (_, i) => i + 1));
-
-    } catch (err) {
-      console.error("Error filtrando o paginando vehículos:", err);
-    }
-  };
-
-  const handleAgregar = (origen) => {
+  const handleAgregar = () => {
     setVehiculoSeleccionado(null);
     setVista("form");
   };
@@ -69,17 +60,16 @@ export default function VehiculosPage() {
       alert("No se pudo cargar el vehículo.");
     }
   };
- 
 
   const handleEliminar = async (vehiculo) => {
-    if (window.confirm(`¿Estás seguro de eliminar el vehículo ${vehiculo.patente}?`)) {
-      try {
-        await eliminarVehiculo(vehiculo.patente);
-        await cargarVehiculos(); 
-      } catch (err) {
-        console.error("Error eliminando vehículo:", err);
-        alert("No se pudo eliminar el vehículo.");
-      }
+    if (!window.confirm(`¿Estás seguro de eliminar el vehículo ${vehiculo.patente}?`)) return;
+
+    try {
+      await eliminarVehiculo(vehiculo.patente);
+      await cargarVehiculos(pagina, 5, false);
+    } catch (err) {
+      console.error("Error eliminando vehículo:", err);
+      alert("No se pudo eliminar el vehículo.");
     }
   };
 
@@ -102,7 +92,7 @@ export default function VehiculosPage() {
         });
       }
 
-      await cargarVehiculos(); 
+      await cargarVehiculos(pagina, 5, false);
       setVista("lista");
     } catch (err) {
       console.error("Error guardando vehículo:", err);
@@ -127,21 +117,16 @@ export default function VehiculosPage() {
             Vehiculos={vehiculos}
             Modificar={handleModificar}
             Eliminar={handleEliminar}
-            Agregar={() => handleAgregar("lista")}
+            Agregar={handleAgregar}
             Pagina={pagina}
             RegistrosTotal={RegistrosTotal}
             Paginas={Paginas}
-            Buscar={handleBuscar}
+            Buscar={cargarVehiculos} 
             FiltroPatente={filtroPatente}
             setFiltroPatente={setFiltroPatente}
             FiltroEstado={filtroEstado}
             setFiltroEstado={setFiltroEstado}
           />
-          {/* <div className="text-center mt-4 mb-3">
-            <button className="btn btn-secondary px-4" onClick={() => window.location.href = "/"}>
-              <i className="fa-solid fa-arrow-left me-2"></i>Volver al menú
-            </button>
-          </div> */}
         </div>
       )}
 
@@ -152,12 +137,6 @@ export default function VehiculosPage() {
             Guardar={handleGuardar}
             Cancelar={handleVolverALista}
           />
-          {/* <div className="text-center mt-4 mb-3">
-            <button className="btn btn-secondary px-4" onClick={handleVolverALista}>
-              <i className="fa-solid fa-arrow-left me-2"></i>
-              {volverA === "menu" ? "Volver al menú" : "Volver al listado"}
-            </button>
-          </div> */}
         </div>
       )}
     </div>

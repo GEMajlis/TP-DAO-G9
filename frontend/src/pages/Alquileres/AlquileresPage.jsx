@@ -1,89 +1,87 @@
-import React, { useState, useEffect } from "react";
-import AlquileresList from "./AlquileresLIst";
+import React, { useState, useEffect, useCallback } from "react";
+import AlquileresList from "./AlquileresList";
 import AlquileresForm from "./AlquileresForm";
 import "../../styles/PageLayout.css";
+import { obtenerAlquileres, obtenerAlquiler, crearAlquiler, finalizarAlquiler } from "../../services/alquileresService";
 
 export default function AlquileresPage() {
     const [vista, setVista] = useState("lista");
 
     const [todosLosAlquileres, setTodosLosAlquileres] = useState([]);
     const [alquileres, setAlquileres] = useState([]);
-    const [alquilerEditando, setAlquilerEditando] = useState(null);
+    const [alquilerSeleccionado, setAlquilerSeleccionado] = useState(null);
     const [pagina, setPagina] = useState(1);
+    const [RegistrosTotal, setRegistrosTotal] = useState(0); 
+    const [Paginas, setPaginas] = useState([]);
 
-    const [filtroIdAlquiler, setFiltroIdAlquiler] = useState("");
+    const [filtroPatente, setFiltroPatente] = useState("");
     const [filtroEstado, setFiltroEstado] = useState("");
 
     useEffect(() => {
-        const datosSimulados = [
-            { IdAlquiler: 1, Patente: "AB123CD", DNICliente: "35111222", FechaInicio: "2023-11-01", FechaFin: "2023-11-05", Costo: 50000, DNIEmpleado: "20999888", NroReserva: 100 },
-            { IdAlquiler: 2, Patente: "AE555EE", DNICliente: "40555666", FechaInicio: "2025-01-10", FechaFin: "2025-12-12", Costo: 30000, DNIEmpleado: "20999888", NroReserva: null },
-            { IdAlquiler: 3, Patente: "ZZ999XX", DNICliente: "12333444", FechaInicio: "2023-11-15", FechaFin: "2023-11-20", Costo: 85000, DNIEmpleado: "20999888", NroReserva: 102 },
-        ];
-
-        setTodosLosAlquileres(datosSimulados);
-        setAlquileres(calcularEstados(datosSimulados));
+        cargarAlquileres(); 
     }, []);
 
-    const calcularEstados = (listaAlquileres) => {
-        const hoy = new Date().toISOString().split('T')[0];
-        return listaAlquileres.map(a => {
-            let estadoCalculado = "Finalizado";
-            if (a.FechaFin >= hoy) {
-                estadoCalculado = "Activo";
-            }
-            return { ...a, Estado: estadoCalculado };
-        });
-    };
+    const cargarAlquileres = useCallback(async (paginaActual = 1) => {
+        try {
+            const data = await obtenerAlquileres(paginaActual, 5, filtroPatente, filtroEstado);
 
-    const handleBuscar = (numPagina) => {
-        setPagina(numPagina || 1);
-        const listaConEstados = calcularEstados(todosLosAlquileres);
-        const resultado = listaConEstados.filter((a) => {
-            const cumpleId = filtroIdAlquiler === "" || a.IdAlquiler.toString().includes(filtroIdAlquiler);
-            const cumpleEstado = filtroEstado === "" || filtroEstado === "Todos" ? true : a.Estado === filtroEstado;
-            return cumpleId && cumpleEstado;
-        });
-        setAlquileres(resultado);
-    };
+            setAlquileres(data.alquileres);
+            setRegistrosTotal(data.total);
+            setPaginas(Array.from({ length: data.total_pages }, (_, i) => i + 1));
+            setPagina(data.page);
+
+        } catch (err) {
+            console.error("Error cargando alquileres:", err);
+            alert("No se pudieron cargar los alquileres.");
+        }
+    }, [filtroPatente, filtroEstado]); 
+
+    const handleBuscar = async (numPagina = 1) => {
+        try {
+            setPagina(numPagina);
+            const data = await obtenerAlquileres(numPagina, 5, filtroPatente, filtroEstado);
+    
+            setAlquileres(data.alquileres);
+            setRegistrosTotal(data.total);
+            setPaginas(Array.from({ length: data.total_pages }, (_, i) => i + 1));
+    
+        } catch (err) {
+          console.error("Error filtrando o paginando alquileres:", err);
+        }
+      };
+
+    useEffect(() => {
+        handleBuscar(1); 
+    }, [filtroPatente, filtroEstado]);
 
     const handleAgregar = () => {
-        setAlquilerEditando(null);
+        setAlquilerSeleccionado(null);
         setVista("form");
     };
 
-    const handleModificar = (alquiler) => {
-        setAlquilerEditando(alquiler);
-        setVista("form");
-    };
-
-    const handleEliminar = (alquiler) => {
-        if (window.confirm(`¿Estás seguro de eliminar el alquiler del vehículo ${alquiler.Patente}?`)) {
-            const nuevaLista = todosLosAlquileres.filter(a => a.IdAlquiler !== alquiler.IdAlquiler);
-            setTodosLosAlquileres(nuevaLista);
-            setAlquileres(calcularEstados(nuevaLista));
+    const handleGuardar = async (alquilerForm) => {
+        try {
+            await crearAlquiler(alquilerForm);
+            await cargarAlquileres(pagina);
+            setVista("lista");
+        } catch (err) {
+            console.error("Error guardando alquiler:", err);
+            alert("No se pudo guardar el alquiler.");
         }
     };
 
-    const handleGuardar = (alquilerForm) => {
-        console.log("Guardando Alquiler:", alquilerForm);
-        let nuevaBase;
 
-        if (alquilerForm.IdAlquiler) {
-            nuevaBase = todosLosAlquileres.map((a) =>
-                a.IdAlquiler === alquilerForm.IdAlquiler ? alquilerForm : a
-            );
-        } else {
-            alquilerForm.IdAlquiler = Date.now();
-            nuevaBase = [...todosLosAlquileres, alquilerForm];
+    const handleFinalizar = async (alquiler) => {
+        if (!window.confirm("¿Seguro que deseas finalizar este alquiler?")) return;
+
+        try {
+            await finalizarAlquiler(alquiler.id);
+            alert("Alquiler finalizado correctamente");
+            await cargarAlquileres(pagina);
+        } catch (err) {
+            console.error(err);
+            alert(err.error || "Error al finalizar el alquiler");
         }
-
-        setTodosLosAlquileres(nuevaBase);
-        setAlquileres(calcularEstados(nuevaBase));
-
-        setFiltroIdAlquiler("");
-        setFiltroEstado("");
-        setVista("lista");
     };
 
     const handleVolverALista = () => {
@@ -101,15 +99,14 @@ export default function AlquileresPage() {
                 <div className="fade-in">
                     <AlquileresList
                         Alquileres={alquileres}
-                        Modificar={handleModificar}
-                        Eliminar={handleEliminar}
+                        Finalizar={handleFinalizar}
                         Agregar={handleAgregar}
                         Pagina={pagina}
-                        RegistrosTotal={alquileres.length}
-                        Paginas={[1]}
+                        RegistrosTotal={RegistrosTotal}
+                        Paginas={Paginas}
                         Buscar={handleBuscar}
-                        FiltroIdAlquiler={filtroIdAlquiler}
-                        setFiltroIdAlquiler={setFiltroIdAlquiler}
+                        FiltroPatente={filtroPatente}
+                        setFiltroPatente={setFiltroPatente}
                         FiltroEstado={filtroEstado}
                         setFiltroEstado={setFiltroEstado}
                     />
@@ -125,7 +122,7 @@ export default function AlquileresPage() {
             {vista === "form" && (
                 <div className="fade-in">
                     <AlquileresForm
-                        Alquiler={alquilerEditando}
+                        Alquiler={alquilerSeleccionado}
                         Guardar={handleGuardar}
                         Cancelar={handleVolverALista}
                     />
