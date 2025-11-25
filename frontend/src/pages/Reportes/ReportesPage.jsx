@@ -382,3 +382,4 @@ export default function ReportesPage() {
     );
 }
 
+// Fin del archivo ReportesPage.jsx
