@@ -16,6 +16,7 @@ import Danios from "./pages/Danios/DaniosPage.jsx";
 import Empleados from "./pages/Empleados/EmpleadosPage.jsx";
 import Mantenimiento from "./pages/Mantenimientos/MantenimientosList";
 import Multas from "./pages/Multas/MultasList";
+import Reportes from "./pages/Reportes/ReportesPage.jsx";
 
 export default function App() {
   return (
@@ -33,6 +34,8 @@ export default function App() {
           <Route path="/empleados" element={<Empleados />} />
           <Route path="/mantenimiento" element={<Mantenimiento />} />
           <Route path="/multas" element={<Multas />} />
+          <Route path="/reportes" element={<Reportes />} />
+
         </Routes>
       </main>
 
