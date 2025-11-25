@@ -96,6 +96,7 @@ def alquiler_create(request):
         reserva = None
         if reserva_id:
             try:
+                # No bloqueamos aún, solo verificamos existencia
                 reserva = Reserva.objects.get(id=reserva_id)
             except Reserva.DoesNotExist:
                 return JsonResponse({
@@ -105,9 +106,15 @@ def alquiler_create(request):
         # Crear el alquiler usando el método de clase
         try:
             with transaction.atomic():
-                # Si viene de una reserva, confirmarla primero si está pendiente
+                # Si viene de una reserva, gestionar transición de estado:
+                # PENDIENTE → CONFIRMADA (al crear el alquiler)
+                # CONFIRMADA → COMPLETADA (al finalizar el alquiler)
                 if reserva:
+                    # Bloquear la reserva para evitar condiciones de carrera
+                    reserva = Reserva.objects.select_for_update().get(id=reserva.id)
+                    
                     if reserva.estado == Reserva.ESTADO_PENDIENTE:
+                        # Transición: PENDIENTE → CONFIRMADA
                         reserva.confirmar()
                     elif reserva.estado != Reserva.ESTADO_CONFIRMADA:
                         return JsonResponse({
@@ -123,9 +130,8 @@ def alquiler_create(request):
                     reserva=reserva
                 )
                 
-                # Completar la reserva después de crear el alquiler exitosamente
-                if reserva:
-                    reserva.completar()
+                # NO completar la reserva aquí
+                # La reserva se completará cuando se finalice el alquiler
                 
                 return JsonResponse({
                     "message": "Alquiler creado correctamente",
@@ -159,12 +165,37 @@ def alquiler_create(request):
 
 @require_http_methods(["GET"])
 def alquiler_list(request):
-    """Listar todos los alquileres"""
+    """Listar todos los alquileres con filtros y paginación"""
     try:
-        alquileres = Alquiler.objects.select_related(
+        # Parámetros de paginación
+        page = int(request.GET.get("page", 1))
+        page_size = int(request.GET.get("page_size", 5))
+        offset = (page - 1) * page_size
+
+        # Filtros opcionales
+        patente_filtro = request.GET.get("patente", "").strip()
+        estado_filtro = request.GET.get("estado", "").strip() 
+
+        # Query inicial
+        alquileres_qs = Alquiler.objects.select_related(
             'cliente', 'vehiculo', 'empleado', 'reserva'
-        ).all()
-        
+        )
+
+        # Filtrar por patente
+        if patente_filtro:
+            alquileres_qs = alquileres_qs.filter(vehiculo__patente__icontains=patente_filtro)
+
+        # Filtrar por estado
+        if estado_filtro == "Activo":
+            alquileres_qs = alquileres_qs.filter(fecha_fin__isnull=True)
+        elif estado_filtro == "Finalizado":
+            alquileres_qs = alquileres_qs.filter(fecha_fin__isnull=False)
+
+        total = alquileres_qs.count()
+
+        # Aplicar paginación
+        alquileres = alquileres_qs.order_by('-fecha_inicio')[offset:offset + page_size]
+
         alquileres_list = [
             {
                 "id": alquiler.id,
@@ -182,9 +213,15 @@ def alquiler_list(request):
             }
             for alquiler in alquileres
         ]
-        
-        return JsonResponse({"alquileres": alquileres_list}, status=200)
-        
+
+        return JsonResponse({
+            "alquileres": alquileres_list,
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+            "total_pages": (total + page_size - 1) // page_size
+        }, status=200)
+
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
@@ -256,7 +293,7 @@ def alquiler_finalizar(request, id):
     """Finalizar un alquiler activo (calcula automáticamente el total)"""
     try:
         with transaction.atomic():
-            alquiler = Alquiler.objects.select_for_update().select_related('vehiculo').get(id=id)
+            alquiler = Alquiler.objects.select_for_update().select_related('vehiculo', 'reserva').get(id=id)
             
             try:
                 # Calcular información antes de finalizar
@@ -265,6 +302,13 @@ def alquiler_finalizar(request, id):
                 
                 # Finalizar (calcula y guarda automáticamente)
                 alquiler.finalizar()
+                
+                # Transición: CONFIRMADA → COMPLETADA
+                # Si el alquiler tiene una reserva asociada, marcarla como completada
+                if alquiler.reserva:
+                    reserva = Reserva.objects.select_for_update().get(id=alquiler.reserva.id)
+                    if reserva.estado == Reserva.ESTADO_CONFIRMADA:
+                        reserva.completar()
                 
                 return JsonResponse({
                     "message": "Alquiler finalizado correctamente",
@@ -275,7 +319,8 @@ def alquiler_finalizar(request, id):
                         "dias_alquilado": dias,
                         "precio_por_dia": str(alquiler.vehiculo.precio_por_dia),
                         "total_pago": str(alquiler.total_pago),
-                        "vehiculo_estado": alquiler.vehiculo.estado
+                        "vehiculo_estado": alquiler.vehiculo.estado,
+                        "reserva_completada": alquiler.reserva.id if alquiler.reserva else None
                     }
                 }, status=200)
                 
