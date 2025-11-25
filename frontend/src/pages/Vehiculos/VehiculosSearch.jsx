@@ -53,17 +53,6 @@ export default function VehiclesSearch({ Patente, setPatente, Estado, setEstado,
           </select>
         </div>
 
-        {/* Botón Buscar */}
-        <div className="col-12 col-md-auto text-center">
-          <button
-            type="button"
-            className="btn-primary fw-bold px-3"
-            onClick={() => Buscar(1)}
-            title="Buscar"
-          >
-            <i className="fa fa-search"></i>
-          </button>
-        </div>
       </div>
     </form>
   );
