@@ -1,4 +1,6 @@
 import React from "react";
+import DaniosSearch from "./DaniosSearch";
+
 export default function DaniosList({
   Danios,
   Modificar,
@@ -7,7 +9,9 @@ export default function DaniosList({
   Pagina,
   RegistrosTotal,
   Paginas,
-  Buscar
+  Buscar,
+  FiltroPatente,
+  setFiltroPatente
 }) {
   return (
     <div className="card border-0 shadow-sm" style={{ borderRadius: "12px" }}>
@@ -18,6 +22,12 @@ export default function DaniosList({
           Listado de Daños
         </h4>
 
+        <DaniosSearch
+          Patente={FiltroPatente}
+          setPatente={setFiltroPatente}
+          Buscar={Buscar}
+        />
+
         <div className="table-responsive">
           <table
             className={`table table-sm align-middle ${Danios?.length > 0 ? "table-hover" : ""}`}
@@ -25,7 +35,8 @@ export default function DaniosList({
           >
             <thead className="table-primary text-center">
               <tr>
-                <th>Alquiler</th>
+                <th>Nro. de alquiler</th>
+                <th>Vehículo</th>
                 <th>Descripción</th>
                 <th>Monto</th>
                 <th className="text-nowrap">Acciones</th>
@@ -35,11 +46,12 @@ export default function DaniosList({
             <tbody>
               {Danios?.length > 0 ? (
                 Danios.map((danio) => (
-                  <tr key={danio.IdDanio}>
-                    <td className="text-center">{danio.IdAlquiler}</td>
-                    <td className="text-center">{danio.Descripcion}</td>
+                  <tr key={danio.id_danio}>
+                    <td className="text-center">{danio.id_alquiler}</td>
+                    <td className="text-center">{danio.patente}</td>
+                    <td className="text-center">{danio.descripcion}</td>
                     <td className="text-center">
-                      ${Number(danio.Monto).toLocaleString()}
+                      ${Number(danio.monto).toLocaleString()}
                     </td>
                     <td className="text-center text-nowrap">
                       <button

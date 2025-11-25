@@ -2,45 +2,35 @@ import React, { useState, useEffect } from "react";
 import DaniosList from "./DaniosList";
 import DaniosForm from "./DaniosForm";
 import "../../styles/PageLayout.css";
-import { obtenerDaniosPorAlquiler, crearDanio, actualizarDanio, eliminarDanio } from "../../services/daniosService";
+import { obtenerDanios } from "../../services/daniosService";
 
 export default function DaniosPage() {
     const [vista, setVista] = useState("lista");
 
-    const [todosLosDanios, setTodosLosDanios] = useState([]);
     const [danios, setDanios] = useState([]);
     const [danioSeleccionado, setDanioSeleccionado] = useState(null);
     const [pagina, setPagina] = useState(1);
+    const [RegistrosTotal, setRegistrosTotal] = useState(0);
+    const [Paginas, setPaginas] = useState([]);
 
-    // const [filtroIdDanio, setFiltroIdDanio] = useState("");
-    // const [filtroIdAlquiler, setFiltroIdAlquiler] = useState("");
+    const [filtroPatente, setFiltroPatente] = useState("");
+
+    const cargarDanios = async (numPagina = 1, pageSize = 5) => {
+        try {
+            const data = await obtenerDanios(numPagina, pageSize, filtroPatente);
+            setDanios(data.danios);
+            setRegistrosTotal(data.total);
+            setPaginas(Array.from({ length: data.total_pages }, (_, i) => i + 1));
+            setPagina(data.page);
+        } catch (err) {
+            console.error("Error cargando daños:", err);
+            alert("No se pudieron cargar los daños.");
+        }
+    };
 
     useEffect(() => {
-        const datosSimulados = [
-            { IdDanio: 1, IdAlquiler: 100, Descripcion: "Raspones en paragolpes", Monto: 25000 },
-            { IdDanio: 2, IdAlquiler: 101, Descripcion: "Rotura de espejo lateral", Monto: 18000 },
-            { IdDanio: 3, IdAlquiler: 100, Descripcion: "Limpieza profunda (barro)", Monto: 8000 },
-        ];
-
-        setTodosLosDanios(datosSimulados);
-        setDanios(datosSimulados);
-    }, []);
-
-    const handleBuscar = (numPagina) => {
-        setPagina(numPagina || 1);
-
-        const filtrados = todosLosDanios.filter((d) => {
-            const cumpleIdDanio =
-                filtroIdDanio === "" || d.IdDanio.toString().includes(filtroIdDanio);
-
-            const cumpleIdAlquiler =
-                filtroIdAlquiler === "" || d.IdAlquiler.toString().includes(filtroIdAlquiler);
-
-            return cumpleIdDanio && cumpleIdAlquiler;
-        });
-
-        setDanios(filtrados);
-    };
+        cargarDanios(1);
+    }, [filtroPatente]);
 
     const handleAgregar = () => {
         setDanioSeleccionado(null);
@@ -53,36 +43,25 @@ export default function DaniosPage() {
     };
 
     const handleEliminar = (danio) => {
-        if (window.confirm(`¿Eliminar daño ID ${danio.IdDanio}?`)) {
-            const nuevaLista = todosLosDanios.filter(d => d.IdDanio !== danio.IdDanio);
-            setTodosLosDanios(nuevaLista);
-            setDanios(nuevaLista);
+        if (window.confirm(`¿Eliminar daño ID ${danio.id_danio}?`)) {
+            setDanios(danios.filter(d => d.id_danio !== danio.id_danio));
         }
     };
 
     const handleGuardar = (danioForm) => {
-        let nuevaBase;
-
-        if (danioForm.IdDanio) {
-            nuevaBase = todosLosDanios.map((d) =>
-                d.IdDanio === danioForm.IdDanio ? danioForm : d
-            );
+        let nuevaLista;
+        if (danioForm.id_danio) {
+            nuevaLista = danios.map(d => (d.id_danio === danioForm.id_danio ? danioForm : d));
         } else {
-            danioForm.IdDanio = Date.now(); 
-            nuevaBase = [...todosLosDanios, danioForm];
+            danioForm.id_danio = Date.now(); // temporal
+            nuevaLista = [...danios, danioForm];
         }
 
-        setTodosLosDanios(nuevaBase);
-        setDanios(nuevaBase);
-
-        setFiltroIdDanio("");
-        setFiltroIdAlquiler("");
+        setDanios(nuevaLista);
         setVista("lista");
     };
 
-    const handleVolverALista = () => {
-        setVista("lista");
-    };
+    const handleVolverALista = () => setVista("lista");
 
     return (
         <div className="page-container">
@@ -99,13 +78,11 @@ export default function DaniosPage() {
                         Eliminar={handleEliminar}
                         Agregar={handleAgregar}
                         Pagina={pagina}
-                        RegistrosTotal={danios.length}
-                        Paginas={[1]}
-                        Buscar={handleBuscar}
-                        FiltroIdDanio={filtroIdDanio}
-                        setFiltroIdDanio={setFiltroIdDanio}
-                        FiltroIdAlquiler={filtroIdAlquiler}
-                        setFiltroIdAlquiler={setFiltroIdAlquiler}
+                        RegistrosTotal={RegistrosTotal}
+                        Paginas={Paginas}
+                        Buscar={cargarDanios}
+                        FiltroPatente={filtroPatente}
+                        setFiltroPatente={setFiltroPatente}
                     />
                 </div>
             )}
