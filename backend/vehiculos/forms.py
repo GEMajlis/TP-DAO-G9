@@ -19,4 +19,7 @@ class VehiculoForm(ModelForm):
             "color": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Color"}
             ),
+            "precio_por_dia": forms.NumberInput(
+                attrs={"class": "form-control", "placeholder": "Precio por día"}
+            ),  
         }

@@ -91,6 +91,33 @@ def vehiculos_list(request):
         return JsonResponse({"error": str(e)}, status=400)
 
  
+@require_http_methods(["GET"])
+def all_vehiculos(request):
+    try:
+        conexion = sqlite3.connect("db.sqlite3")
+        cursor = conexion.cursor()
+        vehiculos = cursor.execute(
+            "SELECT patente, marca, modelo, color, precio_por_dia, estado FROM VEHICULOS"
+        ).fetchall()
+        conexion.close()
+
+        resultado = [
+            {
+                "patente": v[0],
+                "marca": v[1],
+                "modelo": v[2],
+                "color": v[3],
+                "precio_por_dia": str(v[4]),
+                "estado": v[5],
+            }
+            for v in vehiculos
+        ]
+
+        return JsonResponse({"vehiculos": resultado}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
 
 @require_http_methods(["GET"])
 def vehiculo_patente(request, patente):
