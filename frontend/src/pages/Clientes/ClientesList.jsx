@@ -2,6 +2,7 @@ import React from "react";
 // Importarás tu componente de búsqueda de clientes aquí
 import ClientesSearch from "./ClientesSearch"; 
 
+// ----- INICIO CAMBIOS: Recibimos las nuevas props del "cerebro" -----
 export default function ClientesList({
     Clientes,       // Array de clientes
     Modificar,      // Función para modificar un cliente
@@ -10,22 +11,19 @@ export default function ClientesList({
     Pagina,         // Página actual
     RegistrosTotal, // Total de registros
     Paginas,        // Array de números de página
-    Buscar,         // Función para ejecutar la búsqueda/paginación
+    // Se fue 'Buscar'
     FiltroDNI,      // Estado para el filtro de DNI
     setFiltroDNI,   // Función para actualizar el filtro de DNI
     FiltroNombre,   // Estado para el filtro de Nombre
     setFiltroNombre,// Función para actualizar el filtro de Nombre
-}) {
-    
-    // Puedes mantener una función de "badge" si tus clientes tienen un estado (ej. "Activo", "Inactivo")
-    // const getBadgeColor = (estado) => {
-    //     switch (estado) {
-    //         case "Activo": return "bg-success";
-    //         case "Inactivo": return "bg-danger";
-    //         default: return "bg-secondary";
-    //     }
-    // };
 
+    // ¡Nuevas props!
+    BuscarPorDNI,
+    BuscarPorNombre,
+    Limpiar,
+}) {
+// ----- FIN CAMBIOS -----
+    
     return (
         <div className="card border-0 shadow-sm" style={{ borderRadius: "12px" }}>
             <div className="card-body p-4">
@@ -36,13 +34,20 @@ export default function ClientesList({
                 </h4>
 
                 {/* Aquí va tu componente de búsqueda */}
+                {/* ----- INICIO CAMBIOS: Pasamos las nuevas props al Search ----- */}
                 <ClientesSearch
                     DNI={FiltroDNI}
                     setDNI={setFiltroDNI}
                     Nombre={FiltroNombre}
                     setNombre={setFiltroNombre}
-                    Buscar={Buscar}
+                    // Se fue 'Buscar={Buscar}'
+                    
+                    // ¡Nuevas props!
+                    BuscarPorDNI={BuscarPorDNI}
+                    BuscarPorNombre={BuscarPorNombre}
+                    Limpiar={Limpiar}
                 />
+                {/* ----- FIN CAMBIOS ----- */}
 
                 <div className="table-responsive">
                     <table
@@ -53,9 +58,8 @@ export default function ClientesList({
                             <tr>
                                 <th>DNI</th>
                                 <th>Nombre</th>
-                                <th>Apellido</th> {/* Asumiendo que tienes nombre y apellido separados */}
+                                <th>Apellido</th> 
                                 <th>Teléfono</th>
-                                {/* <th>Estado</th> */}
                                 <th className="text-nowrap">Acciones</th>
                             </tr>
                         </thead>
@@ -63,17 +67,11 @@ export default function ClientesList({
                         <tbody>
                             {Clientes?.length > 0 ? (
                                 Clientes.map((cliente) => (
-                                    // Usamos DNI como key, asumiendo que es único
                                     <tr key={cliente.DNI}> 
                                         <td className="fw-semibold text-center">{cliente.DNI}</td>
                                         <td>{cliente.Nombre}</td>
                                         <td>{cliente.Apellido}</td>
                                         <td className="text-center">{cliente.Telefono}</td>
-                                        {/* <td className="text-center">
-                                            <span className={`badge rounded-pill px-3 py-2 ${getBadgeColor(cliente.Estado)}`}>
-                                                {cliente.Estado}
-                                            </span>
-                                        </td> */}
                                         <td className="text-center text-nowrap">
                                             <button
                                                 className="btn btn-sm btn-outline-secondary me-1"
@@ -94,7 +92,6 @@ export default function ClientesList({
                                 ))
                             ) : (
                                 <tr>
-                                    {/* Ajusta el colSpan al número de columnas (ej. 6 si incluyes estado) */}
                                     <td colSpan="5" className="text-center py-5 border-0">
                                         <span className="text-muted fs-6 fst-italic">
                                             No se encontraron clientes con esos criterios.
@@ -112,25 +109,29 @@ export default function ClientesList({
                         Registros: {RegistrosTotal}
                     </span>
 
-                    <div className="input-group input-group-sm" style={{ width: "150px" }}>
+                    {/* ----- INICIO CAMBIOS: Ocultamos el paginador local ----- */}
+                    {/* (Ya no aplica, la búsqueda es por backend) */}
+                    <div className="input-group input-group-sm" style={{ width: "150px", visibility: "hidden" }}>
                         <span className="input-group-text bg-light border">Página</span>
                         <select
                             className="form-select"
                             value={Pagina}
-                            onChange={(e) => Buscar(e.target.value)}
+                            // onChange={(e) => Buscar(e.target.value)} // 'Buscar' ya no existe
+                            disabled={true}
                         >
                             {Paginas?.map((x) => (
                                 <option key={x} value={x}>{x}</option>
                             ))}
                         </select>
                     </div>
+                    {/* ----- FIN CAMBIOS ----- */}
 
                     <button
-                        className="btn-primary" // Asegúrate de que esta clase exista en tu CSS (o usa "btn btn-primary")
+                        className="btn-primary" 
                         onClick={Agregar}
                     >
                         <i className="fa fa-plus me-2"></i>
-                        Nuevo Cliente {/* Texto del botón actualizado */}
+                        Nuevo Cliente 
                     </button>
                 </div>
             </div>

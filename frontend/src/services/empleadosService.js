@@ -26,11 +26,10 @@ const traducirABackend = (empleado) => ({
 
 
 /**
- * Obtiene la lista de empleados (GET)
+ * Obtiene la lista de empleados (GET /empleados/)
  */
 export const getEmpleados = async () => {
   try {
-    // Llama a: http://localhost:8000/empleados/
     const response = await fetch(URL_BASE); 
     if (!response.ok) {
       throw new Error(`Error HTTP: ${response.status}`);
@@ -38,7 +37,6 @@ export const getEmpleados = async () => {
     const dataBruta = await response.json();
     const listaDeApi = dataBruta.empleados;
     
-    // Traducimos los datos antes de devolverlos
     const dataLimpia = listaDeApi.map(traducirAFrontend);
     return dataLimpia;
 
@@ -48,30 +46,23 @@ export const getEmpleados = async () => {
   }
 };
 
-// ----------------------------------------------------
-// ----- 🔴 NUEVAS FUNCIONES DE API AÑADIDAS 🔴 -----
-// ----------------------------------------------------
-
 /**
- * Crea un nuevo empleado (POST)
- * @param {object} empleado - El empleado en formato frontend {DNI, Nombre, Apellido}
+ * Crea un nuevo empleado (POST /empleados/nuevo/)
  */
 export const createEmpleado = async (empleado) => {
   try {
-    // Llama a: http://localhost:8000/empleados/nuevo/
     const response = await fetch(`${URL_BASE}nuevo/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      // Traducimos el empleado al formato del backend antes de enviarlo
       body: JSON.stringify(traducirABackend(empleado)),
     });
 
     if (!response.ok) {
       throw new Error(`Error HTTP: ${response.status}`);
     }
-    return await response.json(); // Devuelve la respuesta del backend (ej: {message: "OK"})
+    return await response.json(); 
 
   } catch (error) {
     console.error("Error en el servicio createEmpleado:", error);
@@ -81,19 +72,15 @@ export const createEmpleado = async (empleado) => {
 
 
 /**
- * Actualiza un empleado existente (PUT)
- * @param {number|string} dni - El DNI del empleado a editar
- * @param {object} empleado - El empleado en formato frontend {DNI, Nombre, Apellido}
+ * Actualiza un empleado existente (PUT /empleados/editar/<dni>/)
  */
 export const updateEmpleado = async (dni, empleado) => {
   try {
-    // Llama a: http://localhost:8000/empleados/editar/12345678/
     const response = await fetch(`${URL_BASE}editar/${dni}/`, {
-      method: 'PUT', // O 'PATCH' si tu backend lo prefiere
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      // Traducimos el empleado al formato del backend
       body: JSON.stringify(traducirABackend(empleado)),
     });
 
@@ -110,12 +97,10 @@ export const updateEmpleado = async (dni, empleado) => {
 
 
 /**
- * Elimina un empleado (DELETE)
- * @param {number|string} dni - El DNI del empleado a eliminar
+ * Elimina un empleado (DELETE /empleados/eliminar/<dni>/)
  */
 export const deleteEmpleado = async (dni) => {
   try {
-    // Llama a: http://localhost:8000/empleados/eliminar/12345678/
     const response = await fetch(`${URL_BASE}eliminar/${dni}/`, {
       method: 'DELETE',
     });
@@ -123,10 +108,72 @@ export const deleteEmpleado = async (dni) => {
     if (!response.ok) {
       throw new Error(`Error HTTP: ${response.status}`);
     }
-    return await response.json(); // Devuelve {message: "Eliminado"}
+    return await response.json(); 
 
   } catch (error) {
     console.error("Error en el servicio deleteEmpleado:", error);
     throw error;
   }
 };
+
+
+// -----------------------------------------------------------
+// ----- 🔴 INICIO DE CAMBIOS: NUEVAS FUNCIONES DE BÚSQUEDA 🔴 -----
+// -----------------------------------------------------------
+
+/**
+ * Obtiene UN empleado por DNI (GET /empleados/dni/<dni>/)
+ * @param {number|string} dni - El DNI a buscar
+ */
+export const getEmpleadoByDni = async (dni) => {
+  try {
+    const response = await fetch(`${URL_BASE}dni/${dni}/`);
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+    const dataBruta = await response.json();
+    
+    // ----- INICIO DE LA CORRECCIÓN -----
+    // La búsqueda de Nombre (que SÍ funciona) usa "empleados" (plural).
+    // Asumimos que DNI también devuelve {"empleados": [{...}]} (una lista con 1 item).
+    
+    const listaDeApi = dataBruta.empleados; // <-- LEEMOS LA LISTA (plural)
+    const empleadoApi = listaDeApi ? listaDeApi[0] : null; // <-- TOMAMOS EL PRIMER ITEM
+    // ----- FIN DE LA CORRECCIÓN -----
+    
+    return traducirAFrontend(empleadoApi); // Traducimos el único objeto
+
+  } catch (error) {
+    console.error("Error en el servicio getEmpleadoByDni:", error);
+    throw error;
+  }
+};
+
+/**
+ * Obtiene UNA LISTA de empleados por Nombre (GET /empleados/nombre/<nombre>/)
+ * @param {string} nombre - El nombre a buscar
+ */
+export const getEmpleadosByNombre = async (nombre) => {
+  try {
+    // Codificamos el nombre para que la URL maneje espacios (ej: "Juan Perez")
+    const encodedNombre = encodeURIComponent(nombre);
+    
+    const response = await fetch(`${URL_BASE}nombre/${encodedNombre}/`);
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+    const dataBruta = await response.json();
+    
+    // Asumimos que la API devuelve { "empleados": [...] } (plural)
+    const listaDeApi = dataBruta.empleados; 
+    
+    return listaDeApi.map(traducirAFrontend); // Traducimos la lista
+
+  } catch (error) {
+    console.error("Error en el servicio getEmpleadosByNombre:", error);
+    throw error;
+  }
+};
+// -----------------------------------------------------------
+// ----- 🔴 FIN DE CAMBIOS 🔴 -----
+// -----------------------------------------------------------
