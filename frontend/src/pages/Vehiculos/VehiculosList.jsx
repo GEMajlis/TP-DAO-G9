@@ -92,7 +92,7 @@ export default function VehiculosList({
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="6" className="text-center py-5 border-0">
+                                    <td colSpan="7" className="text-center py-5 border-0">
                                         <span className="text-muted fs-6 fst-italic">
                                             No se encontraron vehículos con esos criterios.
                                         </span>

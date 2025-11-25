@@ -64,7 +64,9 @@ export default function AlquileresList({
                     <td className="text-center">
                       {alquiler.fecha_fin ? new Date(alquiler.fecha_fin).toLocaleDateString("es-AR") : "-"}
                     </td>
-                    <td className="text-center">${alquiler.total_pago || "-"}</td>
+                    <td className="text-center">
+                      {alquiler.total_pago ? `$${alquiler.total_pago}` : "-"}
+                    </td>
                     <td className="text-center">{alquiler.empleado_nombre}</td>
                     <td className="text-center">{alquiler.reserva_id || "-"}</td>
 

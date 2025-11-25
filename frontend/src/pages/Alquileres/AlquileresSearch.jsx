@@ -1,21 +1,20 @@
 import React from "react";
 
 export default function AlquileresSearch({ Patente, setPatente, Estado, setEstado, Buscar }) {
-    // Función auxiliar para actualizar el filtro y disparar la búsqueda
     const handlePatenteChange = (value) => {
         setPatente(value);
-        Buscar(1); // búsqueda automática
+        Buscar(1); 
     };
 
     const handleEstadoChange = (value) => {
         setEstado(value);
-        Buscar(1); // búsqueda automática
+        Buscar(1); 
     };
 
     return (
         <form
             name="FormBusquedaAlquileres"
-            onSubmit={(e) => e.preventDefault()} // ya no necesitamos botón Buscar
+            onSubmit={(e) => e.preventDefault()} 
             className="bg-light p-3 rounded-3 border mb-4"
         >
             <div className="row align-items-center g-3">

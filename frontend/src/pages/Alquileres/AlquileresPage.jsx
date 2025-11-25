@@ -21,22 +21,11 @@ export default function AlquileresPage() {
         cargarAlquileres(); 
     }, []);
 
-    const cargarAlquileres = useCallback(async (paginaActual = 1) => { 
+    const cargarAlquileres = useCallback(async (paginaActual = 1) => {
         try {
-            const data = await obtenerAlquileres(paginaActual, 5, filtroPatente); 
+            const data = await obtenerAlquileres(paginaActual, 5, filtroPatente, filtroEstado);
 
-            let listaFiltrada = data.alquileres;
-            if (filtroEstado) {
-                const hoy = new Date();
-                listaFiltrada = listaFiltrada.filter(a => {
-                    const fechaFin = a.fecha_fin ? new Date(a.fecha_fin) : null;
-                    if (filtroEstado === "Activo") return !fechaFin || fechaFin >= hoy;
-                    if (filtroEstado === "Finalizado") return fechaFin && fechaFin < hoy;
-                    return true;
-                });
-            }
-
-            setAlquileres(listaFiltrada);
+            setAlquileres(data.alquileres);
             setRegistrosTotal(data.total);
             setPaginas(Array.from({ length: data.total_pages }, (_, i) => i + 1));
             setPagina(data.page);
@@ -47,25 +36,27 @@ export default function AlquileresPage() {
         }
     }, [filtroPatente, filtroEstado]); 
 
-    const handleBuscar = async (numPagina = 1) => { // ← CAMBIO: mantiene misma página o actualiza
-        setPagina(numPagina);
-        await cargarAlquileres(numPagina);
-    };
+    const handleBuscar = async (numPagina = 1) => {
+        try {
+            setPagina(numPagina);
+            const data = await obtenerAlquileres(numPagina, 5, filtroPatente, filtroEstado);
+    
+            setAlquileres(data.alquileres);
+            setRegistrosTotal(data.total);
+            setPaginas(Array.from({ length: data.total_pages }, (_, i) => i + 1));
+    
+        } catch (err) {
+          console.error("Error filtrando o paginando alquileres:", err);
+        }
+      };
+
+    useEffect(() => {
+        handleBuscar(1); 
+    }, [filtroPatente, filtroEstado]);
 
     const handleAgregar = () => {
         setAlquilerSeleccionado(null);
         setVista("form");
-    };
-
-    const handleModificar = async (alquiler) => { // ← CAMBIO: async, trae del backend
-        try {
-            const data = await obtenerAlquiler(alquiler.id);
-            setAlquilerSeleccionado(data.alquiler);
-            setVista("form");
-        } catch (err) {
-            console.error(err);
-            alert("No se pudo cargar el alquiler.");
-        }
     };
 
     const handleGuardar = async (alquilerForm) => {
