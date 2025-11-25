@@ -11,37 +11,83 @@ import {
 } from "../../services/reservasService";
 import "../../styles/PageLayout.css";
 
+// ----- 🔴 1. CONSTANTE DE PAGINACIÓN 🔴 -----
+const REGISTROS_POR_PAGINA = 10;
+// ------------------------------------------
+
 export default function ReservasPage() {
     const [vista, setVista] = useState("lista");
-    const [reservas, setReservas] = useState([]); 
+    
+    // ----- 🔴 2. ESTADOS DE LISTA SEPARADOS 🔴 -----
+    // 'reservas' ahora es 'reservasMostradas' (la "rebanada")
+    const [reservasMostradas, setReservasMostradas] = useState([]); 
+    // NUEVO: 'todosLasReservas' (la lista "master" completa)
+    const [todosLasReservas, setTodosLasReservas] = useState([]);
+    // -------------------------------------------
+
     const [filtroID, setFiltroID] = useState("");
     
-    // ----- INICIO CAMBIO: Se elimina 'pagina' y 'setPagina' -----
-    // const [pagina, setPagina] = useState(1); // <-- LÍNEA BORRADA
-    // ----- FIN CAMBIO -----
+    // ----- 🔴 3. ESTADOS DE PAGINACIÓN 🔴 -----
+    const [paginaActual, setPaginaActual] = useState(1);
+    const [paginasTotales, setPaginasTotales] = useState([]);
+    // ---------------------------------------
     
     const [reservaEditando, setReservaEditando] = useState(null);
     const [volverA, setVolverA] = useState("menu");
-
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null); // <-- 'setError' se usa, 'error' lo usaremos ahora
+    const [error, setError] = useState(null); 
 
-    // fetchReservas ahora es la función "Limpiar"
+    
+    // ----- 🔴 4. HELPER PARA PAGINAR LOCALMENTE 🔴 -----
+    // Esta función "rebana" la lista master y actualiza los estados
+    const actualizarPaginacion = (listaCompleta, numPagina) => {
+        const paginaNum = parseInt(numPagina);
+        
+        // Calcular total de páginas
+        const totalPag = Math.ceil(listaCompleta.length / REGISTROS_POR_PAGINA);
+        // Crear el array [1, 2, ..., N] (aseguramos al menos 1 página)
+        const arrPaginas = Array.from({ length: totalPag || 1 }, (_, i) => i + 1);
+        
+        // Calcular la "rebanada"
+        const inicio = (paginaNum - 1) * REGISTROS_POR_PAGINA;
+        const fin = paginaNum * REGISTROS_POR_PAGINA;
+        
+        // Actualizar todos los estados
+        setPaginasTotales(arrPaginas);
+        setPaginaActual(paginaNum);
+        setReservasMostradas(listaCompleta.slice(inicio, fin));
+    };
+    // --------------------------------------------------
+
+
+    // ----- 🔴 5. 'fetchReservas' ES AHORA LA CARGA INICIAL 🔴 -----
+    // (La "carga lenta" que descarga todo)
     const fetchReservas = async () => {
         setLoading(true);
         setError(null);
         try {
+            // 1. Llama a la API y trae TODAS las reservas
             const data = await getReservas();
-            setReservas(data);
+            
+            // 2. Guarda la "copia master" completa
+            setTodosLasReservas(data);
+            
+            // 3. Llama al helper para mostrar la Página 1
+            actualizarPaginacion(data, 1);
+            
             setFiltroID(""); 
         } catch (err) {
             setError(err.message);
             console.error("Error al cargar reservas:", err);
+            setTodosLasReservas([]);
+            setReservasMostradas([]);
         } finally {
             setLoading(false);
         }
     };
+    // ---------------------------------------------------------
 
+    // useEffect se queda igual, llama a la carga inicial 1 vez
     useEffect(() => {
         fetchReservas();
     }, []); 
@@ -63,29 +109,41 @@ export default function ReservasPage() {
         alert(`Consultando: ${reserva.IdReserva}`); 
     };
 
+    // ----- 🔴 6. 'handleCancelar' DEBE RECARGAR TODO 🔴 -----
+    // (Para que la "copia master" se actualice)
     const handleCancelar = async (reserva) => {
         if (window.confirm(`¿Estás seguro de que deseas CANCELAR la reserva ${reserva.IdReserva}?`)) {
             setLoading(true); 
             setError(null);
             try {
-                const reservaActualizada = await cancelarReserva(reserva.IdReserva);
-                setReservas(prev => prev.map(v => 
-                    v.IdReserva === reservaActualizada.IdReserva ? reservaActualizada : v
-                ));
+                // 1. Llama a la API para cancelar
+                await cancelarReserva(reserva.IdReserva);
+                
+                // 2. RECARGA la lista master (igual que handleGuardar)
+                // Esto asegura que 'todosLasReservas' esté fresco.
+                await fetchReservas();
+
             } catch (err) {
                 setError(err.message);
                 console.error("Error al cancelar reserva:", err);
-            } finally {
-                setLoading(false);
+                setLoading(false); // Detener loading si hay error
             }
+            // fetchReservas() ya apaga el loading si tiene éxito
         }
     };
+    // ----------------------------------------------------
 
-    // Funciones de BÚSQUEDA DE BACKEND
+    // ----- 🔴 7. 'handleLimpiar' AHORA ES LOCAL (RÁPIDO) 🔴 -----
+    // (Restaura la "copia master" SIN llamar a la API)
     const handleLimpiar = () => {
-        fetchReservas();
+        setError(null);
+        setFiltroID("");
+        // 1. Llama al helper para restaurar la Página 1 de la lista master
+        actualizarPaginacion(todosLasReservas, 1);
     };
+    // -------------------------------------------------------
 
+    // ----- 🔴 8. BÚSQUEDA BACKEND (SOBREESCRIBE LA LISTA) 🔴 -----
     const handleBuscarPorId = async () => {
         setLoading(true);
         setError(null);
@@ -95,11 +153,21 @@ export default function ReservasPage() {
             return;
         }
         try {
+            // 1. Llama a la API (rápido)
             const reservaEncontrada = await getReservaById(filtroID);
-            setReservas([reservaEncontrada]);
+            
+            // 2. REEMPLAZA la lista mostrada
+            setReservasMostradas([reservaEncontrada]);
+            
+            // 3. Fija el paginador a "Página 1 de 1"
+            setPaginasTotales([1]);
+            setPaginaActual(1);
+
         } catch (err) {
             setError(err.message);
-            setReservas([]); 
+            setReservasMostradas([]);
+            setPaginasTotales([1]); // Paginador 1 de 1 incluso si hay error
+            setPaginaActual(1);
             console.error("Error al buscar por ID:", err);
         } finally {
             setLoading(false);
@@ -110,17 +178,33 @@ export default function ReservasPage() {
         setLoading(true);
         setError(null);
         try {
+            // 1. Llama a la API (rápido)
             const reservasDelDia = await getReservasHoy();
-            setReservas(reservasDelDia); 
+            
+            // 2. REEMPLAZA la lista mostrada
+            setReservasMostradas(reservasDelDia);
             setFiltroID(""); 
+
+            // 3. Fija el paginador (puede ser 1 o más páginas)
+            // Usamos la misma lógica de paginado local para este resultado
+            actualizarPaginacion(reservasDelDia, 1);
+
+            // IMPORTANTE: Al buscar del día, la "copia master" no se toca.
+            // Si el usuario "Limpia", vuelve a la lista completa.
+            
         } catch (err) {
             setError(err.message);
+            setReservasMostradas([]);
+            setPaginasTotales([1]);
+            setPaginaActual(1);
             console.error("Error al buscar reservas del día:", err);
         } finally {
             setLoading(false);
         }
     };
+    // ---------------------------------------------------------
 
+    // handleGuardar se queda igual (¡ya llamaba a fetchReservas!)
     const handleGuardar = async (reservaForm) => {
         setLoading(true);
         setError(null);
@@ -132,7 +216,7 @@ export default function ReservasPage() {
             }
             setFiltroID("");
             setVista("lista");
-            await fetchReservas(); 
+            await fetchReservas(); // <-- Perfecto. Recarga la "copia master"
         } catch (err) {
             setError(err.message);
             console.error("Error al guardar reserva:", err);
@@ -145,6 +229,15 @@ export default function ReservasPage() {
         setVista(volverA);
     };
 
+    // ----- 🔴 9. NUEVA FUNCIÓN PARA EL PAGINADOR LOCAL 🔴 -----
+    const handleCambiarPagina = (numPagina) => {
+        const paginaNum = parseInt(numPagina);
+        
+        // Simplemente llama al helper para "rebanar" la lista master
+        actualizarPaginacion(todosLasReservas, paginaNum);
+    };
+    // -----------------------------------------------------
+
     return (
         <div className="page-container">
             <h2 className="page-title">Gestión de reservas</h2>
@@ -152,16 +245,13 @@ export default function ReservasPage() {
                 Controlá el estado y los datos de cada reserva.
             </p>
 
-            {/* ----- INICIO CAMBIO: Agregamos el JSX de Error y Loading ----- */}
-            {/* 1. Mensaje de Error Global */}
+            {/* (El JSX de Error y Loading se queda igual) */}
             {error && (
                 <div className="alert alert-danger" role="alert">
                     <strong>Error:</strong> {error}
                     <button type="button" className="btn-close" onClick={() => setError(null)} aria-label="Close"></button>
                 </div>
             )}
-
-            {/* 2. Indicador de Carga Global */}
             {loading && (
                 <div className="text-center p-4">
                     <div className="spinner-border text-primary" role="status">
@@ -170,34 +260,43 @@ export default function ReservasPage() {
                     <p className="mt-2">Cargando datos...</p>
                 </div>
             )}
-            {/* ----- FIN CAMBIO ----- */}
 
 
-            {/* VISTA LISTA (Visible solo si NO está cargando) */}
+            {/* VISTA LISTA */}
             {vista === "lista" && !loading && (
                 <div className="fade-in">
+
+                {/* ----- 🔴 10. PASAMOS LAS NUEVAS PROPS AL LISTADO 🔴 ----- */}
                 <ReservasList
-                    Reservas={reservas}
+                    // La lista "rebanada"
+                    Reservas={reservasMostradas}
+                    
                     Consultar={handleConsultar}
                     Modificar={handleModificar}
                     Cancelar={handleCancelar}
                     Agregar={() => handleAgregar("lista")}
                     
-                    // ----- INICIO CAMBIO: Ya no pasamos 'Pagina' -----
-                    Pagina={1} // Pasamos '1' fijo
-                    // ----- FIN CAMBIO -----
+                    // El total REAL de la "copia master"
+                    RegistrosTotal={todosLasReservas.length} 
                     
-                    RegistrosTotal={reservas.length}
-                    Paginas={[1]} 
+                    // Los estados de paginación
+                    Pagina={paginaActual} 
+                    Paginas={paginasTotales} 
+                    
+                    // La NUEVA función para cambiar de página
+                    CambiarPagina={handleCambiarPagina}
+                    
                     Volver={() => setVista("menu")}
 
-                    // Props de Búsqueda Backend
+                    // Props de Búsqueda Backend (se quedan igual)
                     FiltroID={filtroID}
                     setFiltroID={setFiltroID}
                     BuscarPorID={handleBuscarPorId} 
                     BuscarDelDia={handleBuscarDelDia} 
                     Limpiar={handleLimpiar}
                 />
+                {/* --------------------------------------------------- */}
+
                 </div>
             )}
 

@@ -2,272 +2,332 @@ import React, { useState, useEffect } from "react";
 import EmpleadosList from "./EmpleadosList";
 import EmpleadosForm from "./EmpleadosForm";
 import "../../styles/PageLayout.css";
-
-// ----- 🔴 CAMBIO: Importamos TODAS las funciones del servicio 🔴 -----
 import { 
-  getEmpleados, 
-  createEmpleado, 
-  updateEmpleado, 
-  deleteEmpleado,
-  // ¡NUEVAS!
-  getEmpleadoByDni,
-  getEmpleadosByNombre
+    getEmpleados, 
+    createEmpleado, 
+    updateEmpleado, 
+    deleteEmpleado,
+    getEmpleadoByDni,
+    getEmpleadosByNombre
 } from "../../services/empleadosService"; 
 
+// ----- 🔴 1. CONSTANTE DE PAGINACIÓN 🔴 -----
+const REGISTROS_POR_PAGINA = 10;
+// ------------------------------------------
 
 export default function EmpleadosPage() {
-  const [vista, setVista] = useState("lista");
-  
-  // ----- 🔴 CAMBIO: Eliminamos 'todosLosEmpleados' 🔴 -----
-  // const [todosLosEmpleados, setTodosLosEmpleados] = useState([]); 
-  const [empleados, setEmpleados] = useState([]); 
-  
-  const [filtroDNI, setFiltroDNI] = useState("");
-  const [filtroNombre, setFiltroNombre] = useState("");
-  const [empleadoEditando, setEmpleadoEditando] = useState(null);
-  
-  // ----- 🔴 CAMBIO: Eliminamos 'pagina' y agregamos 'loading' y 'error' 🔴 -----
-  // const [pagina, setPagina] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+    const [vista, setVista] = useState("lista");
+    
+    // ----- 🔴 2. ESTADOS DE LISTA SEPARADOS 🔴 -----
+    // 'empleados' ahora es 'empleadosMostrados' (la "rebanada" que ve el usuario)
+    const [empleadosMostrados, setEmpleadosMostrados] = useState([]);
+    // NUEVO: 'todosLosEmpleados' (la lista "master" completa sin tocar)
+    const [todosLosEmpleados, setTodosLosEmpleados] = useState([]);
+    // -------------------------------------------
+    
+    const [filtroDNI, setFiltroDNI] = useState("");
+    const [filtroNombre, setFiltroNombre] = useState("");
+    
+    // ----- 🔴 3. ESTADOS DE PAGINACIÓN REALES 🔴 -----
+    const [paginaActual, setPaginaActual] = useState(1);
+    const [paginasTotales, setPaginasTotales] = useState([]); // Ya no es [1]
+    // ---------------------------------------
 
-  const [volverA, setVolverA] = useState("menu");
+    const [empleadoEditando, setEmpleadoEditando] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [volverA, setVolverA] = useState("menu");
 
-  
-  // ----- 🔴 CAMBIO: 'fetchEmpleados' reemplaza a 'cargarEmpleados' 🔴 -----
-  // Esta será nuestra función para "Limpiar" y "Cargar Todo"
-  const fetchEmpleados = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getEmpleados();
-      // Ya no guardamos en "todos", solo en la lista visible
-      setEmpleados(data); 
-      // Limpiamos los filtros
-      setFiltroDNI("");
-      setFiltroNombre("");
-    } catch (error) {
-      console.error("No se pudieron cargar los empleados:", error);
-      setError("No se pudieron cargar los empleados.");
-      setEmpleados([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ----- 🔴 CAMBIO: El useEffect ahora solo carga 1 vez al inicio 🔴 -----
-  useEffect(() => {
-    fetchEmpleados();
-  }, []); // El array vacío asegura que se ejecute solo una vez
-
-
-  const handleAgregar = (origen) => {
-    setEmpleadoEditando(null);
-    setVolverA(origen); 
-    setVista("form");
-  };
-
-  const handleModificar = (empleado) => {
-    setEmpleadoEditando(empleado);
-    setVolverA("lista"); 
-    setVista("form");
-  };
-
-  const handleConsultar = (empleado) => {
-    alert(`Consultando: ${empleado.DNI}`);
-  };
-
-
-  // ----- 🔴 CAMBIO: 'handleEliminar' ahora recarga la lista 🔴 -----
-  const handleEliminar = async (empleado) => {
-    if (window.confirm(`¿Estás seguro de eliminar al empleado ${empleado.Nombre} ${empleado.Apellido}?`)) {
-      setLoading(true);
-      setError(null);
-      try {
-        // 1. Llamamos a la API para eliminar
-        await deleteEmpleado(empleado.DNI);
+    
+    // ----- 🔴 4. HELPER PARA PAGINAR LOCALMENTE 🔴 -----
+    // Esta función calcula la "rebanada" de la lista master y actualiza los estados
+    const actualizarPaginacion = (listaCompleta, numPagina) => {
+        const paginaNum = parseInt(numPagina);
         
-        // 2. Si tiene éxito, recargamos la lista desde el backend
-        await fetchEmpleados();
+        // Calcular total de páginas
+        const totalPag = Math.ceil(listaCompleta.length / REGISTROS_POR_PAGINA);
+        // Crear el array [1, 2, ..., N] (aseguramos al menos 1 página)
+        const arrPaginas = Array.from({ length: totalPag || 1 }, (_, i) => i + 1);
+        
+        // Calcular la "rebanada" (.slice())
+        const inicio = (paginaNum - 1) * REGISTROS_POR_PAGINA;
+        const fin = paginaNum * REGISTROS_POR_PAGINA;
+        
+        // Actualizar todos los estados de React
+        setPaginasTotales(arrPaginas);
+        setPaginaActual(paginaNum);
+        setEmpleadosMostrados(listaCompleta.slice(inicio, fin));
+    };
+    // --------------------------------------------------
 
-      } catch (error) {
-        console.error("Error al eliminar empleado:", error);
-        setError("Error al eliminar el empleado.");
-        setLoading(false); // Importante: frenar el loading si hay error
-      }
-      // 'fetchEmpleados' apaga el loading si todo sale bien
-    }
-  };
+    
+    // ----- 🔴 5. 'fetchEmpleados' ES AHORA LA CARGA INICIAL (LENTA) 🔴 -----
+    const fetchEmpleados = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            // 1. Llama a la API y trae TODOS los empleados (ej: 5,000)
+            const data = await getEmpleados();
 
-  
-  // ----- 🔴 CAMBIO: Eliminamos 'handleBuscar' (filtro local) 🔴 -----
-  // const handleBuscar = (numPagina) => { ... };
+            // 2. Guarda la "copia master" completa
+            setTodosLosEmpleados(data); 
 
+            // 3. Llama al helper para mostrar solo la Página 1 de esos 5,000
+            actualizarPaginacion(data, 1);
+            
+            // 4. Limpiamos los filtros
+            setFiltroDNI("");
+            setFiltroNombre("");
+        } catch (error) {
+            console.error("No se pudieron cargar los empleados:", error);
+            setError("No se pudieron cargar los empleados.");
+            setTodosLosEmpleados([]);
+            setEmpleadosMostrados([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+    // ---------------------------------------------------------
 
-  // ----- 🔴 CAMBIO: NUEVAS funciones de Búsqueda de Backend 🔴 -----
-
-  const handleBuscarPorDNI = async () => {
-    if (!filtroDNI) {
-      setError("Debe ingresar un DNI para buscar.");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await getEmpleadoByDni(filtroDNI);
-      // El servicio devuelve 1 objeto, la tabla espera un array
-      setEmpleados(resultado ? [resultado] : []);
-      setFiltroNombre(""); // Limpiamos el otro filtro
-    } catch (err) {
-      console.error("Error buscando por DNI:", err);
-      setError(err.message);
-      setEmpleados([]); // Mostramos tabla vacía si hay error (ej: 404)
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBuscarPorNombre = async () => {
-    if (!filtroNombre) {
-      setError("Debe ingresar un Nombre para buscar.");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await getEmpleadosByNombre(filtroNombre);
-      // El servicio ya devuelve un array
-      setEmpleados(resultado);
-      setFiltroDNI(""); // Limpiamos el otro filtro
-    } catch (err) {
-      console.error("Error buscando por Nombre:", err);
-      setError(err.message);
-      setEmpleados([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLimpiar = () => {
-    // 'fetchEmpleados' ya limpia los filtros y recarga todo
-    fetchEmpleados(); 
-  };
+    // useEffect se queda igual, llama a la carga inicial 1 SOLA VEZ
+    useEffect(() => {
+        fetchEmpleados();
+    }, []); 
 
 
-  // ----- 🔴 CAMBIO: 'handleGuardar' ahora recarga la lista 🔴 -----
-  const handleGuardar = async (empleadoForm) => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (empleadoEditando) { 
-        // --- Lógica de Edición ---
-        await updateEmpleado(empleadoEditando.DNI, empleadoForm);
-      } else {
-        // --- Lógica de Creación ---
-        // ¡Eliminamos la validación local! El backend debe hacerlo.
-        await createEmpleado(empleadoForm);
-      }
+    const handleAgregar = (origen) => {
+        setEmpleadoEditando(null);
+        setVolverA(origen); 
+        setVista("form");
+    };
 
-      // 4. Si todo OK, recargamos la lista desde el backend
-      await fetchEmpleados();
-      setVista("lista"); // Volvemos a la lista
+    const handleModificar = (empleado) => {
+        setEmpleadoEditando(empleado);
+        setVolverA("lista"); 
+        setVista("form");
+    };
 
-    } catch (error) {
-      console.error("Error al guardar empleado:", error);
-      setError("Error al guardar el empleado: " + error.message);
-      setLoading(false); // Frenamos el loading si hay error
-    }
-    // 'fetchEmpleados' apaga el loading si todo sale bien
-  };
+    const handleConsultar = (empleado) => {
+        alert(`Consultando: ${empleado.DNI}`);
+    };
 
-  const handleVolverDesdeForm = () => {
-    setError(null); // Limpiamos errores al volver
-    setVista(volverA);
-  };
+    // ----- 🔴 6. 'handleEliminar' DEBE RECARGAR TODO 🔴 -----
+    // (Para que la "copia master" se actualice)
+    const handleEliminar = async (empleado) => {
+        if (window.confirm(`¿Estás seguro de eliminar al empleado ${empleado.Nombre} ${empleado.Apellido}?`)) {
+            setLoading(true);
+            setError(null);
+            try {
+                // 1. Llamamos a la API para eliminar
+                await deleteEmpleado(empleado.DNI);
+                
+                // 2. Si tiene éxito, recargamos la lista "master"
+                await fetchEmpleados();
+
+            } catch (error) {
+                console.error("Error al eliminar empleado:", error);
+                setError("Error al eliminar el empleado.");
+                setLoading(false); 
+            }
+        }
+    };
+    // -------------------------------------------------
+
+    
+    // ----- 🔴 7. BÚSQUEDA BACKEND POR DNI (SOBREESCRIBE) 🔴 -----
+    const handleBuscarPorDNI = async () => {
+        if (!filtroDNI) {
+            setError("Debe ingresar un DNI para buscar.");
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            // 1. Llama a la API (rápido)
+            const resultado = await getEmpleadoByDni(filtroDNI);
+
+            // 2. REEMPLAZA la lista mostrada (solo 1 item)
+            setEmpleadosMostrados(resultado ? [resultado] : []);
+            
+            // 3. Fija el paginador a "Página 1 de 1"
+            setPaginasTotales([1]);
+            setPaginaActual(1);
+
+            setFiltroNombre(""); 
+        } catch (err) {
+            console.error("Error buscando por DNI:", err);
+            setError(err.message);
+            setEmpleadosMostrados([]); 
+            setPaginasTotales([1]);
+            setPaginaActual(1);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ----- 🔴 8. BÚSQUEDA BACKEND POR NOMBRE (SOBREESCRIBE) 🔴 -----
+    const handleBuscarPorNombre = async () => {
+        if (!filtroNombre) {
+            setError("Debe ingresar un Nombre para buscar.");
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            // 1. Llama a la API (rápido)
+            const resultado = await getEmpleadosByNombre(filtroNombre);
+            
+            // 2. ¡PAGINA LOCALMENTE LOS RESULTADOS!
+            // (Si "García" devuelve 30 empleados, los pagina)
+            actualizarPaginacion(resultado, 1);
+            
+            setFiltroDNI(""); 
+        } catch (err) {
+            console.error("Error buscando por Nombre:", err);
+            setError(err.message);
+            setEmpleadosMostrados([]);
+            setPaginasTotales([1]);
+            setPaginaActual(1);
+        } finally {
+            setLoading(false);
+        }
+    };
+    // ---------------------------------------------------------
+
+    // ----- 🔴 9. 'handleLimpiar' AHORA ES LOCAL (RÁPIDO) 🔴 -----
+    const handleLimpiar = () => {
+        setError(null);
+        setFiltroDNI("");
+        setFiltroNombre("");
+        // 1. Llama al helper para restaurar la Página 1 de la lista master
+        actualizarPaginacion(todosLosEmpleados, 1);
+    };
+    // -------------------------------------------------------
 
 
-  return (
-    <div className="page-container">
-      <h2 className="page-title">Gestión de Empleados</h2>
-      <p className="page-subtitle">
-        Controlá empleados.
-      </p>
+    // handleGuardar se queda igual (¡ya llamaba a fetchEmpleados!)
+    // Esto es vital para que la "copia master" se actualice al crear/modificar
+    const handleGuardar = async (empleadoForm) => {
+        setLoading(true);
+        setError(null);
+        try {
+            if (empleadoEditando) { 
+                await updateEmpleado(empleadoEditando.DNI, empleadoForm);
+            } else {
+                await createEmpleado(empleadoForm);
+            }
+            await fetchEmpleados(); // <-- Perfecto. Recarga la "copia master"
+            setVista("lista"); 
 
-      {/* ----- 🔴 CAMBIO: JSX de Loading y Error 🔴 ----- */}
-      {error && (
-        <div className="alert alert-danger" role="alert">
-          <strong>Error:</strong> {error}
-<button type="button" className="btn-close" onClick={() => setError(null)} aria-label="Close"></button>        </div>
-      )}
-      {loading && (
-        <div className="text-center p-4">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Cargando...</span>
-          </div>
-          <p className="mt-2">Cargando datos...</p>
+        } catch (error) {
+            console.error("Error al guardar empleado:", error);
+            setError("Error al guardar el empleado: " + error.message);
+            setLoading(false); 
+        }
+    };
+
+    const handleVolverDesdeForm = () => {
+        setError(null); 
+        setVista(volverA);
+    };
+
+    // ----- 🔴 10. NUEVA FUNCIÓN PARA EL PAGINADOR LOCAL 🔴 -----
+    const handleCambiarPagina = (numPagina) => {
+        const paginaNum = parseInt(numPagina);
+        
+        // Simplemente llama al helper para "rebanar" la lista master
+        actualizarPaginacion(todosLosEmpleados, paginaNum);
+    };
+    // -----------------------------------------------------
+
+
+    return (
+        <div className="page-container">
+            <h2 className="page-title">Gestión de Empleados</h2>
+            <p className="page-subtitle">
+                Controlá empleados.
+            </p>
+
+            {/* (El JSX de Error y Loading se queda igual) */}
+            {error && (
+            <div className="alert alert-danger" role="alert">
+                <strong>Error:</strong> {error}
+                <button type="button" className="btn-close" onClick={() => setError(null)} aria-label="Close"></button>
+            </div>
+            )}
+            {loading && (
+            <div className="text-center p-4">
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                </div>
+                <p className="mt-2">Cargando datos...</p>
+            </div>
+            )}
+            {/* ----- 🔴 FIN CAMBIO 🔴 ----- */}
+
+
+            {/* ----------- VISTA LISTA ----------- */}
+            {vista === "lista" && !loading && (
+            <div className="fade-in">
+                
+                {/* ----- 🔴 11. PASAMOS LAS NUEVAS PROPS AL LISTADO 🔴 ----- */}
+                <EmpleadosList
+                    // La lista "rebanada"
+                    Empleados={empleadosMostrados}
+
+                    Consultar={handleConsultar}
+                    Modificar={handleModificar}
+                    Eliminar={handleEliminar}
+                    Agregar={() => handleAgregar("lista")}
+                    
+                    // El total REAL de la "copia master" (ej: 5,000)
+                    RegistrosTotal={todosLosEmpleados.length}
+
+                    // Los estados de paginación
+                    Pagina={paginaActual} 
+                    Paginas={paginasTotales}
+
+                    // La NUEVA función para cambiar de página
+                    CambiarPagina={handleCambiarPagina}
+                    
+                    Volver={() => setVista("menu")} 
+                    
+                    // Pasamos los filtros (igual que antes)
+                    FiltroDNI={filtroDNI}
+                    setFiltroDNI={setFiltroDNI}
+                    FiltroNombre={filtroNombre}
+                    setFiltroNombre={setFiltroNombre}
+
+                    // Pasamos las funciones de backend (igual que antes)
+                    BuscarPorDNI={handleBuscarPorDNI}
+                    BuscarPorNombre={handleBuscarPorNombre}
+                    Limpiar={handleLimpiar}
+                />
+                {/* --------------------------------------------------- */}
+            </div>
+            )}
+
+            {/* ----------- VISTA FORMULARIO (Sin cambios) ----------- */}
+            {vista === "form" && (
+            <div className="fade-in">
+                <EmpleadosForm
+                    Empleado={empleadoEditando} 
+                    Guardar={handleGuardar}
+                    Cancelar={handleVolverDesdeForm}
+                />
+
+                <div className="text-center mt-4 mb-3">
+                    <button 
+                        className="btn btn-secondary px-4" 
+                        onClick={handleVolverDesdeForm}
+                        disabled={loading} 
+                    >
+                        <i className="fa-solid fa-arrow-left me-2"></i>
+                        {volverA === "menu" ? "Volver al menú" : "Volver al listado"}
+                    </button>
+                </div>
+            </div>
+            )}
         </div>
-      )}
-      {/* ----- 🔴 FIN CAMBIO 🔴 ----- */}
-
-
-      {/* ----------- VISTA LISTA ----------- */}
-      {/* ----- 🔴 CAMBIO: Ocultamos la lista si está cargando 🔴 ----- */}
-      {vista === "lista" && !loading && (
-        <div className="fade-in">
-          
-          {/* ----- 🔴 CAMBIO: Pasamos las NUEVAS props de búsqueda 🔴 ----- */}
-          <EmpleadosList
-            Empleados={empleados}
-            Consultar={handleConsultar}
-            Modificar={handleModificar}
-            Eliminar={handleEliminar}
-            Agregar={() => handleAgregar("lista")}
-            
-            Pagina={1} // Paginación local eliminada
-            RegistrosTotal={empleados.length}
-            Paginas={[1]} 
-            
-            // Se va 'Buscar'
-            // Buscar={handleBuscar} 
-            
-            Volver={() => setVista("menu")} // Mantenemos esto
-            
-            // Pasamos los filtros
-            FiltroDNI={filtroDNI}
-            setFiltroDNI={setFiltroDNI}
-            FiltroNombre={filtroNombre}
-            setFiltroNombre={setFiltroNombre}
-
-            // ¡Pasamos las NUEVAS funciones de backend!
-            BuscarPorDNI={handleBuscarPorDNI}
-            BuscarPorNombre={handleBuscarPorNombre}
-            Limpiar={handleLimpiar}
-          />
-        </div>
-      )}
-
-      {/* ----------- VISTA FORMULARIO ----------- */}
-      {/* (Ocultamos el form si la lista está cargando) */}
-      {vista === "form" && (
-        <div className="fade-in">
-          <EmpleadosForm
-            Empleado={empleadoEditando} 
-            Guardar={handleGuardar}
-            Cancelar={handleVolverDesdeForm}
-          />
-
-          <div className="text-center mt-4 mb-3">
-            <button 
-              className="btn btn-secondary px-4" 
-              onClick={handleVolverDesdeForm}
-              disabled={loading} // Deshabilitamos si está guardando
-            >
-              <i className="fa-solid fa-arrow-left me-2"></i>
-              {volverA === "menu" ? "Volver al menú" : "Volver al listado"}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    );
 }

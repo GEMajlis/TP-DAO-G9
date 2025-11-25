@@ -23,6 +23,7 @@ from empleados import views as empleado_views
 from mantenimiento import views as mantenimiento_views
 from multas import views as multa_views
 from danios import views as danio_views
+from reportes import views as reporte_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -35,6 +36,7 @@ urlpatterns = [
     path("clientes/", cliente_views.get_clientes, name="get_clientes"),
     # Vehículos URLs
     path("vehiculos/", vehiculo_views.vehiculos_list, name="vehiculos_list"),
+    path("vehiculos/all/", vehiculo_views.all_vehiculos, name="vehiculos_list_all"),
     path("vehiculos/nuevo/", vehiculo_views.vehiculo_create, name="vehiculo_create"),
     path("vehiculos/patente/<str:patente>/", vehiculo_views.vehiculo_patente, name="vehiculo_patente"),
     path("vehiculos/editar/<str:patente>/", vehiculo_views.vehiculo_edit, name="vehiculo_edit"),
@@ -46,7 +48,6 @@ urlpatterns = [
     path("empleados/nombre/<str:nombre>/", empleado_views.empleado_nombre, name="empleado_nombre"),
     path("empleados/editar/<int:dni>/", empleado_views.empleado_edit, name="empleado_edit"),
     path("empleados/eliminar/<int:dni>/", empleado_views.empleado_delete, name="empleado_delete"),
-
     # Mantenimiento URLs
     path("mantenimientos/nuevo/", mantenimiento_views.mantenimiento_create, name="mantenimiento_create"),
     path("mantenimientos/finalizar/<str:patente>/", mantenimiento_views.mantenimiento_close, name="mantenimiento_finalizar"),
@@ -65,4 +66,7 @@ urlpatterns = [
     path('danios/nuevo/', danio_views.danio_create, name='danio_create'),
     path('danios/<int:id_alquiler>/', danio_views.danios_por_alquiler, name='danios_por_alquiler'),
     path('danios/<int:id_alquiler>/<int:id_danio>/', danio_views.danio_update, name='danio_update'),
-]
+    # REPORTES URLs
+    path("reporte/vehiculos/", reporte_views.reporte_vehiculos_mas_alquileres),
+    path("reporte/facturacion/", reporte_views.reporte_facturacion_mensual),
+    path("reporte/alquileres/<str:fecha_inicio>/<str:fecha_fin>/", reporte_views.reporte_alquileres_periodo, name="alquileres_por_periodo",),
