@@ -61,7 +61,8 @@ urlpatterns = [
     path("multas/<int:id_alquiler>/", multa_views.multas_por_alquiler, name="multas_por_alquiler"),
     path("multas/<int:id_alquiler>/<int:id_multa>/", multa_views.multa_update, name="multa_update"),
     # Daños URLs
-    path('danio/nuevo/', danio_views.danio_create, name='danio_create'),
-    path('danio/<int:id_alquiler>/', danio_views.danios_por_alquiler, name='danios_por_alquiler'),
-    path('danio/<int:id_alquiler>/<int:id_danio>/', danio_views.danio_update, name='danio_update'),
+    path('danios/', danio_views.danios_list, name='danios_list'),
+    path('danios/nuevo/', danio_views.danio_create, name='danio_create'),
+    path('danios/<int:id_alquiler>/', danio_views.danios_por_alquiler, name='danios_por_alquiler'),
+    path('danios/<int:id_alquiler>/<int:id_danio>/', danio_views.danio_update, name='danio_update'),
 ]

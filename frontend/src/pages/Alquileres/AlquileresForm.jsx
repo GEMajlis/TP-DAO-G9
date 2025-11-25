@@ -10,8 +10,6 @@ export default function AlquileresForm({ Guardar, Cancelar }) {
         vehiculo_patente: "",
         cliente_dni: "",
         fecha_inicio: hoy,
-        fecha_fin: "",
-        total_pago: "",
         empleado_dni: "",
     });
 
@@ -146,8 +144,8 @@ export default function AlquileresForm({ Guardar, Cancelar }) {
                         </div>
                     </div>
 
-                    {/* Fila 2: Fecha Inicio y Fecha Fin */}
-                    <div className="row g-3 mb-3">
+                    {/* Fila 2: Fecha Inicio y Empleado */}
+                    <div className="row g-3 mb-4">
                         <div className="col-md-6">
                             <div className="input-group">
                                 <span className="input-group-text bg-light text-secondary">
@@ -165,58 +163,6 @@ export default function AlquileresForm({ Guardar, Cancelar }) {
                                     />
                                     <label htmlFor="fecha_inicio" style={labelStyle} className="ps-2">
                                         Fecha de Inicio
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-md-6">
-                            <div className="input-group">
-                                <span className="input-group-text bg-light text-secondary">
-                                    <i className="fa-solid fa-calendar-check"></i>
-                                </span>
-                                <div className="form-floating">
-                                    <input
-                                        type="date"
-                                        className="form-control border-start-0 ps-2"
-                                        id="fecha_fin"
-                                        name="fecha_fin"
-                                        value={form.fecha_fin}
-                                        onChange={handleChange}
-                                        min={form.fecha_inicio}
-                                        required
-                                        style={{ zIndex: 0 }}
-                                    />
-                                    <label htmlFor="fecha_fin" style={labelStyle} className="ps-2">
-                                        Fecha de Fin
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Fila 3: Total y Empleado */}
-                    <div className="row g-3 mb-4">
-                        <div className="col-md-6">
-                            <div className="input-group">
-                                <span className="input-group-text bg-light text-secondary">
-                                    <i className="fa-solid fa-dollar-sign"></i>
-                                </span>
-                                <div className="form-floating">
-                                    <input
-                                        type="number"
-                                        className="form-control border-start-0 ps-2"
-                                        id="total_pago"
-                                        name="total_pago"
-                                        value={form.total_pago}
-                                        onChange={handleChange}
-                                        required
-                                        min="0"
-                                        step="0.01"
-                                        placeholder="Costo Total"
-                                        style={{ zIndex: 0 }}
-                                    />
-                                    <label htmlFor="total_pago" style={labelStyle} className="ps-2">
-                                        Costo Total
                                     </label>
                                 </div>
                             </div>

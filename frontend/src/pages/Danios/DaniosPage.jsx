@@ -2,17 +2,18 @@ import React, { useState, useEffect } from "react";
 import DaniosList from "./DaniosList";
 import DaniosForm from "./DaniosForm";
 import "../../styles/PageLayout.css";
+import { obtenerDaniosPorAlquiler, crearDanio, actualizarDanio, eliminarDanio } from "../../services/daniosService";
 
 export default function DaniosPage() {
     const [vista, setVista] = useState("lista");
 
     const [todosLosDanios, setTodosLosDanios] = useState([]);
     const [danios, setDanios] = useState([]);
-    const [danioEditando, setDanioEditando] = useState(null);
+    const [danioSeleccionado, setDanioSeleccionado] = useState(null);
     const [pagina, setPagina] = useState(1);
 
-    const [filtroIdDanio, setFiltroIdDanio] = useState("");
-    const [filtroIdAlquiler, setFiltroIdAlquiler] = useState("");
+    // const [filtroIdDanio, setFiltroIdDanio] = useState("");
+    // const [filtroIdAlquiler, setFiltroIdAlquiler] = useState("");
 
     useEffect(() => {
         const datosSimulados = [
@@ -42,12 +43,12 @@ export default function DaniosPage() {
     };
 
     const handleAgregar = () => {
-        setDanioEditando(null);
+        setDanioSeleccionado(null);
         setVista("form");
     };
 
     const handleModificar = (danio) => {
-        setDanioEditando(danio);
+        setDanioSeleccionado(danio);
         setVista("form");
     };
 
@@ -112,7 +113,7 @@ export default function DaniosPage() {
             {vista === "form" && (
                 <div className="fade-in">
                     <DaniosForm
-                        Danio={danioEditando}
+                        Danio={danioSeleccionado}
                         Guardar={handleGuardar}
                         Cancelar={handleVolverALista}
                     />
