@@ -8,7 +8,8 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
         color: Vehiculo?.color || "",
         marca: Vehiculo?.marca || "",
         modelo: Vehiculo?.modelo || "",
-        estado: Vehiculo?.estado || "disponible", 
+        precio_por_dia: Vehiculo?.precio_por_dia || "",
+        estado: Vehiculo?.estado || "disponible",
     });
 
     useEffect(() => {
@@ -18,6 +19,7 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
                 color: Vehiculo.color || "",
                 marca: Vehiculo.marca || "",
                 modelo: Vehiculo.modelo || "",
+                precio_por_dia: Vehiculo.precio_por_dia || "",
                 estado: Vehiculo.estado || "disponible",
             });
         } else {
@@ -26,6 +28,7 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
                 color: "",
                 marca: "",
                 modelo: "",
+                precio_por_dia: "",
                 estado: "disponible",
             });
         }
@@ -123,7 +126,7 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
                         </div>
 
                         {/* Fila 2: Marca y Modelo */}
-                        <div className="row g-3 mb-4">
+                        <div className="row g-3 mb-3">
                             {/* Marca */}
                             <div className="col-md-6">
                                 <div className="input-group">
@@ -169,6 +172,35 @@ export default function VehiculosForm({ Vehiculo, Guardar, Cancelar }) {
                                         />
                                         <label htmlFor="inputModelo" style={labelStyle} className="ps-2">
                                             Modelo
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Fila 3: Precio por Día */}
+                        <div className="row g-3 mb-4">
+                            <div className="col-md-12">
+                                <div className="input-group">
+                                    <span className="input-group-text bg-light text-secondary">
+                                        <i className="fa-solid fa-dollar-sign"></i>
+                                    </span>
+                                    <div className="form-floating">
+                                        <input
+                                            type="number"
+                                            className="form-control border-start-0 ps-2"
+                                            id="inputPrecio"
+                                            name="precio_por_dia"
+                                            placeholder="Precio por día"
+                                            value={form.precio_por_dia}
+                                            onChange={handleChange}
+                                            required
+                                            min="0"
+                                            step="0.01"
+                                            style={{ zIndex: 0 }}
+                                        />
+                                        <label htmlFor="inputPrecio" style={labelStyle} className="ps-2">
+                                            Precio por día
                                         </label>
                                     </div>
                                 </div>

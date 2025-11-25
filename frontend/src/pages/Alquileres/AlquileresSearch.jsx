@@ -1,32 +1,39 @@
 import React from "react";
 
-export default function AlquileresSearch({ IdAlquiler, setIdAlquiler, Estado, setEstado, Buscar }) {
+export default function AlquileresSearch({ Patente, setPatente, Estado, setEstado, Buscar }) {
+    const handlePatenteChange = (value) => {
+        setPatente(value);
+        Buscar(1); 
+    };
+
+    const handleEstadoChange = (value) => {
+        setEstado(value);
+        Buscar(1); 
+    };
+
     return (
         <form
             name="FormBusquedaAlquileres"
-            onSubmit={(e) => {
-                e.preventDefault();
-                Buscar(1);
-            }}
+            onSubmit={(e) => e.preventDefault()} 
             className="bg-light p-3 rounded-3 border mb-4"
         >
             <div className="row align-items-center g-3">
 
-                {/* ID Alquiler */}
+                {/* Patente */}
                 <div className="col-12 col-md d-flex align-items-center">
                     <label
                         className="col-form-label fw-bold text-secondary me-2 text-center"
                         style={{ minWidth: "100px" }}
                     >
-                        ID Alquiler
+                        Patente
                     </label>
                     <div className="input-group flex-grow-1">
                         <input
-                            type="number"
+                            type="text"
                             className="form-control"
-                            onChange={(e) => setIdAlquiler(e.target.value)}
-                            value={IdAlquiler}
-                            placeholder="Ingrese ID..."
+                            onChange={(e) => handlePatenteChange(e.target.value)}
+                            value={Patente}
+                            placeholder="Ingrese patente..."
                             autoFocus
                         />
                     </div>
@@ -42,26 +49,15 @@ export default function AlquileresSearch({ IdAlquiler, setIdAlquiler, Estado, se
                     </label>
                     <select
                         className="form-select flex-grow-1"
-                        onChange={(e) => setEstado(e.target.value)}
+                        onChange={(e) => handleEstadoChange(e.target.value)}
                         value={Estado}
                     >
                         <option value="">Todos</option>
-                        <option value="Activo">Activo (En curso)</option>
+                        <option value="Activo">En curso</option>
                         <option value="Finalizado">Finalizado</option>
                     </select>
                 </div>
 
-                {/* Botón Buscar */}
-                <div className="col-12 col-md-auto text-center">
-                    <button
-                        type="button"
-                        className="btn-primary fw-bold px-3"
-                        onClick={() => Buscar(1)}
-                        title="Buscar"
-                    >
-                        <i className="fa fa-search"></i>
-                    </button>
-                </div>
             </div>
         </form>
     );

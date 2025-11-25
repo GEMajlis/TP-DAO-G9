@@ -2,8 +2,17 @@ import axios from "axios";
 
 const API_URL = "http://127.0.0.1:8000/vehiculos/";
 
-export const obtenerVehiculos = async (page = 1, pageSize = 5) => {
-    const response = await axios.get(`${API_URL}?page=${page}&page_size=${pageSize}`);
+export const obtenerVehiculos = async (page = 1, pageSize = 5, patente = "", estado = "") => {
+    let url = `${API_URL}?page=${page}&page_size=${pageSize}`;
+
+    if (patente) {
+        url += `&patente=${patente}`;
+    }
+    if (estado) {
+        url += `&estado=${estado}`;
+    }
+
+    const response = await axios.get(url);
     return response.data;
 };
 
