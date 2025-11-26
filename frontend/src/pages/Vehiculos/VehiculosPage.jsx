@@ -80,7 +80,9 @@ export default function VehiculosPage() {
           patente: vehiculoForm.patente,
           color: vehiculoForm.color,
           marca: vehiculoForm.marca,
-          modelo: vehiculoForm.modelo
+          modelo: vehiculoForm.modelo,
+          precio_por_dia: vehiculoForm.precio_por_dia,
+          estado: vehiculoForm.estado
         });
       } else {
         await crearVehiculo({
@@ -88,6 +90,7 @@ export default function VehiculosPage() {
           color: vehiculoForm.color,
           marca: vehiculoForm.marca,
           modelo: vehiculoForm.modelo,
+          precio_por_dia: vehiculoForm.precio_por_dia,
           estado: vehiculoForm.estado
         });
       }

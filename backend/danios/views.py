@@ -21,7 +21,7 @@ def danio_create(request):
         descripcion = data.get("descripcion")
         monto = data.get("monto")
 
-        if not id_alquiler or not descripcion or not monto:
+        if id_alquiler is None or descripcion is None or monto is None:
             return JsonResponse(
                 {"error": "Se requieren id_alquiler, descripcion y monto"},
                 status=400
@@ -102,7 +102,7 @@ def danio_update(request, id_alquiler, id_danio):
         descripcion = data.get("descripcion")
         monto = data.get("monto")
 
-        if not descripcion and not monto:
+        if descripcion is None and monto is None:
             return JsonResponse(
                 {"error": "Se requiere descripcion o monto para actualizar"},
                 status=400
@@ -143,5 +143,52 @@ def danio_update(request, id_alquiler, id_danio):
         return JsonResponse({"error": "JSON inválido"}, status=400)
     except ValidationError as e:
         return JsonResponse({"error": str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+
+# -----------------------------------------------------------
+# 4) LISTAR DAÑOS (se filtra por patente opcionalmente)
+# -----------------------------------------------------------
+@require_http_methods(["GET"])
+def danios_list(request):
+    try:
+        page = int(request.GET.get("page", 1))
+        page_size = int(request.GET.get("page_size", 5))
+        offset = (page - 1) * page_size
+        patente = request.GET.get("patente", "").strip()
+
+        # Query inicial
+        danios_qs = Danio.objects.select_related('alquiler', 'alquiler__vehiculo')
+
+        # Filtro por patente del vehículo asociado al alquiler
+        if patente:
+            danios_qs = danios_qs.filter(alquiler__vehiculo__patente__icontains=patente)
+
+        total = danios_qs.count()
+
+        # Aplicar paginación
+        danios_page = danios_qs.order_by('id_danio')[offset:offset + page_size]
+
+        lista_danios = [
+            {
+                "id_danio": d.id_danio,
+                "id_alquiler": d.alquiler.id,
+                "patente": d.alquiler.vehiculo.patente,
+                "descripcion": d.descripcion,
+                "monto": float(d.monto),
+            }
+            for d in danios_page
+        ]
+
+        total_pages = (total + page_size - 1) // page_size
+
+        return JsonResponse({
+            "danios": lista_danios,
+            "total": total,
+            "page": page,
+            "total_pages": total_pages
+        }, status=200)
+
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)

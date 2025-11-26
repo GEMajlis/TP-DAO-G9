@@ -5,7 +5,7 @@ from django import forms
 class VehiculoForm(ModelForm):
     class Meta:
         model = Vehiculo
-        fields = ["patente", "marca", "modelo", "color"]
+        fields = ["patente", "marca", "modelo", "color", "precio_por_dia"]
         widgets = {
             "patente": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Patente"}

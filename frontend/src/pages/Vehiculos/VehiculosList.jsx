@@ -15,6 +15,7 @@ export default function VehiculosList({
     FiltroEstado,
     setFiltroEstado,
 }) {
+    
     const getBadgeColor = (estado) => {
         switch (estado) {
             case "disponible": return "bg-success";
@@ -22,6 +23,11 @@ export default function VehiculosList({
             case "mantenimiento": return "bg-danger";
             default: return "bg-secondary";
         }
+    };
+
+    const capitalize = (text) => {
+        if (!text) return "";
+        return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
     };
 
     return (
@@ -69,7 +75,7 @@ export default function VehiculosList({
                                         <td className="text-center">${vehiculo.precio_por_dia}</td>
                                         <td className="text-center">
                                             <span className={`badge rounded-pill py-2 ${getBadgeColor(vehiculo.estado)}`}>
-                                                {vehiculo.estado}
+                                                {capitalize(vehiculo.estado)}
                                             </span>
                                         </td>
                                         <td className="text-center text-nowrap">
