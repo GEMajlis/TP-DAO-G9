@@ -7,33 +7,87 @@ import "../../styles/ReportesPage.css";
 
 
 // Componente para el Reporte de Vehículos Más Alquilados
-const ReporteVehiculos = ({ vehiculos }) => (
-    <div className="report-section card shadow-sm p-4 fade-in">
-        <h5 className="text-primary mb-3"><i className="fa-solid fa-car-side me-2"></i>Vehículos Más Alquilados ({vehiculos.length} vehículos)</h5>
-        <div className="table-responsive">
-            <table className="table table-sm table-striped table-hover align-middle">
-                <thead className="table-secondary">
-                    <tr>
-                        <th>Patente</th>
-                        <th>Marca y Modelo</th>
-                        <th>Color</th>
-                        <th className="text-center">Cant. Alquileres</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {vehiculos.map((v, index) => (
-                        <tr key={v.patente}>
-                            <td className="fw-bold">{v.patente}</td>
-                            <td>{v.marca} - {v.modelo}</td>
-                            <td>{v.color}</td>
-                            <td className="text-center fw-bold">{v.cantidad_alquileres}</td>
+const ReporteVehiculos = ({ vehiculos }) => {
+    
+    // --- Lógica de Paginación ---
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 8; // Mostramos 11 por página
+
+    // Calcular el total de páginas
+    const totalPages = Math.ceil(vehiculos.length / ITEMS_PER_PAGE);
+
+    // Calcular los índices de los items a mostrar
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    
+    // Obtener los items para la página actual
+    const currentItems = vehiculos.slice(startIndex, endIndex);
+
+    // Handlers para cambiar de página
+    const handlePrevPage = () => {
+        setCurrentPage(prev => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage(prev => Math.min(prev + 1, totalPages));
+    };
+    // --- Fin Lógica de Paginación ---
+
+    return (
+        <div className="report-section card shadow-sm p-4 fade-in">
+            <h5 className="text-primary mb-3"><i className="fa-solid fa-car-side me-2"></i>Vehículos Más Alquilados ({vehiculos.length} vehículos)</h5>
+            
+            <div className="table-responsive">
+                <table className="table table-sm table-striped table-hover align-middle">
+                    <thead className="table-secondary">
+                        <tr>
+                            <th>Patente</th>
+                            <th>Marca y Modelo</th>
+                            <th>Color</th>
+                            <th className="text-center">Cant. Alquileres</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+<tbody className="table-fixed-rows">
+                        {/* 🔴 Modificado para iterar sobre currentItems en lugar de vehiculos */}
+                        {currentItems.map((v, index) => (
+                            <tr key={v.patente}>
+                                <td className="fw-bold">{v.patente}</td>
+                                <td>{v.marca} - {v.modelo}</td>
+                                <td>{v.color}</td>
+                                <td className="text-center fw-bold">{v.cantidad_alquileres}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* 🔴 NUEVO: Controles de Paginación */}
+            {totalPages > 1 && (
+                <div className="d-flex justify-content-between align-items-center mt-3">
+                    <button 
+                        className="btn btn-sm btn-outline-secondary" 
+                        onClick={handlePrevPage} 
+                        disabled={currentPage === 1}
+                    >
+                        <i className="fa-solid fa-arrow-left me-1"></i> Anterior
+                    </button>
+                    
+                    <span className="text-muted small">
+                        Página {currentPage} de {totalPages}
+                    </span>
+                    
+                    <button 
+                        className="btn btn-sm btn-outline-secondary" 
+                        onClick={handleNextPage} 
+                        disabled={currentPage === totalPages}
+                    >
+                        Siguiente <i className="fa-solid fa-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            )}
         </div>
-    </div>
-);
+    );
+};
 
 // Componente Reporte de Facturación (CON GRÁFICO DE BARRAS)
 const ReporteFacturacion = ({ facturacion }) => {
@@ -117,25 +171,7 @@ const ReporteFacturacion = ({ facturacion }) => {
                 <canvas ref={chartRef} id="facturacionChart"></canvas>
             </div>
             
-            <div className="table-responsive mt-4">
-                <h6 className="text-muted border-bottom pb-1">Datos Detallados</h6>
-                <table className="table table-sm table-striped align-middle">
-                    <thead className="table-secondary">
-                        <tr>
-                            <th>Mes</th>
-                            <th className="text-end">Monto Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {facturacion.map((f, index) => (
-                            <tr key={f.mes}>
-                                <td>{f.mes}</td>
-                                <td className="text-end fw-bold">${f.monto.toFixed(2)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            
         </div>
     );
 };
@@ -148,22 +184,51 @@ const ReporteAlquileres = ({ alquilerePeriodo, buscarReporte, loading, error }) 
     const [fechaFin, setFechaFin] = useState(today);
     const [busquedaError, setBusquedaError] = useState(null);
 
+    // --- PAGINACIÓN ---
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 6;
+
+    const totalPages = alquilerePeriodo && alquilerePeriodo.length > 0
+        ? Math.ceil(alquilerePeriodo.length / ITEMS_PER_PAGE)
+        : 1;
+
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+
+    const currentItems = alquilerePeriodo
+        ? alquilerePeriodo.slice(startIndex, endIndex)
+        : [];
+    // --------------------
+
+    const handlePrevPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         setBusquedaError(null);
-        
+
         if (fechaInicio > fechaFin) {
             setBusquedaError("La fecha de inicio no puede ser posterior a la fecha de fin.");
             return;
         }
 
         buscarReporte(fechaInicio, fechaFin);
+        setCurrentPage(1); // reset
     };
 
     return (
-        <div className="report-section fade-in">
-            <h5 className="text-primary mb-3"><i className="fa-solid fa-calendar-alt me-2"></i>Alquileres por Período</h5>
-            
+<div className="report-section reporte-alquileres-periodo fade-in">
+            <h5 className="text-primary mb-3">
+                <i className="fa-solid fa-calendar-alt me-2"></i>
+                Alquileres por Período
+            </h5>
+
+            {/* FORM */}
             <form onSubmit={handleSubmit} className="mb-4">
                 <div className="row g-3 align-items-end">
                     <div className="col-md-4">
@@ -177,6 +242,7 @@ const ReporteAlquileres = ({ alquilerePeriodo, buscarReporte, loading, error }) 
                             required
                         />
                     </div>
+
                     <div className="col-md-4">
                         <label htmlFor="fechaFin" className="form-label">Fecha de Fin</label>
                         <input
@@ -188,11 +254,12 @@ const ReporteAlquileres = ({ alquilerePeriodo, buscarReporte, loading, error }) 
                             required
                         />
                     </div>
+
                     <div className="col-md-4">
                         <button type="submit" className="btn btn-primary w-100" disabled={loading}>
                             {loading ? (
                                 <>
-                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    <span className="spinner-border spinner-border-sm me-2"></span>
                                     Cargando...
                                 </>
                             ) : (
@@ -206,19 +273,17 @@ const ReporteAlquileres = ({ alquilerePeriodo, buscarReporte, loading, error }) 
                 </div>
             </form>
 
-            {busquedaError && (
-                <div className="alert alert-warning mb-3">{busquedaError}</div>
-            )}
-            
-            {error && (
-                <div className="alert alert-danger mb-3"><strong>Error al buscar:</strong> {error}</div>
-            )}
+            {busquedaError && <div className="alert alert-warning mb-3">{busquedaError}</div>}
+            {error && <div className="alert alert-danger mb-3"><strong>Error al buscar:</strong> {error}</div>}
 
-            {alquilerePeriodo && (
+            {/* RESULTADOS */}
+            {alquilerePeriodo && alquilerePeriodo.length > 0 && (
                 <div className="alquileres-results mt-4">
                     <p className="fw-bold">
-                        Resultados encontrados: <span className="text-primary">{alquilerePeriodo.length}</span>
+                        Resultados encontrados:{" "}
+                        <span className="text-primary">{alquilerePeriodo.length}</span>
                     </p>
+
                     <div className="table-responsive">
                         <table className="table table-sm table-striped table-hover align-middle">
                             <thead className="table-secondary">
@@ -226,13 +291,15 @@ const ReporteAlquileres = ({ alquilerePeriodo, buscarReporte, loading, error }) 
                                     <th>ID</th>
                                     <th>DNI Cliente</th>
                                     <th>Patente</th>
+                                    <th>DNI Empleado</th>
                                     <th>Inicio</th>
                                     <th>Fin</th>
                                     <th className="text-end">Total Pagado</th>
                                 </tr>
                             </thead>
+
                             <tbody>
-                                {alquilerePeriodo.map((a) => (
+                                {currentItems.map((a) => (
                                     <tr key={a.id_alquiler}>
                                         <td className="fw-bold">{a.id_alquiler}</td>
                                         <td>{a.cliente_dni}</td>
@@ -240,17 +307,45 @@ const ReporteAlquileres = ({ alquilerePeriodo, buscarReporte, loading, error }) 
                                         <td>{a.empleado_dni}</td>
                                         <td>{a.fecha_inicio}</td>
                                         <td>{a.fecha_fin}</td>
-                                        <td className="text-end fw-bold">${a.total_pago ? a.total_pago.toFixed(2) : 'N/A'}</td>
+                                        <td className="text-end fw-bold">
+                                            ${a.total_pago ? a.total_pago.toFixed(2) : "N/A"}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
+
+                    {/* PAGINACIÓN EXACTA A VEHÍCULOS */}
+                    {totalPages > 1 && (
+                        <div className="d-flex justify-content-between align-items-center mt-3">
+                            <button
+                                className="btn btn-sm btn-outline-secondary"
+                                onClick={handlePrevPage}
+                                disabled={currentPage === 1}
+                            >
+                                <i className="fa-solid fa-arrow-left me-1"></i> Anterior
+                            </button>
+
+                            <span className="text-muted small">
+                                Página {currentPage} de {totalPages}
+                            </span>
+
+                            <button
+                                className="btn btn-sm btn-outline-secondary"
+                                onClick={handleNextPage}
+                                disabled={currentPage === totalPages}
+                            >
+                                Siguiente <i className="fa-solid fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
     );
 };
+
 
 // Componente Principal de la Página de Reportes
 export default function ReportesPage() {
