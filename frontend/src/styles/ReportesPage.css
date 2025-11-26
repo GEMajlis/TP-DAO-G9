@@ -1,3 +1,23 @@
+/* Altura fija SOLO para el reporte "Alquileres por Período" */
+.reporte-alquileres-periodo {
+    min-height: 520px;   /* podés ajustar a gusto */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hace que la tabla no empuje el card */
+.reporte-alquileres-periodo .alquileres-results {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.reporte-alquileres-periodo .table-responsive {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+
 .reportes-page-container {
 max-width: 1400px;
 }
@@ -28,4 +48,45 @@ transition: transform 0.2s;
 
 .card.shadow-sm:hover {
 transform: translateY(-2px);
+}
+
+/* Altura fija para las dos tarjetas de la fila superior */
+.reportes-grid .row:first-child .col-md-6 .report-section {
+    min-height: 455px; /* ajustá este número si querés */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Que la tabla nunca haga crecer la tarjeta */
+.table-responsive {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Fuerza altura fija del card completo */
+.periodo-section {
+    min-height: 520px !important;  /* Ajustalo si querés */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start;
+}
+
+/* Para que la tabla no cambie el tamaño del card */
+.periodo-section .table-responsive {
+    flex-grow: 1 !important;
+    overflow-y: auto !important;
+}
+
+/* Texto + form arriba, tabla ocupa el resto */
+.periodo-section .alquileres-results {
+    flex-grow: 1 !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Altura fija del card completo del reporte 3 */
+.reporte-periodo-card {
+    min-height: 520px; /* o el alto que quieras, mismo que los demás */
+    display: flex;
+    flex-direction: column;
 }
