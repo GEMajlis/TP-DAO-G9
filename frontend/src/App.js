@@ -15,7 +15,7 @@ import Reservas from "./pages/Reservas/ReservasPage.jsx";
 import Danios from "./pages/Danios/DaniosPage.jsx";
 import Empleados from "./pages/Empleados/EmpleadosPage.jsx";
 import Mantenimiento from "./pages/Mantenimientos/MantenimientosList";
-import Multas from "./pages/Multas/MultasList";
+import Multas from "./pages/Multas/MultasPage.jsx";
 import Reportes from "./pages/Reportes/ReportesPage.jsx";
 
 export default function App() {
