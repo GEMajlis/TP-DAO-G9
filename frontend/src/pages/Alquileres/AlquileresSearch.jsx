@@ -25,7 +25,7 @@ export default function AlquileresSearch({ Patente, setPatente, Estado, setEstad
                         className="col-form-label fw-bold text-secondary me-2 text-center"
                         style={{ minWidth: "100px" }}
                     >
-                        Patente
+                        Vehículo
                     </label>
                     <div className="input-group flex-grow-1">
                         <input

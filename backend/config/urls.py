@@ -70,3 +70,4 @@ urlpatterns = [
     path("reporte/vehiculos/", reporte_views.reporte_vehiculos_mas_alquileres),
     path("reporte/facturacion/", reporte_views.reporte_facturacion_mensual),
     path("reporte/alquileres/<str:fecha_inicio>/<str:fecha_fin>/", reporte_views.reporte_alquileres_periodo, name="alquileres_por_periodo",),
+]
