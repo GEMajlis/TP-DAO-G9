@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-<<<<<<< HEAD
     "date-fns": "^3.6.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -13,22 +12,6 @@
     "bootstrap": "^5.3.3",
     "@fortawesome/fontawesome-free": "^6.5.2",
     "web-vitals": "^3.5.2"
-=======
-    "@fortawesome/fontawesome-free": "^7.1.0",
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.13.2",
-    "bootstrap": "^5.3.8",
-    "date-fns": "^2.30.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-hook-form": "^7.66.1",
-    "react-router-dom": "^7.9.5",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
->>>>>>> 44b2d37e3fb358cb2c4fd7d01dc8ed76144e3035
   },
   "scripts": {
     "start": "react-scripts start",
