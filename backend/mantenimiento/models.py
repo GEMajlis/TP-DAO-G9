@@ -28,20 +28,20 @@ class Mantenimiento(models.Model):
         db_table = 'MANTENIMIENTOS'
 
     @classmethod
+    @classmethod
     def iniciar_mantenimiento(cls, empleado: Empleado, vehiculo: Vehiculo):
-        """
-        Inicia un mantenimiento para un vehículo dado.
-        - Verifica que el vehículo no esté alquilado.
-        - Cambia el estado del vehículo a mantenimiento.
-        - Crea el registro con fecha de inicio = hoy.
-        """
 
-        # Validación: el vehículo debe poder pasar a mantenimiento
+    # 🚫 1. Verificar si ya existe un mantenimiento activo para este vehículo
+        if cls.objects.filter(vehiculo=vehiculo, fecha_fin__isnull=True).exists():
+            raise ValidationError("El vehículo ya tiene un mantenimiento activo.")
+
+    # 2. Validar que el vehículo pueda entrar en mantenimiento
         try:
             vehiculo.marcar_como_mantenimiento()
         except ValidationError as e:
             raise ValidationError(f"No se puede iniciar mantenimiento: {str(e)}")
 
+    # 3. Crear el nuevo mantenimiento
         mantenimiento = cls.objects.create(
             empleado=empleado,
             vehiculo=vehiculo,
@@ -49,6 +49,7 @@ class Mantenimiento(models.Model):
         )
 
         return mantenimiento
+
 
     @classmethod
     def finalizar_mantenimiento_por_id(cls, id_mantenimiento: int):
