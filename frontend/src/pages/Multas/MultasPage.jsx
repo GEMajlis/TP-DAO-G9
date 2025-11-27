@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MultasList from "./MultasList";
 import MultasForm from "./MultasForm";
 import "../../styles/PageLayout.css";
@@ -7,50 +7,132 @@ import {
     getMultasPorAlquiler,
     createMulta,
     updateMulta,
+    getMultasTodas,
 } from "../../services/multasService";
 
 export default function MultasPage() {
     const [vista, setVista] = useState("lista");
 
     const [multas, setMultas] = useState([]);
+
+    // paginación
+    const [pagina, setPagina] = useState(1);
+    const [registrosTotal, setRegistrosTotal] = useState(0);
+    const pageSize = 10;
+
+    const [paginas, setPaginas] = useState([]);
+
+    // filtro
     const [filtroAlquiler, setFiltroAlquiler] = useState("");
+
     const [multaSeleccionada, setMultaSeleccionada] = useState(null);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const handleBuscar = async () => {
+    // ======================================================
+    // CARGA INICIAL: TODAS LAS MULTAS
+    // ======================================================
+    useEffect(() => {
+        const cargarMultas = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const data = await getMultasTodas();
+                prepararPaginacion(data);
+            } catch (err) {
+                setError("Error cargando multas");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        cargarMultas();
+    }, []);
+
+    // ======================================================
+    // PAGINACIÓN (FRONTEND)
+    // ======================================================
+    const prepararPaginacion = (data) => {
+        setRegistrosTotal(data.length);
+
+        const totalPaginas = Math.max(1, Math.ceil(data.length / pageSize));
+        const paginasArray = [];
+
+        for (let i = 1; i <= totalPaginas; i++) paginasArray.push(i);
+
+        setPaginas(paginasArray);
+
+        setMultas(data);
+
+        // mantener página si es válida
+        setPagina((prev) => (prev > totalPaginas ? 1 : prev));
+    };
+
+    const multasPaginadas = multas.slice(
+        (pagina - 1) * pageSize,
+        pagina * pageSize
+    );
+
+    // ======================================================
+    // CAMBIO DE PÁGINA
+    // ======================================================
+    const CambiarPagina = (nuevaPagina) => {
+        setPagina(Number(nuevaPagina));
+    };
+
+    // ======================================================
+    // BÚSQUEDA POR ID ALQUILER
+    // ======================================================
+    const handleBuscar = async (p = 1) => {
         if (!filtroAlquiler) {
-            setError("Debe ingresar un ID de Alquiler para buscar multas.");
-            setMultas([]);
+            setError("Debe ingresar un ID de Alquiler");
             return;
         }
-        
+
         setLoading(true);
         setError(null);
-        setMultas([]);
 
         try {
             const data = await getMultasPorAlquiler(filtroAlquiler);
-            setMultas(data);
-
-            if (data.length === 0) {
-                setError("No se encontraron multas para el ID de Alquiler: " + filtroAlquiler);
-            }
+            prepararPaginacion(data);
+            setPagina(Number(p));
         } catch (err) {
-            console.error("Error filtrando multas:", err);
-            setError(err.message);
+            setError("Error al buscar multas");
+            prepararPaginacion([]);
         } finally {
             setLoading(false);
         }
     };
 
+    // ======================================================
+    // LIMPIAR
+    // ======================================================
+    const handleLimpiar = async () => {
+        setFiltroAlquiler("");
+        setLoading(true);
+        setError(null);
+
+        try {
+            const data = await getMultasTodas();
+            prepararPaginacion(data);
+        } catch (err) {
+            setError("Error recargando multas");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ======================================================
+    // AGREGAR / MODIFICAR / GUARDAR
+    // ======================================================
     const handleAgregar = () => {
         setMultaSeleccionada({
             id_multa: 0,
             alquiler: "",
             motivo: "",
-            monto: 0
+            monto: 0,
         });
         setVista("form");
     };
@@ -58,7 +140,7 @@ export default function MultasPage() {
     const handleModificar = (multa) => {
         setMultaSeleccionada({
             ...multa,
-            alquiler: filtroAlquiler   // <-- ESTA ES LA CLAVE
+            alquiler: multa.alquiler?.id_alquiler,
         });
         setVista("form");
     };
@@ -69,32 +151,28 @@ export default function MultasPage() {
 
         try {
             if (form.id_multa) {
-                const datosUpdate = {
+                await updateMulta(form.alquiler, form.id_multa, {
                     motivo: form.motivo,
-                    monto: form.monto
-                };
-                await updateMulta(form.alquiler, form.id_multa, datosUpdate);
-
+                    monto: form.monto,
+                });
             } else {
                 await createMulta(form);
             }
 
-            // Volvemos a cargar las multas
-            await handleBuscar();
-            setVista("lista");
+            // recargar según si hay filtro o no
+            if (filtroAlquiler) {
+                await handleBuscar(pagina);
+            } else {
+                const data = await getMultasTodas();
+                prepararPaginacion(data);
+            }
 
+            setVista("lista");
         } catch (err) {
-            console.error("Error guardando multa:", err);
-            setError(err.message || "No se pudo guardar la multa.");
+            setError("Error guardando multa");
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleLimpiar = () => {
-        setFiltroAlquiler("");
-        setMultas([]);
-        setError(null);
     };
 
     return (
@@ -107,7 +185,11 @@ export default function MultasPage() {
             {error && (
                 <div className="alert alert-danger" role="alert">
                     <strong>Error:</strong> {error}
-                    <button type="button" className="btn-close" onClick={() => setError(null)} aria-label="Close"></button>
+                    <button
+                        type="button"
+                        className="btn-close"
+                        onClick={() => setError(null)}
+                    ></button>
                 </div>
             )}
 
@@ -120,28 +202,28 @@ export default function MultasPage() {
             )}
 
             {vista === "lista" && !loading && (
-                <div className="fade-in">
-                    <MultasList
-                        Multas={multas}
-                        Modificar={handleModificar}
-                        Agregar={handleAgregar}
-                        Buscar={handleBuscar}
-                        Limpiar={handleLimpiar}
-                        FiltroAlquiler={filtroAlquiler}
-                        setFiltroAlquiler={setFiltroAlquiler}
-                    />
-                </div>
+                <MultasList
+                    Multas={multasPaginadas}
+                    Modificar={handleModificar}
+                    Agregar={handleAgregar}
+                    Pagina={pagina}
+                    RegistrosTotal={registrosTotal}
+                    Paginas={paginas}
+                    CambiarPagina={CambiarPagina}
+                    Buscar={handleBuscar}
+                    Limpiar={handleLimpiar}
+                    FiltroAlquiler={filtroAlquiler}
+                    setFiltroAlquiler={setFiltroAlquiler}
+                />
             )}
 
             {vista === "form" && (
-                <div className="fade-in">
-                    <MultasForm
-                        Multa={multaSeleccionada}
-                        Guardar={handleGuardar}
-                        Cancelar={() => setVista("lista")}
-                        loading={loading}
-                    />
-                </div>
+                <MultasForm
+                    Multa={multaSeleccionada}
+                    Guardar={handleGuardar}
+                    Cancelar={() => setVista("lista")}
+                    loading={loading}
+                />
             )}
         </div>
     );

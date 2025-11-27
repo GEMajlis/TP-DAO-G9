@@ -124,3 +124,10 @@ export const getMultaEspecifica = async (idAlquiler, idMulta) => {
     const response = await fetch(`${API_PREFIX}/multas/${idAlquiler}/${idMulta}/`);
     return handleResponse(response); // el backend devolverá solo UNA multa
 };
+export const getMultasTodas = async () => {
+    const response = await fetch(`${API_PREFIX}/multas/`);
+    const data = await handleResponse(response);
+
+    // tu view debería devolver { multas: [...] }
+    return data.multas;
+};
