@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { obtenerAlquileres } from "../../services/alquileresService";
 
 export default function MultasForm({ Multa, Guardar, Cancelar, loading }) {
     
     // 1. Verificamos si es edición (¡Ahora 'Multa' también tendrá 'id_multa'!)
     const esEdicion = Multa && Multa.id_multa;
+
+    // Estado para almacenar alquileres activos
+    const [alquileres, setAlquileres] = useState([]);
 
     // 2. AÑADIMOS 'id_multa' al estado inicial del formulario
     const [form, setForm] = useState({
@@ -12,6 +16,19 @@ export default function MultasForm({ Multa, Guardar, Cancelar, loading }) {
         motivo: Multa?.motivo || "",
         monto: Multa?.monto || "",
     });
+
+    // Cargar alquileres activos
+    useEffect(() => {
+        const fetchAlquileres = async () => {
+            try {
+                const data = await obtenerAlquileres(1, 100, "", "Activo");
+                setAlquileres(data.alquileres);
+            } catch (err) {
+                console.error("Error al cargar alquileres:", err);
+            }
+        };
+        fetchAlquileres();
+    }, []);
 
     // 3. AÑADIMOS 'id_multa' al useEffect
     useEffect(() => {
@@ -105,24 +122,25 @@ export default function MultasForm({ Multa, Guardar, Cancelar, loading }) {
                                         <i className="fa-solid fa-file-contract"></i>
                                     </span>
                                     <div className="form-floating">
-                                        <input
-                                            type="number"
-                                            // 4. CAMBIO: El ID de Alquiler NUNCA se edita
-                                            className="form-control border-start-0 ps-2 bg-light" 
+                                        <select
+                                            className="form-select border-start-0 ps-2"
                                             id="inputAlquiler"
                                             name="alquiler"
-                                            placeholder="ID de Alquiler"
                                             value={form.alquiler}
                                             onChange={handleChange}
                                             required
-                                            // --- LA CORRECCIÓN CLAVE ---
-                                            // Solo 'solo lectura' si es Edición o si está Cargando
-                                            readOnly={esEdicion || loading} 
-                                            // -----------------------------
+                                            disabled={esEdicion || loading}
                                             style={{ zIndex: 0 }}
-                                        />
+                                        >
+                                            <option value="">Seleccione un alquiler</option>
+                                            {alquileres.map(alq => (
+                                                <option key={alq.id} value={alq.id}>
+                                                    ID {alq.id} - {alq.cliente_nombre} - {alq.vehiculo_modelo} ({alq.vehiculo_patente})
+                                                </option>
+                                            ))}
+                                        </select>
                                         <label htmlFor="inputAlquiler" style={labelStyle} className="ps-2">
-                                            ID Alquiler
+                                            Alquiler {esEdicion && <span className="text-muted">(bloqueado)</span>}
                                         </label>
                                     </div>
                                 </div>
