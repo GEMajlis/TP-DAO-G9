@@ -34,7 +34,7 @@ export default function DaniosForm({ Danio, Guardar, Cancelar }) {
     useEffect(() => {
         const fetchAlquileres = async () => {
             try {
-                const data = await obtenerAlquileres(1, 100, "", "");
+                const data = await obtenerAlquileres(1, 100, "", "Activo");
                 setAlquileres(data.alquileres || []);
             } catch (err) {
                 console.error("Error al cargar alquileres:", err);
