@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { obtenerAlquileres } from "../../services/alquileresService"; 
+import { obtenerAlquileres } from "../../services/alquileresService";
 
 export default function DaniosForm({ Danio, Guardar, Cancelar }) {
     const esEdicion = !!Danio;
@@ -34,15 +34,17 @@ export default function DaniosForm({ Danio, Guardar, Cancelar }) {
     useEffect(() => {
         const fetchAlquileres = async () => {
             try {
-                const data = await obtenerAlquileres(1, 100, "", "Finalizado");
-                setAlquileres(data.alquileres || []); 
+                const data = await obtenerAlquileres(1, 100, "", "");
+                setAlquileres(data.alquileres || []);
             } catch (err) {
                 console.error("Error al cargar alquileres:", err);
                 setAlquileres([]);
             }
         };
-        fetchAlquileres();
-    }, []);
+        if (!esEdicion) { // Solo cargar alquileres si es creación
+            fetchAlquileres();
+        }
+    }, [esEdicion]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -55,6 +57,14 @@ export default function DaniosForm({ Danio, Guardar, Cancelar }) {
     };
 
     const labelStyle = { backgroundColor: "transparent" };
+
+    // Obtener texto del alquiler para mostrar cuando es edición
+    const getAlquilerTexto = () => {
+        if (Danio?.alquiler) {
+            return `${Danio.alquiler.vehiculo_modelo || ''} (${Danio.vehiculo?.patente || ''}) - ${Danio.cliente?.nombre || ''} ${Danio.cliente?.apellido || ''}`;
+        }
+        return `Alquiler ID: ${form.id_alquiler}`;
+    };
 
     return (
         <div className="card shadow-lg border-0 w-100 formulario-container" style={{ maxWidth: "800px", margin: "0 auto", borderRadius: "12px" }}>
@@ -77,23 +87,34 @@ export default function DaniosForm({ Danio, Guardar, Cancelar }) {
                                     <i className="fa-solid fa-receipt"></i>
                                 </span>
                                 <div className="form-floating">
-                                    <select
-                                        className="form-select border-start-0 ps-2"
-                                        id="id_alquiler"
-                                        name="id_alquiler"
-                                        value={form.id_alquiler}
-                                        onChange={handleChange}
-                                        required
-                                        style={{ zIndex: 0 }}
-                                    >
-                                        <option value="">Seleccione un alquiler</option>
-                                        {alquileres.map(a => (
-                                            <option key={a.id} value={a.id}>
-                                                {a.vehiculo_modelo} ({a.vehiculo_patente}) - {a.cliente_nombre}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <label htmlFor="id_alquiler" style={labelStyle} className="ps-2">
+                                    {esEdicion ? (
+                                        <input
+                                            type="text"
+                                            className="form-control border-start-0 ps-2 bg-light"
+                                            id="id_alquiler_readonly"
+                                            value={getAlquilerTexto()}
+                                            readOnly
+                                            style={{ zIndex: 0 }}
+                                        />
+                                    ) : (
+                                        <select
+                                            className="form-select border-start-0 ps-2"
+                                            id="id_alquiler"
+                                            name="id_alquiler"
+                                            value={form.id_alquiler}
+                                            onChange={handleChange}
+                                            required
+                                            style={{ zIndex: 0 }}
+                                        >
+                                            <option value="">Seleccione un alquiler</option>
+                                            {alquileres.map(a => (
+                                                <option key={a.id} value={a.id}>
+                                                    {a.vehiculo_modelo} ({a.vehiculo_patente}) - {a.cliente_nombre}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                    <label htmlFor={esEdicion ? "id_alquiler_readonly" : "id_alquiler"} style={labelStyle} className="ps-2">
                                         Alquiler
                                     </label>
                                 </div>
