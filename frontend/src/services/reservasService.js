@@ -22,15 +22,12 @@ const mapApiToReact = (reservaApi) => {
 const mapReactToApi = (reservaReact) => {
     if (!reservaReact) return null;
 
-    // ----- INICIO DEL CAMBIO -----
-    // Hacemos que el servicio "escuche" las claves que el formulario SÍ envía
     return {
-        cliente: reservaReact.DNICLiente,  // <-- Leemos DNICLiente
-        vehiculo: reservaReact.Patente,  // <-- Leemos Patente
+        cliente: reservaReact.DNICliente,
+        vehiculo: reservaReact.Patente,
         fecha_inicio: reservaReact.FechaInicio,
         fecha_fin: reservaReact.FechaFin,
     };
-    // ----- FIN DEL CAMBIO -----
 };
 
 // ----- 2. HELPER GENÉRICO (Manejo de Errores) -----
