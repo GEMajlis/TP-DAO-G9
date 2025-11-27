@@ -71,10 +71,25 @@ class Alquiler(models.Model):
         return dias
 
     def calcular_total(self, fecha_fin=None):
-        """Calcula el total a pagar basado en días y precio del vehículo"""
+        """Calcula el total a pagar basado en días, precio del vehículo, multas y daños"""
+        # Cálculo base: días * precio por día
         dias = self.calcular_dias_alquilado(fecha_fin)
         total = Decimal(dias) * self.vehiculo.precio_por_dia
-        return total
+        
+        # Sumar multas asociadas a este alquiler
+        multas_total = self.multa_set.aggregate(
+            total=models.Sum('monto')
+        )['total'] or Decimal('0.00')
+        
+        # Sumar daños asociados a este alquiler
+        danios_total = self.danio_set.aggregate(
+            total=models.Sum('monto')
+        )['total'] or Decimal('0.00')
+        
+        # Total final = precio base + multas + daños
+        total_final = total + multas_total + danios_total
+        
+        return total_final
 
     def finalizar(self):
         """Finaliza el alquiler, calculando automáticamente el total"""
