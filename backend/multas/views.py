@@ -133,3 +133,53 @@ def multa_update(request, id_alquiler, id_multa):
         return JsonResponse({"error": "JSON inválido"}, status=400)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
+    
+
+# GET DE TODAS LAS MULTAS (ALQUILERES ACTIVOS E INACTIVOS)
+@require_http_methods(["GET"])
+def multas_todas(request):
+    try:
+        multas = Multa.objects.all().order_by("id_multa")
+
+        lista = []
+
+        for multa in multas:
+            # Obtener el alquiler asociado
+            alquiler = multa.alquiler
+
+            # Obtener cliente del alquiler
+            cliente = alquiler.cliente
+
+            # Obtener vehículo del alquiler
+            vehiculo = alquiler.vehiculo
+
+            lista.append({
+                "id_multa": multa.id_multa,
+                "motivo": multa.motivo,
+                "monto": float(multa.monto),
+
+                "alquiler": {
+                    "id_alquiler": alquiler.id,
+                    "fecha_inicio": str(alquiler.fecha_inicio),
+                    "fecha_fin": str(alquiler.fecha_fin) if alquiler.fecha_fin else None
+                },
+
+                "cliente": {
+                    "dni": cliente.dni,
+                    "nombre": cliente.nombre,
+                    "apellido": cliente.apellido
+                },
+
+                "vehiculo": {
+                    "patente": vehiculo.patente,
+                    "marca": vehiculo.marca,
+                    "modelo": vehiculo.modelo,
+                    "color": vehiculo.color,
+                    "precio_por_dia": float(vehiculo.precio_por_dia)
+                }
+            })
+
+        return JsonResponse({"multas": lista}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)

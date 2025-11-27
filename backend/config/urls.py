@@ -53,6 +53,7 @@ urlpatterns = [
     path("mantenimientos/finalizar/<str:patente>/", mantenimiento_views.mantenimiento_close, name="mantenimiento_finalizar"),
     path("mantenimientos/activos/", mantenimiento_views.mantenimientos_activos, name="mantenimientos_activos"),
     path("mantenimientos/<int:id_mantenimiento>/", mantenimiento_views.mantenimiento_por_id, name="mantenimiento_por_id"),
+    path("mantenimientos/", mantenimiento_views.mantenimientos_todos),
     # Reservas URLs
     path("reservas/", include('reservas.urls')),
     # Alquileres URLs
@@ -61,13 +62,12 @@ urlpatterns = [
     path("multas/nuevo/", multa_views.multa_create, name="multa_create"),
     path("multas/<int:id_alquiler>/", multa_views.multas_por_alquiler, name="multas_por_alquiler"),
     path("multas/<int:id_alquiler>/<int:id_multa>/", multa_views.multa_update, name="multa_update"),
+    path("multas/", multa_views.multas_todas, name="multas_list"),
     # Daños URLs
-    path('danios/', danio_views.danios_list, name='danios_list'),
     path('danios/nuevo/', danio_views.danio_create, name='danio_create'),
     path('danios/<int:id_alquiler>/', danio_views.danios_por_alquiler, name='danios_por_alquiler'),
     path('danios/<int:id_alquiler>/<int:id_danio>/', danio_views.danio_update, name='danio_update'),
-    # REPORTES URLs
-    path("reporte/vehiculos/", reporte_views.reporte_vehiculos_mas_alquileres),
-    path("reporte/facturacion/", reporte_views.reporte_facturacion_mensual),
-    path("reporte/alquileres/<str:fecha_inicio>/<str:fecha_fin>/", reporte_views.reporte_alquileres_periodo, name="alquileres_por_periodo",),
+    path('danios/', danio_views.danios_todos, name='danios_todos'),
+    # REPORTES URLs (PATRON STRATEGY)
+    path('reporte/', reporte_views.generar_reporte_strategy, name='generar_reporte')
 ]
