@@ -147,47 +147,56 @@ def danio_update(request, id_alquiler, id_danio):
         return JsonResponse({"error": str(e)}, status=400)
     
 
-# -----------------------------------------------------------
-# 4) LISTAR TODOS LOS DAÑOS (activos e inactivos)
-# -----------------------------------------------------------
+# --------------------------------------------------------------------
+# 4) LISTAR TODOS LOS DAÑOS (activos e inactivos y con filtro patente)
+# --------------------------------------------------------------------
 @require_http_methods(["GET"])
 def danios_todos(request):
     try:
-        danios = Danio.objects.all().order_by("id_danio")
+        # Parámetros de paginación
+        page = int(request.GET.get("page", 1))
+        page_size = int(request.GET.get("page_size", 5))
+        offset = (page - 1) * page_size
+        
+        # Filtro opcional por patente
+        patente_filtro = request.GET.get("patente", "").strip()
+        
+        # Query inicial
+        danios_qs = Danio.objects.all().select_related('alquiler__cliente', 'alquiler__vehiculo')
+        
+        # Filtrar por patente si se proporciona
+        if patente_filtro:
+            danios_qs = danios_qs.filter(alquiler__vehiculo__patente__icontains=patente_filtro)
+        
+        total = danios_qs.count()
+        
+        # Aplicar paginación
+        danios = danios_qs.order_by('-id_danio')[offset:offset + page_size]
 
         lista = []
-
         for d in danios:
-            # Obtener alquiler asociado
             alquiler = d.alquiler
-
-            # Obtener cliente asociado al alquiler
             cliente = alquiler.cliente
-
-            # Obtener vehículo asociado al alquiler
             vehiculo = alquiler.vehiculo
 
             lista.append({
                 "id_danio": d.id_danio,
                 "descripcion": d.descripcion,
                 "monto": float(d.monto),
-
-                # Información del alquiler
+                "id_alquiler": alquiler.id,
+                "patente": vehiculo.patente,
+                "cliente_nombre": f"{cliente.nombre} {cliente.apellido}",
                 "alquiler": {
                     "id_alquiler": alquiler.id,
                     "fecha_inicio": str(alquiler.fecha_inicio),
                     "fecha_fin": str(alquiler.fecha_fin) if alquiler.fecha_fin else None,
                     "estado": "activo" if alquiler.fecha_fin is None else "finalizado"
                 },
-
-                # Información del cliente
                 "cliente": {
                     "dni": cliente.dni,
                     "nombre": cliente.nombre,
                     "apellido": cliente.apellido
                 },
-
-                # Información del vehículo
                 "vehiculo": {
                     "patente": vehiculo.patente,
                     "marca": vehiculo.marca,
@@ -197,7 +206,13 @@ def danios_todos(request):
                 }
             })
 
-        return JsonResponse({"danios": lista}, status=200)
+        return JsonResponse({
+            "danios": lista,
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+            "total_pages": (total + page_size - 1) // page_size
+        }, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
