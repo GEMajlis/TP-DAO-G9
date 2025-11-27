@@ -1,20 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { obtenerVehiculos } from "../../services/vehiculosService";
+import { getClientes } from "../../services/clientesService";
 
 export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
     const [form, setForm] = useState({
         IdReserva: Reserva?.IdReserva || "",
-        DNICLiente: Reserva?.DNICLiente || "",
+        DNICliente: Reserva?.DNICliente || "",
         Patente: Reserva?.Patente || "",
         FechaInicio: Reserva?.FechaInicio || "",
         FechaFin: Reserva?.FechaFin || "",
-        // ----- INICIO CAMBIOS -----
-        // Añadimos los campos que faltaban (para ver en modo edición)
         FechaReserva: Reserva?.FechaReserva || "",
         Estado: Reserva?.Estado || "",
-        // El 'Estado' se quita de la lógica de creación,
-        // el backend lo setea por defecto (ej: "Pendiente").
-        // ----- FIN CAMBIOS -----
     });
+
+    const [vehiculos, setVehiculos] = useState([]);
+    const [clientes, setClientes] = useState([]);
+
+    // Cargar vehículos disponibles
+    useEffect(() => {
+        const fetchVehiculos = async () => {
+            try {
+                const data = await obtenerVehiculos(1, 100, "", "disponible");
+                setVehiculos(data.vehiculos);
+            } catch (err) {
+                console.error("Error al cargar vehículos:", err);
+            }
+        };
+        fetchVehiculos();
+    }, []);
+
+    // Cargar clientes
+    useEffect(() => {
+        const fetchClientes = async () => {
+            try {
+                const data = await getClientes();
+                setClientes(data);
+            } catch (err) {
+                console.error("Error al cargar clientes:", err);
+            }
+        };
+        fetchClientes();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -74,7 +100,7 @@ export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
                                             readOnly
                                             disabled
                                         />
-                                        <label htmlFor="inputFechaReserva">
+                                        <label htmlFor="inputFechaReserva" style={labelStyle}>
                                             Fecha de Creación
                                         </label>
                                     </div>
@@ -90,7 +116,7 @@ export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
                                             readOnly
                                             disabled
                                         />
-                                        <label htmlFor="inputEstado">Estado Actual</label>
+                                        <label htmlFor="inputEstado" style={labelStyle}>Estado Actual</label>
                                     </div>
                                 </div>
                             </div>
@@ -100,60 +126,70 @@ export default function ReservasForm({ Reserva, Guardar, Cancelar }) {
 
                         {/* Fila 1 (ahora Fila 2): DNI del Cliente y Patente del Vehículo */}
                         <div className="row g-3 mb-3">
-                            {/* Columna 1: DNI del Cliente */}
+                            {/* Columna 1: Cliente */}
                             <div className="col-md-6">
                                 <div className="input-group">
                                     <span className="input-group-text bg-light text-secondary">
-                                        <i className="fa-solid fa-id-card"></i>
+                                        <i className="fa-solid fa-user"></i>
                                     </span>
                                     <div className="form-floating">
-                                        <input
-                                            type="number" 
-                                            className="form-control border-start-0 ps-2"
+                                        <select
+                                            className="form-select border-start-0 ps-2"
                                             id="inputDniCliente"
-                                            name="DNICLiente" 
-                                            placeholder="DNI del Cliente"
-                                            value={form.DNICLiente || ''} // Evitar 'null' en input
+                                            name="DNICliente" 
+                                            value={form.DNICliente}
                                             onChange={handleChange}
                                             required
                                             autoFocus 
                                             style={{ zIndex: 0 }}
-                                        />
+                                        >
+                                            <option value="">Seleccione un cliente</option>
+                                            {clientes.map(c => (
+                                                <option key={c.DNI} value={c.DNI}>
+                                                    {c.Nombre} {c.Apellido} ({c.DNI})
+                                                </option>
+                                            ))}
+                                        </select>
                                         <label
                                             htmlFor="inputDniCliente"
                                             style={labelStyle}
                                             className="ps-2"
                                         >
-                                            DNI del Cliente
+                                            Cliente
                                         </label>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Columna 2: Patente del Vehículo */}
+                            {/* Columna 2: Vehículo */}
                             <div className="col-md-6">
                                 <div className="input-group">
                                     <span className="input-group-text bg-light text-secondary">
-                                        <i className="fa-solid fa-barcode"></i>
+                                        <i className="fa-solid fa-car"></i>
                                     </span>
                                     <div className="form-floating">
-                                        <input
-                                            type="text"
-                                            className="form-control border-start-0 ps-2"
+                                        <select
+                                            className="form-select border-start-0 ps-2"
                                             id="inputPatente"
                                             name="Patente" 
-                                            placeholder="Patente del Vehículo"
                                             value={form.Patente}
                                             onChange={handleChange}
                                             required
                                             style={{ zIndex: 0 }}
-                                        />
+                                        >
+                                            <option value="">Seleccione un vehículo</option>
+                                            {vehiculos.map(v => (
+                                                <option key={v.patente} value={v.patente}>
+                                                    {v.modelo} ({v.patente})
+                                                </option>
+                                            ))}
+                                        </select>
                                         <label
                                             htmlFor="inputPatente"
                                             style={labelStyle}
                                             className="ps-2"
                                         >
-                                            Patente del Vehículo
+                                            Vehículo
                                         </label>
                                     </div>
                                 </div>

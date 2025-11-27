@@ -96,7 +96,10 @@ const ReporteFacturacion = ({ facturacion }) => {
 
     useEffect(() => {
         // Aseguramos que Chart.js esté cargado y tengamos datos
-        if (typeof Chart === 'undefined' || !chartRef.current || !facturacion || facturacion.length === 0) return;
+        if (typeof Chart === 'undefined' || !chartRef.current || !facturacion || facturacion.length === 0) {
+            console.log("Condición no cumplida para renderizar el gráfico");
+            return;
+        }
 
         // Limpiar la instancia anterior antes de crear una nueva
         if (chartInstance.current) {
@@ -350,14 +353,31 @@ const ReporteAlquileres = ({ alquilerePeriodo, buscarReporte, loading, error }) 
 // Componente Principal de la Página de Reportes
 export default function ReportesPage() {
     
+    // Estado para controlar si Chart.js está cargado
+    const [chartJsLoaded, setChartJsLoaded] = useState(false);
+    
     // Carga del CDN de Chart.js
     useEffect(() => {
-        if (typeof Chart === 'undefined') {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js';
-            script.async = true;
-            document.body.appendChild(script);
+        if (typeof Chart !== 'undefined') {
+            setChartJsLoaded(true);
+            return;
         }
+        
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js';
+        script.async = true;
+        script.onload = () => {
+            console.log('Chart.js cargado exitosamente');
+            setChartJsLoaded(true);
+        };
+        script.onerror = () => {
+            console.error('Error al cargar Chart.js');
+        };
+        document.body.appendChild(script);
+        
+        return () => {
+            // Limpieza opcional si el componente se desmonta
+        };
     }, []);
     // ------------------------------------------------
     
@@ -454,7 +474,19 @@ export default function ReportesPage() {
                             <ReporteVehiculos vehiculos={vehiculosReporte} />
                         </div>
                         <div className="col-md-6">
-                            <ReporteFacturacion facturacion={facturacionReporte} />
+                            {chartJsLoaded ? (
+                                <ReporteFacturacion facturacion={facturacionReporte} />
+                            ) : (
+                                <div className="report-section card shadow-sm p-4 fade-in">
+                                    <h5 className="text-primary mb-3"><i className="fa-solid fa-money-bill-transfer me-2"></i>Facturación Mensual (Año en Curso)</h5>
+                                    <div className="text-center p-4">
+                                        <div className="spinner-border text-primary" role="status">
+                                            <span className="visually-hidden">Cargando gráfico...</span>
+                                        </div>
+                                        <p className="mt-2 text-muted">Cargando Chart.js...</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
