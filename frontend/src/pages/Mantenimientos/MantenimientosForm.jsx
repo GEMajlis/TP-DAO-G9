@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { obtenerActivos } from "../../services/mantenimientosService";
+import { obtenerVehiculos } from "../../services/vehiculosService";
+import { getEmpleados } from "../../services/empleadosService";
 
 export default function MantenimientoForm({ Guardar, Cancelar, loading }) {
 
@@ -8,7 +10,35 @@ export default function MantenimientoForm({ Guardar, Cancelar, loading }) {
         patente: ""
     });
 
+    const [vehiculos, setVehiculos] = useState([]);
+    const [empleados, setEmpleados] = useState([]);
     const [patenteEnMantenimiento, setPatenteEnMantenimiento] = useState(false);
+
+    // Cargar vehículos disponibles
+    useEffect(() => {
+        const fetchVehiculos = async () => {
+            try {
+                const data = await obtenerVehiculos(1, 100, "", "disponible");
+                setVehiculos(data.vehiculos);
+            } catch (err) {
+                console.error("Error al cargar vehículos:", err);
+            }
+        };
+        fetchVehiculos();
+    }, []);
+
+    // Cargar empleados
+    useEffect(() => {
+        const fetchEmpleados = async () => {
+            try {
+                const data = await getEmpleados();
+                setEmpleados(data);
+            } catch (err) {
+                console.error("Error al cargar empleados:", err);
+            }
+        };
+        fetchEmpleados();
+    }, []);
 
     // Cada vez que cambia la patente, validamos si está activa
     useEffect(() => {
@@ -46,72 +76,109 @@ export default function MantenimientoForm({ Guardar, Cancelar, loading }) {
             className="card shadow-lg border-0 w-100"
             style={{ maxWidth: "700px", margin: "0 auto", borderRadius: "12px" }}
         >
-            <div className="card-header bg-white border-bottom-0 pt-3 pb-1">
+            <div className="card-header bg-white border-bottom-0 pt-3 pb-1" style={{ borderRadius: "12px 12px 0 0" }}>
                 <h4 className="card-title mb-0 text-primary fw-bold">
                     <i className="fa-solid fa-plus me-2"></i>
                     Iniciar Mantenimiento
                 </h4>
+                <p className="text-muted small mb-0 mt-1 ms-4">
+                    Seleccione el vehículo y empleado responsable:
+                </p>
             </div>
 
-            <div className="card-body p-4">
+            <div className="card-body p-4 pt-2">
                 <form onSubmit={handleSubmit}>
 
-                    {/* DNI */}
-                    <div className="mb-3">
-                        <label className="form-label fw-bold">DNI del Empleado</label>
-                        <input
-                            type="number"
-                            className="form-control"
-                            name="dni_empleado"
-                            value={form.dni_empleado}
-                            onChange={handleChange}
-                            required
-                            disabled={loading}
-                            placeholder="12345678"
-                        />
-                    </div>
-
-                    {/* Patente */}
-                    <div className="mb-3">
-                        <label className="form-label fw-bold">Patente del Vehículo</label>
-                        <input
-                            type="text"
-                            className={`form-control ${patenteEnMantenimiento ? "is-invalid" : ""}`}
-                            name="patente"
-                            value={form.patente}
-                            onChange={handleChange}
-                            required
-                            disabled={loading}
-                            placeholder="ABC123"
-                        />
-
-                        {patenteEnMantenimiento && (
-                            <div className="invalid-feedback d-block">
-                                ⚠ Este vehículo ya tiene un mantenimiento activo.
+                    {/* Fila: Vehículo y Empleado */}
+                    <div className="row g-3 mb-3">
+                        
+                        {/* Patente */}
+                        <div className="col-md-6">
+                            <div className="input-group">
+                                <span className="input-group-text bg-light text-secondary">
+                                    <i className="fa-solid fa-car"></i>
+                                </span>
+                                <div className="form-floating">
+                                    <select
+                                        className={`form-select border-start-0 ps-2 ${patenteEnMantenimiento ? "is-invalid" : ""}`}
+                                        id="patente"
+                                        name="patente"
+                                        value={form.patente}
+                                        onChange={handleChange}
+                                        required
+                                        disabled={loading}
+                                        style={{ zIndex: 0 }}
+                                    >
+                                        <option value="">Seleccione un vehículo</option>
+                                        {vehiculos.map(v => (
+                                            <option key={v.patente} value={v.patente}>
+                                                {v.modelo} ({v.patente})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <label htmlFor="patente" style={{ backgroundColor: "transparent" }} className="ps-2">
+                                        Vehículo
+                                    </label>
+                                    {patenteEnMantenimiento && (
+                                        <div className="invalid-feedback">
+                                            ⚠ Este vehículo ya tiene un mantenimiento activo.
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        )}
+                        </div>
+
+                        {/* DNI Empleado */}
+                        <div className="col-md-6">
+                            <div className="input-group">
+                                <span className="input-group-text bg-light text-secondary">
+                                    <i className="fa-solid fa-user-gear"></i>
+                                </span>
+                                <div className="form-floating">
+                                    <select
+                                        className="form-select border-start-0 ps-2"
+                                        id="dni_empleado"
+                                        name="dni_empleado"
+                                        value={form.dni_empleado}
+                                        onChange={handleChange}
+                                        required
+                                        disabled={loading}
+                                        style={{ zIndex: 0 }}
+                                    >
+                                        <option value="">Seleccione un empleado</option>
+                                        {empleados.map(emp => (
+                                            <option key={emp.DNI} value={emp.DNI}>
+                                                {emp.Nombre} {emp.Apellido} ({emp.DNI})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <label htmlFor="dni_empleado" style={{ backgroundColor: "transparent" }} className="ps-2">
+                                        Empleado Responsable
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     {/* Botones */}
-                    <div className="d-flex justify-content-end gap-3 pt-3 border-top">
-
+                    <div className="d-flex justify-content-center gap-3 pt-3 pb-2 border-top">
                         <button
                             type="button"
-                            className="btn btn-secondary"
+                            className="btn-secondary px-4 fw-bold"
                             onClick={Cancelar}
                             disabled={loading}
                         >
-                            Cancelar
+                            <i className="fa-solid fa-times me-2"></i>Cancelar
                         </button>
-
                         <button
                             type="submit"
-                            className="btn btn-primary"
+                            className="btn-primary px-4 fw-bold"
                             disabled={loading}
                         >
+                            <i className="fa-solid fa-save me-2"></i>
                             {loading ? "Guardando..." : "Iniciar"}
                         </button>
-
                     </div>
 
                 </form>
