@@ -14,7 +14,7 @@ import Alquileres from "./pages/Alquileres/AlquileresPage.jsx";
 import Reservas from "./pages/Reservas/ReservasPage.jsx";
 import Danios from "./pages/Danios/DaniosPage.jsx";
 import Empleados from "./pages/Empleados/EmpleadosPage.jsx";
-import Mantenimiento from "./pages/Mantenimientos/MantenimientosList";
+import Mantenimiento from "./pages/Mantenimientos/MantenimientosPage.jsx";
 import Multas from "./pages/Multas/MultasPage.jsx";
 import Reportes from "./pages/Reportes/ReportesPage.jsx";
 
