@@ -85,7 +85,7 @@ export default function MultasList({
 
                     <div className="col-12 col-md-4 d-flex justify-content-center">
                         <div className="input-group input-group-sm" style={{ width: "150px" }}>
-                            <span className="input-group-text bg-light border">PÃ¡gina</span>
+                            <span className="input-group-text bg-light border">Pagina</span>
                             <select
                                 className="form-select"
                                 value={Pagina}

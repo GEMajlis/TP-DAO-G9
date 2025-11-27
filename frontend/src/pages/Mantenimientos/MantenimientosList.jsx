@@ -3,6 +3,10 @@ import MantenimientosSearch from "./MantenimientosSearch";
 
 export default function MantenimientosList({
     Mantenimientos,
+    RegistrosTotal,
+    Pagina,
+    Paginas,
+    setPagina,
     FiltroId,
     setFiltroId,
     BuscarPorId,
@@ -11,7 +15,6 @@ export default function MantenimientosList({
     Finalizar,
     Iniciar
 }) {
-
     return (
         <div className="card border-0 shadow-sm">
             <div className="card-body p-4">
@@ -53,7 +56,6 @@ export default function MantenimientosList({
                                         <td>{m.patente}</td>
                                         <td>{m.fecha_inicio}</td>
                                         <td>{m.fecha_fin || "-"}</td>
-
                                         <td className="text-center">
                                             {!m.fecha_fin && (
                                                 <button
@@ -77,11 +79,39 @@ export default function MantenimientosList({
                     </table>
                 </div>
 
-                <div className="d-flex justify-content-end mt-3">
-                    <button className="btn btn-primary" onClick={Iniciar}>
-                        <i className="fa fa-plus me-2" />
-                        Iniciar Mantenimiento
-                    </button>
+                {/* FOOTER: registros y paginación */}
+                <div className="row mt-3 align-items-center text-center">
+
+                    {/* Registros */}
+                    <div className="col-12 col-md-4 d-flex justify-content-center justify-content-md-start mb-2">
+                        <span className="badge bg-light text-dark border px-3 py-2 fs-6">
+                            Registros: {RegistrosTotal}
+                        </span>
+                    </div>
+
+                    {/* Selector de página */}
+                    <div className="col-12 col-md-4 d-flex justify-content-center mb-2">
+                        <div className="input-group input-group-sm" style={{ width: "150px" }}>
+                            <span className="input-group-text bg-light border">Página</span>
+                            <select
+                                className="form-select"
+                                value={Pagina}
+                                onChange={(e) => setPagina(Number(e.target.value))}
+                            >
+                                {Paginas.map((p) => (
+                                    <option key={p} value={p}>{p}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Botón crear */}
+                    <div className="col-12 col-md-4 d-flex justify-content-center justify-content-md-end">
+                        <button className="btn btn-primary" onClick={Iniciar}>
+                            <i className="fa fa-plus me-2"></i>
+                            Iniciar Mantenimiento
+                        </button>
+                    </div>
                 </div>
 
             </div>
