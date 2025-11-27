@@ -257,7 +257,7 @@ def reservas_del_dia(request):
         hoy = timezone.now().date()
         
         reservas = Reserva.objects.filter(
-            estado=Reserva.ESTADO_CONFIRMADA,
+            estado=Reserva.ESTADO_PENDIENTE,
             fecha_inicio=hoy
         ).select_related('cliente', 'vehiculo')
         
@@ -268,8 +268,10 @@ def reservas_del_dia(request):
                 "cliente_nombre": f"{reserva.cliente.nombre} {reserva.cliente.apellido}",
                 "vehiculo_patente": reserva.vehiculo.patente,
                 "vehiculo_modelo": f"{reserva.vehiculo.marca} {reserva.vehiculo.modelo}",
+                "fecha_reserva": reserva.fecha_reserva.isoformat(),
                 "fecha_inicio": reserva.fecha_inicio.isoformat(),
-                "fecha_fin": reserva.fecha_fin.isoformat()
+                "fecha_fin": reserva.fecha_fin.isoformat(),
+                "estado": reserva.estado
             }
             for reserva in reservas
         ]
