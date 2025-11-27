@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { obtenerVehiculos } from "../../services/vehiculosService";
 import { getClientes } from "../../services/clientesService";
 import { getEmpleados } from "../../services/empleadosService";
+import { getReservasHoy } from "../../services/reservasService";
 
 export default function AlquileresForm({ Guardar, Cancelar }) {
     const hoy = new Date().toISOString().split("T")[0];
@@ -11,11 +12,27 @@ export default function AlquileresForm({ Guardar, Cancelar }) {
         cliente_dni: "",
         fecha_inicio: hoy,
         empleado_dni: "",
+        reserva_id: "",
     });
 
     const [vehiculos, setVehiculos] = useState([]);
     const [clientes, setClientes] = useState([]);
     const [empleados, setEmpleados] = useState([]);
+    const [reservas, setReservas] = useState([]);
+    const [reservaSeleccionada, setReservaSeleccionada] = useState(null);
+
+    // Traer reservas del día (pendientes)
+    useEffect(() => {
+        const fetchReservas = async () => {
+            try {
+                const data = await getReservasHoy();
+                setReservas(data);
+            } catch (err) {
+                console.error("Error al cargar reservas:", err);
+            }
+        };
+        fetchReservas();
+    }, []);
 
     useEffect(() => {
         const fetchVehiculos = async () => {
@@ -55,9 +72,37 @@ export default function AlquileresForm({ Guardar, Cancelar }) {
         fetchEmpleados();
     }, []);
 
+    // Auto-completar campos cuando se selecciona una reserva
+    useEffect(() => {
+        if (reservaSeleccionada) {
+            setForm(prev => ({
+                ...prev,
+                vehiculo_patente: reservaSeleccionada.Patente,
+                cliente_dni: reservaSeleccionada.DNICliente,
+                reserva_id: reservaSeleccionada.IdReserva,
+            }));
+        }
+    }, [reservaSeleccionada]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleReservaChange = (e) => {
+        const reservaId = e.target.value;
+        if (reservaId) {
+            const reserva = reservas.find(r => r.IdReserva === parseInt(reservaId));
+            setReservaSeleccionada(reserva);
+        } else {
+            setReservaSeleccionada(null);
+            setForm(prev => ({
+                ...prev,
+                vehiculo_patente: "",
+                cliente_dni: "",
+                reserva_id: "",
+            }));
+        }
     };
 
     const handleSubmit = (e) => {
@@ -82,6 +127,52 @@ export default function AlquileresForm({ Guardar, Cancelar }) {
             <div className="card-body p-4 pt-2">
                 <form onSubmit={handleSubmit}>
 
+                    {/* Fila 0: Selector de Reserva (Opcional) */}
+                    <div className="row g-3 mb-3">
+                        <div className="col-12">
+                            <div className="alert alert-info d-flex align-items-center mb-3">
+                                <i className="fa-solid fa-info-circle me-2"></i>
+                                <span className="small">
+                                    <strong>Opcional:</strong> Seleccione una reserva del día para auto-completar cliente y vehículo
+                                </span>
+                            </div>
+                            <div className="input-group">
+                                <span className="input-group-text bg-light text-secondary">
+                                    <i className="fa-solid fa-calendar-check"></i>
+                                </span>
+                                <div className="form-floating">
+                                    <select
+                                        className="form-select border-start-0 ps-2"
+                                        id="reserva_select"
+                                        value={reservaSeleccionada?.IdReserva || ""}
+                                        onChange={handleReservaChange}
+                                        style={{ zIndex: 0 }}
+                                    >
+                                        <option value="">Sin reserva (entrada manual)</option>
+                                        {reservas.map(r => (
+                                            <option key={r.IdReserva} value={r.IdReserva}>
+                                                Reserva #{r.IdReserva} - {r.ClienteNombre} - {r.VehiculoModelo} ({r.Patente})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <label htmlFor="reserva_select" style={labelStyle} className="ps-2">
+                                        Reserva (Opcional)
+                                    </label>
+                                </div>
+                                {reservaSeleccionada && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary"
+                                        onClick={() => handleReservaChange({ target: { value: "" } })}
+                                        title="Limpiar reserva"
+                                    >
+                                        <i className="fa-solid fa-times"></i>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Fila 1: Vehículo y Cliente */}
                     <div className="row g-3 mb-3">
                         <div className="col-md-6">
@@ -97,6 +188,7 @@ export default function AlquileresForm({ Guardar, Cancelar }) {
                                         value={form.vehiculo_patente}
                                         onChange={handleChange}
                                         required
+                                        disabled={!!reservaSeleccionada}
                                         style={{ zIndex: 0 }}
                                     >
                                         <option value="">Seleccione un vehículo</option>
@@ -107,7 +199,7 @@ export default function AlquileresForm({ Guardar, Cancelar }) {
                                         ))}
                                     </select>
                                     <label htmlFor="vehiculo_patente" style={labelStyle} className="ps-2">
-                                        Vehículo
+                                        Vehículo {reservaSeleccionada && <span className="text-muted">(desde reserva)</span>}
                                     </label>
                                 </div>
                             </div>
@@ -126,6 +218,7 @@ export default function AlquileresForm({ Guardar, Cancelar }) {
                                         value={form.cliente_dni}
                                         onChange={handleChange}
                                         required
+                                        disabled={!!reservaSeleccionada}
                                         style={{ zIndex: 0 }}
                                     >
                                         <option value="">Seleccione un cliente</option>
@@ -136,7 +229,7 @@ export default function AlquileresForm({ Guardar, Cancelar }) {
                                         ))}
                                     </select>
                                     <label htmlFor="cliente_dni" style={labelStyle} className="ps-2">
-                                        Cliente
+                                        Cliente {reservaSeleccionada && <span className="text-muted">(desde reserva)</span>}
                                     </label>
                                 </div>
                             </div>
