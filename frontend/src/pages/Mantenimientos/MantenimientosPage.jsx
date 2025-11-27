@@ -20,11 +20,29 @@ export default function MantenimientosPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // 🔵 PAGINACIÓN
+    const [paginaActual, setPaginaActual] = useState(1);
+    const registrosPorPagina = 5;
+
+    // Función que toma la página actual y devuelve solo esos ítems
+    const paginar = () => {
+        const inicio = (paginaActual - 1) * registrosPorPagina;
+        const fin = inicio + registrosPorPagina;
+        return mantenimientos.slice(inicio, fin);
+    };
+
+    // Total de páginas
+    const paginas = Array.from(
+        { length: Math.ceil(mantenimientos.length / registrosPorPagina) || 1 },
+        (_, i) => i + 1
+    );
+
     const cargarActivos = async () => {
         setLoading(true);
         try {
             const data = await obtenerActivos();
             setMantenimientos(data);
+            setPaginaActual(1);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -37,6 +55,7 @@ export default function MantenimientosPage() {
         try {
             const data = await obtenerTodos();
             setMantenimientos(data);
+            setPaginaActual(1);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -53,7 +72,8 @@ export default function MantenimientosPage() {
         setLoading(true);
         try {
             const data = await obtenerPorId(filtroId);
-            setMantenimientos([data]); // un solo objeto → lo metemos en una lista
+            setMantenimientos([data]);
+            setPaginaActual(1);
         } catch (err) {
             setError(err.message);
             setMantenimientos([]);
@@ -105,7 +125,11 @@ export default function MantenimientosPage() {
 
             {vista === "lista" && (
                 <MantenimientosList
-                    Mantenimientos={mantenimientos}
+                    Mantenimientos={paginar()}
+                    RegistrosTotal={mantenimientos.length}
+                    Pagina={paginaActual}
+                    Paginas={paginas}
+                    setPagina={setPaginaActual}
                     FiltroId={filtroId}
                     setFiltroId={setFiltroId}
                     BuscarPorId={buscarPorId}
