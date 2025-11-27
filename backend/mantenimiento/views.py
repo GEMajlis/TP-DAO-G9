@@ -153,3 +153,30 @@ def mantenimiento_por_id(request, id_mantenimiento):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
 
+# -------------------------------------------------------------
+# GET: Obtener todos los mantenimientos (activos e inactivos)
+# -------------------------------------------------------------
+@require_http_methods(["GET"])
+def mantenimientos_todos(request):
+    try:
+        mantenimientos = Mantenimiento.objects.all().order_by("id_mantenimiento")
+
+        lista = []
+        for m in mantenimientos:
+            lista.append({
+                "id_mantenimiento": m.id_mantenimiento,
+                "dni_empleado": m.empleado.dni,
+                "empleado_nombre": m.empleado.nombre,
+                "empleado_apellido": m.empleado.apellido,
+                "patente": m.vehiculo.patente,
+                "marca": m.vehiculo.marca,
+                "modelo": m.vehiculo.modelo,
+                "fecha_inicio": str(m.fecha_inicio),
+                "fecha_fin": str(m.fecha_fin) if m.fecha_fin else None,
+                "estado_mantenimiento": "activo" if m.fecha_fin is None else "finalizado",
+            })
+
+        return JsonResponse({"mantenimientos": lista}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
