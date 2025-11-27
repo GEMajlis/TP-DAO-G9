@@ -33,22 +33,6 @@ export default function MultasSearch({
                     </div>
                 </div>
 
-                {/* Nuevo Campo para ID Multa */}
-                <div className="col-12 col-md">
-                    <div className="d-flex align-items-center">
-                        <label className="col-form-label fw-bold text-secondary me-2" style={{ minWidth: "100px" }}>
-                            ID Multa
-                        </label>
-                        <input
-                            type="number"
-                            className="form-control"
-                            value={IdMulta}
-                            onChange={(e) => setIdMulta(e.target.value)}
-                            placeholder="Buscar por multa..."
-                        />
-                    </div>
-                </div>
-
                 {/* Botón de Búsqueda */}
                 <div className="col-12 col-md-auto text-center">
                     <button type="submit" className="btn btn-primary fw-bold px-3">
