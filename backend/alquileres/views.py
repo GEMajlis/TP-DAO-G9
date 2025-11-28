@@ -228,11 +228,37 @@ def alquiler_list(request):
 
 @require_http_methods(["GET"])
 def alquiler_detail(request, id):
-    """Obtener detalle de un alquiler específico"""
+    """Obtener detalle de un alquiler específico con multas y daños"""
     try:
         alquiler = Alquiler.objects.select_related(
             'cliente', 'vehiculo', 'empleado', 'reserva'
-        ).get(id=id)
+        ).prefetch_related('multa_set', 'danio_set').get(id=id)
+        
+        # Obtener multas asociadas
+        multas = [
+            {
+                "id": multa.id_multa,
+                "motivo": multa.motivo,
+                "monto": str(multa.monto)
+            }
+            for multa in alquiler.multa_set.all()
+        ]
+        
+        # Obtener daños asociados
+        danios = [
+            {
+                "id": danio.id_danio,
+                "descripcion": danio.descripcion,
+                "monto": str(danio.monto)
+            }
+            for danio in alquiler.danio_set.all()
+        ]
+        
+        # Calcular totales para el desglose
+        dias = alquiler.calcular_dias_alquilado(alquiler.fecha_fin)
+        costo_base = float(alquiler.vehiculo.precio_por_dia) * dias
+        total_multas = sum(float(m.monto) for m in alquiler.multa_set.all())
+        total_danios = sum(float(d.monto) for d in alquiler.danio_set.all())
         
         return JsonResponse({
             "alquiler": {
@@ -244,13 +270,22 @@ def alquiler_detail(request, id):
                 "vehiculo_marca": alquiler.vehiculo.marca,
                 "vehiculo_modelo": alquiler.vehiculo.modelo,
                 "vehiculo_color": alquiler.vehiculo.color,
+                "vehiculo_precio_dia": str(alquiler.vehiculo.precio_por_dia),
                 "empleado_dni": alquiler.empleado.dni,
                 "empleado_nombre": f"{alquiler.empleado.nombre} {alquiler.empleado.apellido}",
                 "reserva_id": alquiler.reserva.id if alquiler.reserva else None,
                 "fecha_inicio": alquiler.fecha_inicio.isoformat(),
                 "fecha_fin": alquiler.fecha_fin.isoformat() if alquiler.fecha_fin else None,
                 "total_pago": str(alquiler.total_pago) if alquiler.total_pago else None,
-                "activo": alquiler.esta_activo()
+                "activo": alquiler.esta_activo(),
+                "multas": multas,
+                "danios": danios,
+                "desglose": {
+                    "dias": dias,
+                    "costo_base": str(costo_base),
+                    "total_multas": str(total_multas),
+                    "total_danios": str(total_danios)
+                }
             }
         }, status=200)
         
