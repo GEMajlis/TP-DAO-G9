@@ -118,7 +118,7 @@ const ReporteFacturacion = ({ facturacion }) => {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Facturación (€)',
+                    label: 'Facturación ($)',
                     data: dataValues,
                     backgroundColor: 'rgba(54, 162, 235, 0.7)', // Azul primario
                     borderColor: 'rgba(54, 162, 235, 1)',
@@ -143,7 +143,7 @@ const ReporteFacturacion = ({ facturacion }) => {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Monto (€)'
+                            text: 'Monto ($)'
                         }
                     },
                     x: {
