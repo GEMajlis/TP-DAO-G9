@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MantenimientosList from "./MantenimientosList";
 import MantenimientoForm from "./MantenimientosForm";
 import "../../styles/PageLayout.css";
@@ -110,6 +110,10 @@ export default function MantenimientosPage() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        cargarActivos();
+    }, []);
 
     return (
         <div className="page-container">
