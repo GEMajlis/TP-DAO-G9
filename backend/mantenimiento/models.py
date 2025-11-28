@@ -28,7 +28,6 @@ class Mantenimiento(models.Model):
         db_table = 'MANTENIMIENTOS'
 
     @classmethod
-    @classmethod
     def iniciar_mantenimiento(cls, empleado: Empleado, vehiculo: Vehiculo):
 
     # 🚫 1. Verificar si ya existe un mantenimiento activo para este vehículo
