@@ -4,6 +4,7 @@ import AlquileresSearch from "./AlquileresSearch";
 export default function AlquileresList({
   Alquileres,
   Finalizar,
+  VerDetalle,
   Agregar,
   Pagina,
   RegistrosTotal,
@@ -71,6 +72,13 @@ export default function AlquileresList({
                     <td className="text-center">{alquiler.reserva_id || "-"}</td>
 
                     <td className="text-center text-nowrap">
+                      <button
+                        className="btn btn-sm btn-outline-primary me-1"
+                        onClick={() => VerDetalle(alquiler)}
+                        title="Ver Detalle"
+                      >
+                        <i className="fa-solid fa-eye"></i>
+                      </button>
                       <button
                         className="btn btn-sm btn-outline-success"
                         onClick={() => Finalizar(alquiler)}

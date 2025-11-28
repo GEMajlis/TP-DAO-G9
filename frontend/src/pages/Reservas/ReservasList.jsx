@@ -99,14 +99,16 @@ export default function ReservasList({
                                             </td>
                                         
                                         <td className="text-center text-nowrap">
-                                            {/* Modificar */}
-                                            <button
-                                                className="btn btn-sm btn-outline-secondary me-1"
-                                                onClick={() => Modificar(reserva)}
-                                                title="Modificar"
-                                            >
-                                                <i className="fa-solid fa-pen-to-square"></i>
-                                            </button>
+                                            {/* Modificar - Solo disponible para reservas pendientes */}
+                                            {reserva.Estado === "pendiente" && (
+                                                <button
+                                                    className="btn btn-sm btn-outline-secondary me-1"
+                                                    onClick={() => Modificar(reserva)}
+                                                    title="Modificar"
+                                                >
+                                                    <i className="fa-solid fa-pen-to-square"></i>
+                                                </button>
+                                            )}
 
                                             {/* Cancelar */}
                                             {(reserva.Estado === "pendiente" || reserva.Estado === "confirmado") && (

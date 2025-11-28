@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import AlquileresList from "./AlquileresList";
 import AlquileresForm from "./AlquileresForm";
+import AlquileresDetail from "./AlquileresDetail";
 import "../../styles/PageLayout.css";
-import { obtenerAlquileres, crearAlquiler, finalizarAlquiler } from "../../services/alquileresService";
+import { obtenerAlquileres, obtenerAlquiler, crearAlquiler, finalizarAlquiler } from "../../services/alquileresService";
 
 export default function AlquileresPage() {
     const [vista, setVista] = useState("lista");
@@ -72,6 +73,13 @@ export default function AlquileresPage() {
         try {
             await finalizarAlquiler(alquiler.id);
             alert("Alquiler finalizado correctamente");
+            
+            // Si estamos en vista detalle, recargar el detalle
+            if (vista === "detalle") {
+                const data = await obtenerAlquiler(alquiler.id);
+                setAlquilerSeleccionado(data.alquiler);
+            }
+            
             await cargarAlquileres(pagina, 5, false);
         } catch (err) {
             console.error(err);
@@ -79,8 +87,20 @@ export default function AlquileresPage() {
         }
     };
 
+    const handleVerDetalle = async (alquiler) => {
+        try {
+            const data = await obtenerAlquiler(alquiler.id);
+            setAlquilerSeleccionado(data.alquiler);
+            setVista("detalle");
+        } catch (err) {
+            console.error("Error cargando detalle:", err);
+            alert("No se pudo cargar el detalle del alquiler.");
+        }
+    };
+
     const handleVolverALista = () => {
         setVista("lista");
+        setAlquilerSeleccionado(null);
     };
 
     return (
@@ -95,6 +115,7 @@ export default function AlquileresPage() {
                     <AlquileresList
                         Alquileres={alquileres}
                         Finalizar={handleFinalizar}
+                        VerDetalle={handleVerDetalle}
                         Agregar={handleAgregar}
                         Pagina={pagina}
                         RegistrosTotal={RegistrosTotal}
@@ -105,12 +126,6 @@ export default function AlquileresPage() {
                         FiltroEstado={filtroEstado}
                         setFiltroEstado={setFiltroEstado}
                     />
-
-                    {/* <div className="text-center mt-4 mb-3">
-                        <button className="btn btn-secondary px-4" onClick={() => window.location.href = "/"}>
-                            <i className="fa-solid fa-arrow-left me-2"></i> Volver al Inicio
-                        </button>
-                    </div> */}
                 </div>
             )}
 
@@ -121,13 +136,16 @@ export default function AlquileresPage() {
                         Guardar={handleGuardar}
                         Cancelar={handleVolverALista}
                     />
+                </div>
+            )}
 
-                    {/* <div className="text-center mt-4 mb-3">
-                        <button className="btn btn-secondary px-4" onClick={handleVolverALista}>
-                            <i className="fa-solid fa-arrow-left me-2"></i>
-                            Volver al listado
-                        </button>
-                    </div> */}
+            {vista === "detalle" && (
+                <div className="fade-in">
+                    <AlquileresDetail
+                        Alquiler={alquilerSeleccionado}
+                        Volver={handleVolverALista}
+                        Finalizar={handleFinalizar}
+                    />
                 </div>
             )}
         </div>
