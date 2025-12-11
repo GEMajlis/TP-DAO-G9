@@ -35,7 +35,7 @@ export default function App() {
           <Route path="/mantenimiento" element={<Mantenimiento />} />
           <Route path="/multas" element={<Multas />} />
           <Route path="/reportes" element={<Reportes />} />
-
+          <Route path="*" element={<Home />} />
         </Routes>
       </main>
 
